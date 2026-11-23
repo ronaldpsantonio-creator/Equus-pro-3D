@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WifiOff } from 'lucide-react';
 import { BottomDock, DockTab } from './components/BottomDock';
 import { HoverTooltip } from './components/HoverTooltip';
 import { TopBar } from './components/TopBar';
+import { useOnlineStatus } from './hooks/usePWA';
 import { loadProClaVetCatalog } from './services/catalogLoader';
 import { EquineSceneManager, SceneVisualConfig } from './three/EquineSceneManager';
 import {
   CameraPreset,
   CutawayMode,
+  FichaData,
   InventoryReport,
   LAYERS,
   LayerCode,
@@ -100,7 +103,11 @@ export default function App() {
   const [quizProgress, setQuizProgress] = useState<QuizProgress>(() =>
     loadJson('va_prog', { n: 0, ok: 0, sys: {}, miss: {} }),
   );
+  const [fichaDrafts, setFichaDrafts] = useState<Record<string, FichaData>>(() =>
+    loadJson('va_drafts', {}),
+  );
   const [modelBump, setModelBump] = useState(0);
+  const isOnline = useOnlineStatus();
 
   const visualConfig: SceneVisualConfig = useMemo(
     () => ({
@@ -334,6 +341,40 @@ export default function App() {
     [persist],
   );
 
+  const handleUpdateFichaDraft = useCallback(
+    (id: string, nextFicha: FichaData) => {
+      setFichaDrafts((prev) => {
+        const cleaned: FichaData = {};
+        for (const [k, v] of Object.entries(nextFicha)) {
+          if (typeof v === 'string' && v.trim().length > 0) {
+            cleaned[k] = v;
+          }
+        }
+        const next = { ...prev };
+        if (Object.keys(cleaned).length === 0) {
+          delete next[id];
+        } else {
+          next[id] = cleaned;
+        }
+        persist('va_drafts', next);
+        return next;
+      });
+    },
+    [persist],
+  );
+
+  const handleClearFichaDraft = useCallback(
+    (id: string) => {
+      setFichaDrafts((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        persist('va_drafts', next);
+        return next;
+      });
+    },
+    [persist],
+  );
+
   const handleUploadGlbClick = useCallback(() => {
     if (!selectedId) {
       setActiveTab('ficha');
@@ -489,6 +530,14 @@ export default function App() {
         </div>
       )}
 
+      {/* Offline PWA Status Indicator */}
+      {!isOnline && (
+        <div className="fixed bottom-4 left-4 z-30 flex items-center gap-2 rounded-lg border border-amber-500/50 bg-[#0e141d]/95 px-3 py-1.5 text-xs font-medium text-amber-200 shadow-lg">
+          <WifiOff className="h-3.5 w-3.5 text-amber-400" />
+          <span>Modo sin conexión · catálogos en caché</span>
+        </div>
+      )}
+
       {/* Collapsible Bottom Control Dock */}
       <BottomDock
         collapsed={dockCollapsed}
@@ -530,6 +579,7 @@ export default function App() {
         favorites={favorites}
         notes={notes}
         verified={verified}
+        fichaDrafts={fichaDrafts}
         loadedModelMeta={loadedModelMeta}
         hasMeshFn={hasMeshFn}
         getModelStateFn={getModelStateFn}
@@ -546,6 +596,8 @@ export default function App() {
           setModelBump((n) => n + 1);
         }}
         onUpdateNote={handleUpdateNote}
+        onUpdateFichaDraft={handleUpdateFichaDraft}
+        onClearFichaDraft={handleClearFichaDraft}
         onVerifyAndNext={handleVerifyAndNext}
         quizProgress={quizProgress}
         getVisible3DIdsFn={getVisible3DIdsFn}

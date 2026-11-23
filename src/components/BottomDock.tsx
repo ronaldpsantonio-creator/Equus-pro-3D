@@ -14,6 +14,7 @@ import {
   CAMERA_PRESETS,
   CameraPreset,
   CutawayMode,
+  FichaData,
   InventoryReport,
   LAYERS,
   LayerCode,
@@ -81,6 +82,7 @@ interface BottomDockProps {
   favorites: Record<string, boolean>;
   notes: Record<string, string>;
   verified: Record<string, boolean>;
+  fichaDrafts: Record<string, FichaData>;
   loadedModelMeta: Record<string, LoadedModelMeta>;
   hasMeshFn: (id: string) => boolean;
   getModelStateFn: (id: string) => 'esquemático' | 'cargado' | 'pendiente';
@@ -90,6 +92,8 @@ interface BottomDockProps {
   onToggleFavorite: (id: string) => void;
   onToggleStructureVisible: (id: string) => void;
   onUpdateNote: (id: string, note: string) => void;
+  onUpdateFichaDraft: (id: string, nextFicha: FichaData) => void;
+  onClearFichaDraft: (id: string) => void;
   onVerifyAndNext: (id: string) => void;
 
   // Quiz
@@ -140,6 +144,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     favorites,
     notes,
     verified,
+    fichaDrafts,
     loadedModelMeta,
     hasMeshFn,
     getModelStateFn,
@@ -149,6 +154,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     onToggleFavorite,
     onToggleStructureVisible,
     onUpdateNote,
+    onUpdateFichaDraft,
+    onClearFichaDraft,
     onVerifyAndNext,
     quizProgress,
     getVisible3DIdsFn,
@@ -471,6 +478,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 favorites={favorites}
                 notes={notes}
                 verified={verified}
+                fichaDrafts={fichaDrafts}
                 loadedModelMeta={loadedModelMeta}
                 hasMeshFn={hasMeshFn}
                 getModelStateFn={getModelStateFn}
@@ -480,6 +488,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 onToggleFavorite={onToggleFavorite}
                 onToggleStructureVisible={onToggleStructureVisible}
                 onUpdateNote={onUpdateNote}
+                onUpdateFichaDraft={onUpdateFichaDraft}
+                onClearFichaDraft={onClearFichaDraft}
                 onVerifyAndNext={onVerifyAndNext}
               />
             )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Camera, Eye, EyeOff, HeartPulse } from 'lucide-react';
 import { CutawayMode, InventoryReport, SexFilter } from '../types/proclavet';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface TopBarProps {
   report: InventoryReport | null;
@@ -154,6 +155,9 @@ export const TopBar: React.FC<TopBarProps> = ({
           <HeartPulse className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Signos vitales</span>
         </button>
+
+        {/* PWA Install (auto-hides when already installed in standalone mode) */}
+        <PWAInstallButton />
 
         {/* Screenshot */}
         <button
