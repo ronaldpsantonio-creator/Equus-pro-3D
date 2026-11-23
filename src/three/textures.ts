@@ -107,7 +107,7 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   coatBump.repeat.set(3, 3);
   coatBump.anisotropy = aniso;
 
-  // 2. Striated skeletal muscle fibers (512x512 color + bump)
+  // 2. Longitudinal striated skeletal muscle fascicles (512x512 color + bump along UV.y origin->insertion)
   const [musC, musCtx] = makeCanvas(512, 512);
   musCtx.fillStyle = '#a43a31';
   musCtx.fillRect(0, 0, 512, 512);
@@ -115,23 +115,23 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   musBCtx.fillStyle = '#808080';
   musBCtx.fillRect(0, 0, 512, 512);
 
-  for (let y = 0; y < 512; y += 2) {
+  for (let x = 0; x < 512; x += 2) {
     const band =
-      Math.sin((y / 512) * Math.PI * 52) * 0.35 +
-      Math.sin((y / 512) * Math.PI * 16) * 0.25 +
+      Math.sin((x / 512) * Math.PI * 56) * 0.34 +
+      Math.sin((x / 512) * Math.PI * 18) * 0.24 +
       0.5;
     musCtx.fillStyle =
-      band > 0.52 ? 'rgba(218, 118, 104, 0.22)' : 'rgba(98, 22, 18, 0.26)';
-    musCtx.fillRect(0, y, 512, 2);
-    const v = Math.round(85 + Math.max(0, Math.min(1, band)) * 135);
+      band > 0.52 ? 'rgba(222, 118, 102, 0.24)' : 'rgba(92, 20, 16, 0.28)';
+    musCtx.fillRect(x, 0, 2, 512);
+    const v = Math.round(78 + Math.max(0, Math.min(1, band)) * 146);
     musBCtx.fillStyle = `rgb(${v},${v},${v})`;
-    musBCtx.fillRect(0, y, 512, 2);
+    musBCtx.fillRect(x, 0, 2, 512);
   }
-  for (let i = 0; i < 900; i++) {
+  for (let i = 0; i < 1100; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    musCtx.fillStyle = 'rgba(246, 228, 222, 0.09)';
-    musCtx.fillRect(x, y, 22 + rand() * 44, 1);
+    musCtx.fillStyle = 'rgba(248, 228, 222, 0.11)';
+    musCtx.fillRect(x, y, 1, 24 + rand() * 48);
   }
 
   const muscleColor = new THREE.CanvasTexture(musC);

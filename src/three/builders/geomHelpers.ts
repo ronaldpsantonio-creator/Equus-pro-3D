@@ -318,6 +318,7 @@ export function createCurvedMuscleSheetMesh(
   sd: -1 | 1,
   mat: THREE.Material,
   verticalSegs = 10,
+  horizontalFibers = true,
 ): THREE.Mesh {
   const rows = stations.length;
   const cols = verticalSegs + 1;
@@ -334,7 +335,8 @@ export function createCurvedMuscleSheetMesh(
       const bow = st.zBow * Math.sin(vCoord * Math.PI);
       const z = (st.zMid + bow) * sd;
       positions.push(st.x, y, z);
-      uvs.push(uCoord, vCoord);
+      // When horizontalFibers=true, swap UV so vertical canvas striations run cranio-caudally
+      uvs.push(horizontalFibers ? vCoord : uCoord, horizontalFibers ? uCoord : vCoord);
     }
   }
 
@@ -366,6 +368,41 @@ export function createCurvedMuscleSheetMesh(
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+/**
+ * Builds a composite anatomical muscle unit (`THREE.Group`) combining the
+ * striated red muscular belly in the center with pearly aponeurotic/tendon
+ * origin & insertion cuffs at both ends (Biosphera écorché look).
+ */
+export function createMuscleUnitWithTendonCaps(
+  a: THREE.Vector3,
+  b: THREE.Vector3,
+  radius: number,
+  flattenZ: number,
+  bellyMat: THREE.Material,
+  tendonMat: THREE.Material,
+  bellyOffset = 0.48,
+  originTendonFrac = 0.14,
+  insertionTendonFrac = 0.18,
+): THREE.Group {
+  const g = new THREE.Group();
+  const dir = new THREE.Vector3().subVectors(b, a);
+  const len = Math.max(dir.length(), 0.03);
+
+  const bellyStart = a.clone().lerp(b, originTendonFrac * 0.55);
+  const bellyEnd = a.clone().lerp(b, 1 - insertionTendonFrac * 0.55);
+  g.add(createMuscleBellyMesh(bellyStart, bellyEnd, radius, flattenZ, bellyMat, bellyOffset));
+
+  if (originTendonFrac > 0.02 && len > 0.05) {
+    const oEnd = a.clone().lerp(b, originTendonFrac + 0.06);
+    g.add(createMuscleBellyMesh(a, oEnd, radius * 0.46, flattenZ * 0.9, tendonMat, 0.72));
+  }
+  if (insertionTendonFrac > 0.02 && len > 0.05) {
+    const iStart = a.clone().lerp(b, 1 - insertionTendonFrac - 0.06);
+    g.add(createMuscleBellyMesh(iStart, b, radius * 0.42, flattenZ * 0.9, tendonMat, 0.28));
+  }
+  return g;
 }
 
 /**
