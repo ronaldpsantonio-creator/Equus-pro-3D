@@ -1,0 +1,6 @@
+{
+  "name": "Equus 3D — Atlas de Anatomía Equina",
+  "description": "Atlas anatómico equino interactivo en 3D para estudiar por capas los sistemas y aparatos del cuerpo del caballo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
