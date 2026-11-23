@@ -2,18 +2,21 @@ import React from 'react';
 import {
   ArrowLeft,
   Camera,
+  DraftingCompass,
   Eye,
   EyeOff,
   HeartPulse,
   Home,
   Moon,
   RotateCcw,
+  Ruler,
   Scissors,
   Sun,
 } from 'lucide-react';
 import {
   CutawayMode,
   InventoryReport,
+  MeasureToolMode,
   RenderViewMode,
   SceneTheme,
   SexFilter,
@@ -32,6 +35,8 @@ interface TopBarProps {
   onToggleVitalSigns: () => void;
   dissectMode: boolean;
   onToggleDissectMode: () => void;
+  measureMode: MeasureToolMode;
+  onToggleMeasureMode: (mode: MeasureToolMode) => void;
   hiddenCount: number;
   onRestoreHidden: () => void;
   renderMode: RenderViewMode;
@@ -59,6 +64,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   onToggleVitalSigns,
   dissectMode,
   onToggleDissectMode,
+  measureMode,
+  onToggleMeasureMode,
   hiddenCount,
   onRestoreHidden,
   renderMode,
@@ -246,6 +253,42 @@ export const TopBar: React.FC<TopBarProps> = ({
           <Scissors className="h-3.5 w-3.5" />
           <span className="hidden xl:inline">Disección</span>
         </button>
+
+        {/* 3D Distance Ruler & Articular Goniometer */}
+        <div
+          className="flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5 shadow-sm"
+          role="group"
+          aria-label="Medición morfométrica 3D"
+        >
+          <button
+            type="button"
+            onClick={() => onToggleMeasureMode(measureMode === 'ruler' ? 'none' : 'ruler')}
+            className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
+              measureMode === 'ruler'
+                ? 'bg-cyan-500 text-slate-950'
+                : 'text-slate-300 hover:text-white'
+            }`}
+            title="Regla 3D: mide distancias lineales sobre mallas 3D o plano del suelo (cm/mm/m)"
+          >
+            <Ruler className="h-3.5 w-3.5" />
+            <span className="hidden xl:inline">Regla 3D</span>
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              onToggleMeasureMode(measureMode === 'goniometer' ? 'none' : 'goniometer')
+            }
+            className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
+              measureMode === 'goniometer'
+                ? 'bg-amber-500 text-slate-950'
+                : 'text-slate-300 hover:text-white'
+            }`}
+            title="Goniómetro articular 3D: mide ángulos (3 puntos) en hombro, codo, babilla, corvejón o casco"
+          >
+            <DraftingCompass className="h-3.5 w-3.5" />
+            <span className="hidden xl:inline">Goniómetro</span>
+          </button>
+        </div>
 
         {/* Restore hidden structures counter */}
         {hiddenCount > 0 && (

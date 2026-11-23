@@ -1,6 +1,20 @@
 import React from 'react';
-import { EyeOff, ImagePlus, RotateCcw, ScanLine, SlidersHorizontal } from 'lucide-react';
 import {
+  DraftingCompass,
+  EyeOff,
+  ImagePlus,
+  RotateCcw,
+  Ruler,
+  ScanLine,
+  SlidersHorizontal,
+  Trash2,
+} from 'lucide-react';
+import {
+  EQUINE_MEASURE_PRESETS,
+  EquineMeasurePreset,
+} from '../three/measurementOverlay';
+import {
+  MeasureToolMode,
   MprSliceState,
   ReferencePlaneConfig,
   ReferenceProjection,
@@ -17,6 +31,11 @@ interface ImagingTabProps {
   onReferencePlaneChange: (next: ReferencePlaneConfig) => void;
   onUploadReferenceImage: () => void;
   onSelectPresetCamera?: (mode: 'lat' | 'distal') => void;
+  measureMode: MeasureToolMode;
+  onMeasureModeChange: (mode: MeasureToolMode) => void;
+  measurementCount: number;
+  onApplyMeasurePreset: (preset: EquineMeasurePreset) => void;
+  onClearMeasurements: () => void;
 }
 
 export const ImagingTab: React.FC<ImagingTabProps> = ({
@@ -29,6 +48,11 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
   onReferencePlaneChange,
   onUploadReferenceImage,
   onSelectPresetCamera,
+  measureMode,
+  onMeasureModeChange,
+  measurementCount,
+  onApplyMeasurePreset,
+  onClearMeasurements,
 }) => {
   const anyMprActive = mpr.sagittal.enabled || mpr.transverse.enabled || mpr.dorsal.enabled;
 
@@ -420,6 +444,68 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
               <span className="font-mono text-slate-300">&lt;ID&gt;.meta.json</span>.
             </div>
           )}
+        </div>
+
+        {/* Quick 3D Clinical Morphometry & Goniometric Presets */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-200">
+              Medición clínica 3D y referencias goniométricas
+            </span>
+            {measurementCount > 0 && (
+              <button
+                type="button"
+                onClick={onClearMeasurements}
+                className="flex items-center gap-1 rounded border border-slate-700 px-2 py-0.5 text-[11px] text-rose-200 hover:border-rose-500/60 hover:text-white whitespace-nowrap"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Limpiar ({measurementCount})</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => onMeasureModeChange(measureMode === 'ruler' ? 'none' : 'ruler')}
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+                measureMode === 'ruler'
+                  ? 'border-cyan-400 bg-cyan-500 text-slate-950'
+                  : 'border-slate-700/80 bg-slate-950/70 text-slate-200 hover:border-cyan-500/60'
+              }`}
+            >
+              <Ruler className="h-3.5 w-3.5" />
+              <span>Regla 3D libre</span>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onMeasureModeChange(measureMode === 'goniometer' ? 'none' : 'goniometer')
+              }
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+                measureMode === 'goniometer'
+                  ? 'border-amber-400 bg-amber-500 text-slate-950'
+                  : 'border-slate-700/80 bg-slate-950/70 text-slate-200 hover:border-amber-500/60'
+              }`}
+            >
+              <DraftingCompass className="h-3.5 w-3.5" />
+              <span>Goniómetro libre (3 pts)</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-1 pt-0.5">
+            {EQUINE_MEASURE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onApplyMeasurePreset(preset)}
+                title={preset.description}
+                className="rounded-md border border-slate-700/80 bg-slate-950/60 px-2 py-0.5 text-[11px] text-slate-300 transition-colors hover:border-amber-500/60 hover:text-white whitespace-nowrap"
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

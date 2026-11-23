@@ -10,12 +10,17 @@ import {
   LayerCode,
   LayerState,
   LoadedModelMeta,
+  MeasurementRecord,
+  MeasurePoint,
+  MeasureToolMode,
+  MeasureUnit,
   ModelManifest,
   MprSliceState,
   ReferencePlaneConfig,
   RenderViewMode,
   SceneTheme,
   ScreenLabel,
+  ScreenMeasurementBadge,
   SexFilter,
   StructureRecord,
   SystemCode,
@@ -23,6 +28,7 @@ import {
 import { buildMuscularAndTegumentaryParts } from './builders/buildMuscularAndTegumentary';
 import { buildSkeletalAndArticularParts, BuiltPart } from './builders/buildSkeletalAndArticular';
 import { buildVisceraAndNeuroParts } from './builders/buildVisceraAndNeuro';
+import { MeasurementOverlayManager } from './measurementOverlay';
 import { createProceduralTextures, ProceduralTextureSet } from './textures';
 
 interface MeshMaterialBackup {
@@ -65,6 +71,8 @@ export interface SceneCallbacks {
   onSelect: (id: string | null) => void;
   onHover: (id: string | null, x: number, y: number) => void;
   onLabelsUpdate: (labels: ScreenLabel[]) => void;
+  onMeasurePick?: (point: [number, number, number], structureId?: string) => void;
+  onMeasureBadgesUpdate?: (badges: ScreenMeasurementBadge[]) => void;
   onContextLost: (lost: boolean) => void;
 }
 
@@ -72,6 +80,8 @@ export interface SceneCallbacks {
 const _v3 = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
 const _proj = new THREE.Vector3();
+const _rayFloorHit = new THREE.Vector3();
+const _floorMeasurePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const _camPosTarget = new THREE.Vector3(2.45, 1.55, -2.55);
 const _camLookTarget = new THREE.Vector3(0.1, 0.95, 0);
 
@@ -239,6 +249,15 @@ export class EquineSceneManager {
   private lastHoverCheck = 0;
   private lastLabelEmit = 0;
 
+  // 3D Ruler & Articular Goniometer state
+  private measurementOverlay: MeasurementOverlayManager;
+  private measureMode: MeasureToolMode = 'none';
+  private measureUnit: MeasureUnit = 'cm';
+  private measurements: MeasurementRecord[] = [];
+  private draftPoints: MeasurePoint[] = [];
+  private measureHoverPos: THREE.Vector3 | null = null;
+  private measureHoverTemp = new THREE.Vector3();
+
   private frameId = 0;
   private renderBusy = false;
   private renderDirty = false;
@@ -374,6 +393,10 @@ export class EquineSceneManager {
     );
     this.referenceGroup.add(this.referenceMesh, this.referenceFrame);
     this.scene.add(this.referenceGroup);
+
+    // 3D Ruler & Articular Goniometer Overlay
+    this.measurementOverlay = new MeasurementOverlayManager();
+    this.scene.add(this.measurementOverlay.group);
 
     // Events
     this.bindEvents();
@@ -721,6 +744,36 @@ export class EquineSceneManager {
     _camPosTarget.copy(worldCenter).add(offset);
     this.cameraAnimating = true;
     this.startLoopIfActive();
+  }
+
+  public focusOnPoint(pos: [number, number, number]): void {
+    const targetPt = new THREE.Vector3(pos[0], pos[1], pos[2]);
+    const offset = this.camera.position.clone().sub(this.controls.target);
+    const dist = THREE.MathUtils.clamp(offset.length(), 0.75, 2.4);
+    offset.normalize().multiplyScalar(dist);
+    _camLookTarget.copy(targetPt);
+    _camPosTarget.copy(targetPt).add(offset);
+    this.cameraAnimating = true;
+    this.startLoopIfActive();
+  }
+
+  public setMeasurementState(
+    mode: MeasureToolMode,
+    unit: MeasureUnit,
+    measurements: MeasurementRecord[],
+    draftPoints: MeasurePoint[],
+  ): void {
+    this.measureMode = mode;
+    this.measureUnit = unit;
+    this.measurements = measurements;
+    this.draftPoints = draftPoints;
+    if (mode === 'none') {
+      this.measureHoverPos = null;
+    }
+    this.measurementOverlay.syncSavedAndDraft(measurements, draftPoints, mode);
+    this.measurementOverlay.updateHoverPreview(this.measureHoverPos, draftPoints, mode);
+    this.emitMeasureBadges();
+    this.requestRender();
   }
 
   public setReferencePlane(cfg: ReferencePlaneConfig): void {
@@ -1285,7 +1338,10 @@ export class EquineSceneManager {
     this.pointerNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
-  private pickStructureId(e: PointerEvent | MouseEvent): string | null {
+  private pickSurfaceHit(
+    e: PointerEvent | MouseEvent,
+    allowFloorFallback: boolean,
+  ): { id: string | null; point: THREE.Vector3 } | null {
     this.updatePointerNDC(e);
     this.raycaster.setFromCamera(this.pointerNDC, this.camera);
     const hits = this.raycaster.intersectObjects(this.clickableMeshes, false);
@@ -1312,10 +1368,21 @@ export class EquineSceneManager {
 
       const id = hit.object.userData.id as string | undefined;
       if (id && this.items[id]?.group.visible) {
-        return id;
+        return { id, point: hit.point.clone() };
       }
     }
+
+    if (allowFloorFallback && this.raycaster.ray.intersectPlane(_floorMeasurePlane, _rayFloorHit)) {
+      if (Math.abs(_rayFloorHit.x) <= 2.3 && Math.abs(_rayFloorHit.z) <= 1.2) {
+        return { id: null, point: _rayFloorHit.clone() };
+      }
+    }
+
     return null;
+  }
+
+  private pickStructureId(e: PointerEvent | MouseEvent): string | null {
+    return this.pickSurfaceHit(e, false)?.id ?? null;
   }
 
   private onPointerDown = (e: PointerEvent): void => {
@@ -1327,6 +1394,31 @@ export class EquineSceneManager {
     if (now - this.lastHoverCheck < 45) return;
     this.lastHoverCheck = now;
     if (e.buttons !== 0) return;
+
+    if (this.measureMode !== 'none') {
+      const hit = this.pickSurfaceHit(e, true);
+      if (hit) {
+        this.measureHoverTemp.copy(hit.point);
+        this.measureHoverPos = this.measureHoverTemp;
+        this.renderer.domElement.style.cursor = 'crosshair';
+      } else {
+        this.measureHoverPos = null;
+        this.renderer.domElement.style.cursor = 'grab';
+      }
+      this.measurementOverlay.updateHoverPreview(
+        this.measureHoverPos,
+        this.draftPoints,
+        this.measureMode,
+      );
+      this.emitMeasureBadges();
+      this.requestRender();
+
+      const hitId = hit?.id ?? null;
+      if (hitId !== this.config.hoveredId || hitId) {
+        this.callbacks.onHover(hitId, e.clientX, e.clientY);
+      }
+      return;
+    }
 
     const hitId = this.pickStructureId(e);
     this.renderer.domElement.style.cursor = hitId ? 'pointer' : 'grab';
@@ -1343,11 +1435,23 @@ export class EquineSceneManager {
     this.pointerDownPos = null;
     if (dist > 5) return;
 
+    if (this.measureMode !== 'none') {
+      const hit = this.pickSurfaceHit(e, true);
+      if (hit) {
+        this.callbacks.onMeasurePick?.(
+          [hit.point.x, hit.point.y, hit.point.z],
+          hit.id ?? undefined,
+        );
+      }
+      return;
+    }
+
     const hitId = this.pickStructureId(e);
     this.callbacks.onSelect(hitId);
   };
 
   private onDoubleClick = (e: MouseEvent): void => {
+    if (this.measureMode !== 'none') return;
     const hitId = this.pickStructureId(e);
     if (hitId) {
       this.callbacks.onSelect(hitId);
@@ -1470,9 +1574,29 @@ export class EquineSceneManager {
     return active;
   }
 
+  private emitMeasureBadges(): void {
+    if (!this.callbacks.onMeasureBadgesUpdate) return;
+    const w = this.container.clientWidth;
+    const h = this.container.clientHeight;
+    if (w <= 0 || h <= 0) return;
+    const badges = this.measurementOverlay.projectBadges(
+      this.camera,
+      w,
+      h,
+      this.measurements,
+      this.draftPoints,
+      this.measureHoverPos,
+      this.measureMode,
+      this.measureUnit,
+    );
+    this.callbacks.onMeasureBadgesUpdate(badges);
+  }
+
   private emitLabels(now: number): void {
     if (now - this.lastLabelEmit < 75) return;
     this.lastLabelEmit = now;
+
+    this.emitMeasureBadges();
 
     if (this.config.blindMode || (!this.config.showLabels && !this.config.selectedId)) {
       this.callbacks.onLabelsUpdate([]);
@@ -1564,6 +1688,7 @@ export class EquineSceneManager {
     (this.referenceFrame.material as THREE.Material).dispose();
     this.referenceMat.dispose();
     this.referenceTexture?.dispose();
+    this.measurementOverlay.dispose();
 
     this.dracoLoader.dispose();
     this.textures.dispose();

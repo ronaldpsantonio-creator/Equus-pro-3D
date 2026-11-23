@@ -7,6 +7,11 @@ import { useOnlineStatus } from './hooks/usePWA';
 import { loadProClaVetCatalog } from './services/catalogLoader';
 import { EquineSceneManager, SceneVisualConfig } from './three/EquineSceneManager';
 import {
+  computeMeasureAngle,
+  computeMeasureDistance,
+  EquineMeasurePreset,
+} from './three/measurementOverlay';
+import {
   BreadcrumbStep,
   CAMERA_PRESETS,
   CameraPreset,
@@ -18,12 +23,17 @@ import {
   LayerCode,
   LayerState,
   LoadedModelMeta,
+  MeasurementRecord,
+  MeasurePoint,
+  MeasureToolMode,
+  MeasureUnit,
   MprSliceState,
   QuizProgress,
   ReferencePlaneConfig,
   RenderViewMode,
   SceneTheme,
   ScreenLabel,
+  ScreenMeasurementBadge,
   SexFilter,
   StructureRecord,
   STUDY_PRESETS,
@@ -116,6 +126,16 @@ export default function App() {
   );
   const [dissectMode, setDissectMode] = useState(false);
   const dissectModeRef = useRef(false);
+  const [measureMode, setMeasureMode] = useState<MeasureToolMode>('none');
+  const measureModeRef = useRef<MeasureToolMode>('none');
+  const [measureUnit, setMeasureUnit] = useState<MeasureUnit>('cm');
+  const [measurements, setMeasurements] = useState<MeasurementRecord[]>([]);
+  const [draftPoints, setDraftPoints] = useState<MeasurePoint[]>([]);
+  const [measurementBadges, setMeasurementBadges] = useState<ScreenMeasurementBadge[]>([]);
+  const measureSeqRef = useRef(1);
+  const onMeasurePickRef = useRef<
+    (pos: [number, number, number], structureId?: string) => void
+  >(() => {});
   const [mpr, setMpr] = useState<MprSliceState>({
     sagittal: { enabled: false, value: 0 },
     transverse: { enabled: false, value: 0.2 },
@@ -210,6 +230,12 @@ export default function App() {
       onLabelsUpdate: (nextLabels) => {
         setLabels(nextLabels);
       },
+      onMeasurePick: (pos, structureId) => {
+        onMeasurePickRef.current(pos, structureId);
+      },
+      onMeasureBadgesUpdate: (badges) => {
+        setMeasurementBadges(badges);
+      },
       onContextLost: (lost) => {
         setContextLost(lost);
       },
@@ -255,6 +281,12 @@ export default function App() {
   useEffect(() => {
     sceneRef.current?.setReferencePlane(referencePlane);
   }, [referencePlane]);
+
+  // Sync 3D Ruler & Articular Goniometer state into scene overlay
+  useEffect(() => {
+    measureModeRef.current = measureMode;
+    sceneRef.current?.setMeasurementState(measureMode, measureUnit, measurements, draftPoints);
+  }, [measureMode, measureUnit, measurements, draftPoints]);
 
   useEffect(() => {
     return () => {
@@ -319,6 +351,116 @@ export default function App() {
     };
   }, [byId, pushHistory, selectedId]);
 
+  useEffect(() => {
+    onMeasurePickRef.current = (pos: [number, number, number], structureId?: string) => {
+      const mode = measureModeRef.current;
+      if (mode === 'none') return;
+
+      const resolved = structureId ? byId[structureId] || byTraceabilityId[structureId] : undefined;
+      const structureName = resolved
+        ? blindMode
+          ? resolved.id
+          : resolved.es
+        : pos[1] < 0.015
+          ? 'Plano del suelo'
+          : undefined;
+
+      const nextPoint: MeasurePoint = {
+        position: pos,
+        structureId: resolved?.id || structureId,
+        structureName,
+      };
+
+      if (mode === 'ruler') {
+        if (draftPoints.length === 0) {
+          setDraftPoints([nextPoint]);
+        } else {
+          const p0 = draftPoints[0];
+          const distanceMeters = computeMeasureDistance(p0.position, nextPoint.position);
+          const rec: MeasurementRecord = {
+            id: `meas-${measureSeqRef.current++}`,
+            kind: 'ruler',
+            points: [p0, nextPoint],
+            distanceMeters,
+          };
+          setMeasurements((prev) => [...prev, rec]);
+          setDraftPoints([]);
+        }
+        return;
+      }
+
+      if (mode === 'goniometer') {
+        if (draftPoints.length < 2) {
+          setDraftPoints([...draftPoints, nextPoint]);
+        } else {
+          const pA = draftPoints[0];
+          const pV = draftPoints[1];
+          const { angleDeg, supplementDeg } = computeMeasureAngle(
+            pA.position,
+            pV.position,
+            nextPoint.position,
+          );
+          const rec: MeasurementRecord = {
+            id: `meas-${measureSeqRef.current++}`,
+            kind: 'goniometer',
+            points: [pA, pV, nextPoint],
+            angleDeg,
+            supplementDeg,
+          };
+          setMeasurements((prev) => [...prev, rec]);
+          setDraftPoints([]);
+        }
+      }
+    };
+  }, [blindMode, byId, byTraceabilityId, draftPoints]);
+
+  const handleMeasureModeChange = useCallback((nextMode: MeasureToolMode) => {
+    setDraftPoints([]);
+    setMeasureMode(nextMode);
+    if (nextMode !== 'none') {
+      setDissectMode(false);
+    }
+  }, []);
+
+  const handleToggleDissectMode = useCallback(() => {
+    setDissectMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setMeasureMode('none');
+        setDraftPoints([]);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleApplyMeasurePreset = useCallback((preset: EquineMeasurePreset) => {
+    const rec = preset.build();
+    setMeasurements((prev) => [...prev.filter((m) => m.id !== rec.id), rec]);
+    setDraftPoints([]);
+    const focusTarget: [number, number, number] =
+      rec.kind === 'ruler'
+        ? [
+            (rec.points[0].position[0] + rec.points[1].position[0]) * 0.5,
+            (rec.points[0].position[1] + rec.points[1].position[1]) * 0.5,
+            (rec.points[0].position[2] + rec.points[1].position[2]) * 0.5,
+          ]
+        : rec.points[1].position;
+    sceneRef.current?.focusOnPoint(focusTarget);
+  }, []);
+
+  const handleUndoDraftPoint = useCallback(() => {
+    setDraftPoints((prev) => prev.slice(0, -1));
+  }, []);
+
+  const handleDeleteMeasurement = useCallback((id: string) => {
+    setMeasurements((prev) => prev.filter((m) => m.id !== id));
+  }, []);
+
+  const handleClearMeasurements = useCallback(() => {
+    setMeasurements([]);
+    setDraftPoints([]);
+  }, []);
+
   const handleStepBack = useCallback(() => {
     setNavHistory((prev) => {
       if (prev.length === 0) return prev;
@@ -349,6 +491,9 @@ export default function App() {
     setSelectedId(null);
     setBlindMode(false);
     setDissectMode(false);
+    setMeasureMode('none');
+    setDraftPoints([]);
+    setMeasurements([]);
     setVitalSigns(false);
     setRenderMode('anatomico');
     setMpr({
@@ -368,7 +513,7 @@ export default function App() {
     setModelBump((n) => n + 1);
   }, []);
 
-  // Keyboard shortcuts: H (toggle HUD), Alt+ArrowLeft (step back), Escape (close deep edit/coverage view)
+  // Keyboard shortcuts: H (toggle HUD), Alt+ArrowLeft (step back), Escape (cancel measure / close deep view)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName;
@@ -378,13 +523,19 @@ export default function App() {
       } else if (e.altKey && e.key === 'ArrowLeft') {
         e.preventDefault();
         handleStepBack();
-      } else if (e.key === 'Escape' && (fichaSubView === 'edit' || fichaSubView === 'coverage')) {
-        handleStepBack();
+      } else if (e.key === 'Escape') {
+        if (draftPoints.length > 0) {
+          setDraftPoints([]);
+        } else if (measureMode !== 'none') {
+          setMeasureMode('none');
+        } else if (fichaSubView === 'edit' || fichaSubView === 'coverage') {
+          handleStepBack();
+        }
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [fichaSubView, handleStepBack]);
+  }, [draftPoints.length, fichaSubView, handleStepBack, measureMode]);
 
   const persist = useCallback((key: string, val: unknown) => {
     try {
@@ -767,6 +918,8 @@ export default function App() {
     explode === 0 &&
     renderMode === 'anatomico' &&
     !dissectMode &&
+    measureMode === 'none' &&
+    measurements.length === 0 &&
     !blindMode &&
     !mpr.sagittal.enabled &&
     !mpr.transverse.enabled &&
@@ -863,6 +1016,23 @@ export default function App() {
       steps.push({ id: 'ficha-edit', label: 'Editar ficha' });
     }
 
+    if (measureMode !== 'none' || measurements.length > 0) {
+      steps.push({
+        id: 'measure-3d',
+        label:
+          measureMode === 'ruler'
+            ? 'Regla 3D'
+            : measureMode === 'goniometer'
+              ? 'Goniómetro'
+              : `Mediciones (${measurements.length})`,
+        onClick: () => {
+          setMeasureMode('none');
+          setDraftPoints([]);
+          setMeasurements([]);
+        },
+      });
+    }
+
     return steps;
   }, [
     activeTab,
@@ -878,6 +1048,8 @@ export default function App() {
     hiddenCount,
     isAtHome,
     isolated,
+    measureMode,
+    measurements.length,
     mpr.dorsal.enabled,
     mpr.sagittal.enabled,
     mpr.transverse.enabled,
@@ -917,6 +1089,33 @@ export default function App() {
         </div>
       )}
 
+      {/* Projected 3D Ruler & Articular Goniometer Badges */}
+      {!hudHidden && measurementBadges.length > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden">
+          {measurementBadges.map((b) => {
+            const isRuler = b.kind === 'ruler';
+            return (
+              <div
+                key={b.id}
+                style={{ left: b.x, top: b.y }}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] shadow-md ${
+                  b.draft
+                    ? 'border border-dashed border-teal-400/80 bg-[#0e141d]/95 text-teal-200'
+                    : isRuler
+                      ? 'border border-cyan-500/60 bg-[#0e141d]/95 text-cyan-200'
+                      : 'border border-amber-500/60 bg-[#0e141d]/95 text-amber-200'
+                }`}
+              >
+                <span className="font-mono font-semibold tabular-nums">{b.primary}</span>
+                {b.secondary && (
+                  <span className="ml-1.5 text-[10px] text-slate-300">{b.secondary}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Cursor Hover Tooltip */}
       {!hudHidden && (
         <HoverTooltip
@@ -944,7 +1143,9 @@ export default function App() {
         vitalSigns={vitalSigns}
         onToggleVitalSigns={() => setVitalSigns((v) => !v)}
         dissectMode={dissectMode}
-        onToggleDissectMode={() => setDissectMode((d) => !d)}
+        onToggleDissectMode={handleToggleDissectMode}
+        measureMode={measureMode}
+        onToggleMeasureMode={handleMeasureModeChange}
         hiddenCount={hiddenCount}
         onRestoreHidden={handleRestoreHidden}
         renderMode={renderMode}
@@ -1000,7 +1201,7 @@ export default function App() {
         onHideSelected={handleHideSelected}
         hiddenCount={hiddenCount}
         dissectMode={dissectMode}
-        onToggleDissectMode={() => setDissectMode((d) => !d)}
+        onToggleDissectMode={handleToggleDissectMode}
         sceneTheme={sceneTheme}
         onToggleTheme={handleToggleTheme}
         onShowAll={handleShowAll}
@@ -1037,6 +1238,17 @@ export default function App() {
         referencePlane={referencePlane}
         onReferencePlaneChange={setReferencePlane}
         onUploadReferenceImage={() => refImageInputRef.current?.click()}
+        measureMode={measureMode}
+        onMeasureModeChange={handleMeasureModeChange}
+        measureUnit={measureUnit}
+        onMeasureUnitChange={setMeasureUnit}
+        measurements={measurements}
+        draftPoints={draftPoints}
+        onUndoDraftPoint={handleUndoDraftPoint}
+        onDeleteMeasurement={handleDeleteMeasurement}
+        onClearMeasurements={handleClearMeasurements}
+        onFocusMeasurePoint={(pos) => sceneRef.current?.focusOnPoint(pos)}
+        onApplyMeasurePreset={handleApplyMeasurePreset}
         structures={structures}
         byId={byId}
         byTraceabilityId={byTraceabilityId}

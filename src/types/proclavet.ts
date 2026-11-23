@@ -32,6 +32,43 @@ export type RenderViewMode = 'anatomico' | 'radiografia' | 'tc';
 export type SceneTheme = 'oscuro' | 'atlas';
 export type FichaSubView = 'ficha' | 'coverage' | 'edit';
 export type ReferenceProjection = 'LM' | 'DP' | 'DV';
+export type MeasureToolMode = 'none' | 'ruler' | 'goniometer';
+export type MeasureUnit = 'cm' | 'mm' | 'm';
+
+export interface MeasurePoint {
+  position: [number, number, number];
+  structureId?: string;
+  structureName?: string;
+}
+
+export interface DistanceMeasurement {
+  id: string;
+  kind: 'ruler';
+  points: [MeasurePoint, MeasurePoint];
+  distanceMeters: number;
+  label?: string;
+}
+
+export interface AngleMeasurement {
+  id: string;
+  kind: 'goniometer';
+  points: [MeasurePoint, MeasurePoint, MeasurePoint]; // [proximalArm, vertex, distalArm]
+  angleDeg: number;
+  supplementDeg: number;
+  label?: string;
+}
+
+export type MeasurementRecord = DistanceMeasurement | AngleMeasurement;
+
+export interface ScreenMeasurementBadge {
+  id: string;
+  x: number;
+  y: number;
+  primary: string;
+  secondary?: string;
+  draft?: boolean;
+  kind: 'ruler' | 'goniometer';
+}
 
 export interface BreadcrumbStep {
   id: string;

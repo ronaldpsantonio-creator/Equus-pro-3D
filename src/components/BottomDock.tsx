@@ -26,6 +26,10 @@ import {
   LayerCode,
   LayerState,
   LoadedModelMeta,
+  MeasurementRecord,
+  MeasurePoint,
+  MeasureToolMode,
+  MeasureUnit,
   MprSliceState,
   QuizProgress,
   ReferencePlaneConfig,
@@ -38,8 +42,10 @@ import {
   SYSTEMS,
   SystemCode,
 } from '../types/proclavet';
+import { EquineMeasurePreset } from '../three/measurementOverlay';
 import { CatalogAndFichaTab } from './CatalogAndFichaTab';
 import { ImagingTab } from './ImagingTab';
+import { MeasureBar } from './MeasureBar';
 import { QuizTab } from './QuizTab';
 import { SelectionBar } from './SelectionBar';
 
@@ -100,6 +106,19 @@ interface BottomDockProps {
   referencePlane: ReferencePlaneConfig;
   onReferencePlaneChange: (next: ReferencePlaneConfig) => void;
   onUploadReferenceImage: () => void;
+
+  // 3D Ruler & Goniometer
+  measureMode: MeasureToolMode;
+  onMeasureModeChange: (mode: MeasureToolMode) => void;
+  measureUnit: MeasureUnit;
+  onMeasureUnitChange: (unit: MeasureUnit) => void;
+  measurements: MeasurementRecord[];
+  draftPoints: MeasurePoint[];
+  onUndoDraftPoint: () => void;
+  onDeleteMeasurement: (id: string) => void;
+  onClearMeasurements: () => void;
+  onFocusMeasurePoint: (pos: [number, number, number]) => void;
+  onApplyMeasurePreset: (preset: EquineMeasurePreset) => void;
 
   // Catalog & Ficha
   structures: StructureRecord[];
@@ -188,6 +207,17 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     referencePlane,
     onReferencePlaneChange,
     onUploadReferenceImage,
+    measureMode,
+    onMeasureModeChange,
+    measureUnit,
+    onMeasureUnitChange,
+    measurements,
+    draftPoints,
+    onUndoDraftPoint,
+    onDeleteMeasurement,
+    onClearMeasurements,
+    onFocusMeasurePoint,
+    onApplyMeasurePreset,
     structures,
     byId,
     byTraceabilityId,
@@ -227,6 +257,20 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
   return (
     <div className="pointer-events-none fixed bottom-4 left-1/2 z-20 w-[min(980px,95vw)] -translate-x-1/2">
       <div className="pointer-events-auto">
+        <MeasureBar
+          measureMode={measureMode}
+          onMeasureModeChange={onMeasureModeChange}
+          measureUnit={measureUnit}
+          onMeasureUnitChange={onMeasureUnitChange}
+          measurements={measurements}
+          draftPoints={draftPoints}
+          onUndoDraftPoint={onUndoDraftPoint}
+          onDeleteMeasurement={onDeleteMeasurement}
+          onClearMeasurements={onClearMeasurements}
+          onFocusPoint={onFocusMeasurePoint}
+          onApplyPreset={onApplyMeasurePreset}
+        />
+
         <SelectionBar
           structure={selectedStructure}
           modelState={selectedModelState}
@@ -611,6 +655,11 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                   );
                   if (targetPreset) onSelectCameraPreset(targetPreset);
                 }}
+                measureMode={measureMode}
+                onMeasureModeChange={onMeasureModeChange}
+                measurementCount={measurements.length}
+                onApplyMeasurePreset={onApplyMeasurePreset}
+                onClearMeasurements={onClearMeasurements}
               />
             )}
 
