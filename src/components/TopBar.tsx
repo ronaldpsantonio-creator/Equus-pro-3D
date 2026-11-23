@@ -5,6 +5,7 @@ import { CutawayMode, InventoryReport, SexFilter } from '../types/proclavet';
 interface TopBarProps {
   report: InventoryReport | null;
   mounted3DCount: number;
+  loadedGlbCount: number;
   sex: SexFilter;
   onSexChange: (sex: SexFilter) => void;
   cutaway: CutawayMode;
@@ -19,6 +20,7 @@ interface TopBarProps {
 export const TopBar: React.FC<TopBarProps> = ({
   report,
   mounted3DCount,
+  loadedGlbCount,
   sex,
   onSexChange,
   cutaway,
@@ -63,6 +65,12 @@ export const TopBar: React.FC<TopBarProps> = ({
               <span>{report.totalRecords.toLocaleString('es-ES')} estructuras</span>
               <span aria-hidden="true">·</span>
               <span>{mounted3DCount} mallas 3D</span>
+              {loadedGlbCount > 0 && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-emerald-300">{loadedGlbCount} GLB</span>
+                </>
+              )}
               <span aria-hidden="true">·</span>
               <span>{report.withFichaCount} fichas</span>
               <span aria-hidden="true">·</span>

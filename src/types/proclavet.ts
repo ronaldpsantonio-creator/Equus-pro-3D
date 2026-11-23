@@ -61,6 +61,7 @@ export interface StructureRecord {
   sex?: 'm' | 'f';
   model?: string;
   licencia?: string;
+  fuente?: string;
   ph?: PlaceholderSpec;
   ficha?: FichaData;
   trazabilidad_ids?: string[];
@@ -77,6 +78,28 @@ export interface StructureRecord {
     [key: string]: unknown;
   };
   _catalog?: SystemCode;
+}
+
+export interface LoadedModelMeta {
+  id: string;
+  path: string;
+  origin: 'repo' | 'local';
+  licencia?: string;
+  fuente?: string;
+  notas?: string;
+}
+
+export interface ModelManifestEntry {
+  path: string;
+  licencia?: string;
+  fuente?: string;
+  notas?: string;
+  archivo_original_id?: string;
+}
+
+export interface ModelManifest {
+  version: number;
+  models: Record<string, ModelManifestEntry>;
 }
 
 export function formatRevisionEstado(estado?: string): string {

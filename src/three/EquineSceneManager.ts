@@ -8,6 +8,8 @@ import {
   LAYERS,
   LayerCode,
   LayerState,
+  LoadedModelMeta,
+  ModelManifest,
   ScreenLabel,
   SexFilter,
   StructureRecord,
@@ -347,6 +349,22 @@ export class EquineSceneManager {
     return this.items[id]?.state || 'pendiente';
   }
 
+  public getLoadedGlbCount(): number {
+    let count = 0;
+    for (const it of Object.values(this.items)) {
+      if (it.state === 'cargado') count++;
+    }
+    return count;
+  }
+
+  public getMounted3DCount(): number {
+    let count = 0;
+    for (const it of Object.values(this.items)) {
+      if (it.hasMesh) count++;
+    }
+    return count;
+  }
+
   public hasMesh(id: string): boolean {
     return !!this.items[id]?.hasMesh;
   }
@@ -405,7 +423,126 @@ export class EquineSceneManager {
     this.startLoopIfActive();
   }
 
-  public async loadCustomGlb(id: string, file: File): Promise<void> {
+  private replaceItemWithGlbScene(
+    id: string,
+    gltfScene: THREE.Group,
+    autoFitIsolated: boolean,
+  ): void {
+    const it = this.items[id];
+    if (!it) return;
+
+    // Capture existing anatomical bounding reference before removing procedural mesh
+    const hadProcedural = it.hasMesh && it.group.children.length > 0;
+    let prevCenter: THREE.Vector3 | null = null;
+    let prevMaxDim = 0;
+    if (hadProcedural) {
+      const prevBox = new THREE.Box3().setFromObject(it.group);
+      if (!prevBox.isEmpty()) {
+        prevCenter = prevBox.getCenter(new THREE.Vector3());
+        const prevSize = prevBox.getSize(new THREE.Vector3());
+        prevMaxDim = Math.max(prevSize.x, prevSize.y, prevSize.z);
+      }
+    }
+
+    // Remove & dispose previous meshes and purge stale clickableMeshes entries
+    this.clickableMeshes = this.clickableMeshes.filter((m) => m.userData.id !== id);
+    while (it.group.children.length > 0) {
+      const ch = it.group.children[0];
+      ch.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) {
+          const m = obj as THREE.Mesh;
+          m.geometry?.dispose();
+          if (Array.isArray(m.material)) {
+            m.material.forEach((mat) => mat.dispose());
+          } else {
+            m.material?.dispose();
+          }
+        }
+      });
+      it.group.remove(ch);
+    }
+
+    // Auto-align isolated local bone/organ GLBs exported around origin or in cm/mm
+    if (autoFitIsolated && prevCenter && prevMaxDim > 0.005) {
+      const rawBox = new THREE.Box3().setFromObject(gltfScene);
+      if (!rawBox.isEmpty()) {
+        const rawCenter = rawBox.getCenter(new THREE.Vector3());
+        const rawSize = rawBox.getSize(new THREE.Vector3());
+        const rawMaxDim = Math.max(rawSize.x, rawSize.y, rawSize.z);
+        const looksOriginCentered =
+          rawCenter.length() < 0.35 && prevCenter.distanceTo(rawCenter) > 0.45;
+        const looksWrongUnits = rawMaxDim > 3.5 || (rawMaxDim > 0 && rawMaxDim < 0.015);
+        if ((looksOriginCentered || looksWrongUnits) && rawMaxDim > 0.0001) {
+          const scale = prevMaxDim / rawMaxDim;
+          gltfScene.scale.multiplyScalar(scale);
+          gltfScene.updateMatrixWorld(true);
+          const scaledBox = new THREE.Box3().setFromObject(gltfScene);
+          const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+          gltfScene.position.add(prevCenter.clone().sub(scaledCenter));
+        }
+      }
+    }
+
+    it.materials = [];
+    it.baseColorHex = [];
+    it.group.add(gltfScene);
+
+    gltfScene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const m = obj as THREE.Mesh;
+        if (Array.isArray(m.material)) {
+          m.material = m.material.map((mm) => {
+            const cloned = mm.clone();
+            cloned.transparent = true;
+            if (cloned instanceof THREE.MeshStandardMaterial) {
+              it.materials.push(cloned);
+              it.baseColorHex.push(cloned.color.getHex());
+            }
+            return cloned;
+          });
+        } else if (m.material instanceof THREE.MeshStandardMaterial) {
+          const cloned = m.material.clone() as THREE.MeshStandardMaterial;
+          cloned.transparent = true;
+          m.material = cloned;
+          it.materials.push(cloned);
+          it.baseColorHex.push(cloned.color.getHex());
+        } else {
+          const fallbackMat = new THREE.MeshStandardMaterial({
+            color: 0xe2dcd0,
+            roughness: 0.55,
+            transparent: true,
+          });
+          m.material = fallbackMat;
+          it.materials.push(fallbackMat);
+          it.baseColorHex.push(fallbackMat.color.getHex());
+        }
+        m.userData.id = id;
+        m.castShadow = true;
+        m.receiveShadow = true;
+        this.clickableMeshes.push(m);
+      }
+    });
+
+    if (id === 'equ.car.cor.001') this.heartGroup = gltfScene;
+    if (id.startsWith('equ.res.pul.001')) this.lungGroups.push(gltfScene);
+
+    const box = new THREE.Box3().setFromObject(gltfScene);
+    if (!box.isEmpty()) {
+      box.getCenter(it.center);
+    }
+    const explodeDir = it.center.clone().sub(_v3.set(0.05, 1.05, 0));
+    if (explodeDir.lengthSq() < 0.001) explodeDir.set(0, 0.2, 0);
+    it.explodeDir.copy(explodeDir.normalize());
+
+    if (!hadProcedural) {
+      it.hasMesh = true;
+    }
+    it.state = 'cargado';
+    this.applyVisualConfig(this.config, true);
+    this.requestRender();
+  }
+
+  public async loadCustomGlb(id: string, file: File): Promise<LoadedModelMeta> {
     const it = this.items[id];
     if (!it) throw new Error('Estructura no encontrada');
     const url = URL.createObjectURL(file);
@@ -413,39 +550,122 @@ export class EquineSceneManager {
       const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
         this.gltfLoader.load(url, resolve, undefined, reject);
       });
-      // Remove existing children
-      while (it.group.children.length > 0) {
-        const ch = it.group.children[0];
-        it.group.remove(ch);
-      }
-      it.materials = [];
-      it.baseColorHex = [];
-      it.group.add(gltf.scene);
-      gltf.scene.traverse((obj) => {
-        if ((obj as THREE.Mesh).isMesh) {
-          const m = obj as THREE.Mesh;
-          if (m.material instanceof THREE.MeshStandardMaterial) {
-            const cloned = m.material.clone() as THREE.MeshStandardMaterial;
-            cloned.transparent = true;
-            m.material = cloned;
-            it.materials.push(cloned);
-            it.baseColorHex.push(cloned.color.getHex());
-          }
-          m.userData.id = id;
-          m.castShadow = true;
-          m.receiveShadow = true;
-          this.clickableMeshes.push(m);
-        }
-      });
-      const box = new THREE.Box3().setFromObject(gltf.scene);
-      box.getCenter(it.center);
-      it.hasMesh = true;
-      it.state = 'cargado';
-      this.applyVisualConfig(this.config, true);
-      this.requestRender();
+      this.replaceItemWithGlbScene(id, gltf.scene, true);
+      return {
+        id,
+        path: file.name,
+        origin: 'local',
+        licencia: it.record.licencia || 'Archivo local sin licencia declarada',
+      };
     } finally {
       URL.revokeObjectURL(url);
     }
+  }
+
+  public async loadGlbFilesBatch(
+    files: File[],
+    byTraceabilityId: Record<string, StructureRecord>,
+  ): Promise<{ loaded: LoadedModelMeta[]; unmatched: string[]; errors: string[] }> {
+    const matchedTasks: Array<{ id: string; file: File }> = [];
+    const unmatched: string[] = [];
+
+    for (const file of files) {
+      const baseName = file.name.replace(/\.glb$/i, '').trim();
+      const targetId = this.items[baseName]
+        ? baseName
+        : byTraceabilityId[baseName]?.id;
+      if (targetId && this.items[targetId]) {
+        matchedTasks.push({ id: targetId, file });
+      } else {
+        unmatched.push(file.name);
+      }
+    }
+
+    const loaded: LoadedModelMeta[] = [];
+    const errors: string[] = [];
+    const queue = [...matchedTasks];
+
+    const worker = async () => {
+      while (queue.length > 0 && !this.disposed) {
+        const next = queue.shift();
+        if (!next) break;
+        try {
+          const meta = await this.loadCustomGlb(next.id, next.file);
+          loaded.push(meta);
+        } catch {
+          errors.push(next.file.name);
+        }
+      }
+    };
+
+    await Promise.all([worker(), worker()]);
+    return { loaded, unmatched, errors };
+  }
+
+  public async loadManifestModels(
+    byTraceabilityId: Record<string, StructureRecord>,
+    onLoaded?: (meta: LoadedModelMeta) => void,
+  ): Promise<LoadedModelMeta[]> {
+    const manifestUrl = `${import.meta.env.BASE_URL}models/equino/manifest.json`;
+    let manifest: ModelManifest | null = null;
+    try {
+      const res = await fetch(manifestUrl, { cache: 'no-cache' });
+      if (!res.ok) return [];
+      manifest = (await res.json()) as ModelManifest;
+    } catch {
+      return [];
+    }
+
+    const entries = Object.entries(manifest?.models || {});
+    if (entries.length === 0) return [];
+
+    const tasks: Array<{ id: string; url: string; meta: LoadedModelMeta }> = [];
+    for (const [rawId, entry] of entries) {
+      if (!entry?.path) continue;
+      const targetId = this.items[rawId] ? rawId : byTraceabilityId[rawId]?.id;
+      if (!targetId || !this.items[targetId]) continue;
+
+      const resolvedUrl = /^https?:\/\//i.test(entry.path)
+        ? entry.path
+        : `${import.meta.env.BASE_URL}${entry.path.replace(/^\/+/, '')}`;
+
+      tasks.push({
+        id: targetId,
+        url: resolvedUrl,
+        meta: {
+          id: targetId,
+          path: entry.path,
+          origin: 'repo',
+          licencia: entry.licencia || this.items[targetId].record.licencia,
+          fuente: entry.fuente || this.items[targetId].record.fuente,
+          notas: entry.notas,
+        },
+      });
+    }
+
+    const loaded: LoadedModelMeta[] = [];
+    const queue = [...tasks];
+
+    const worker = async () => {
+      while (queue.length > 0 && !this.disposed) {
+        const task = queue.shift();
+        if (!task) break;
+        try {
+          const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
+            this.gltfLoader.load(task.url, resolve, undefined, reject);
+          });
+          if (this.disposed) break;
+          this.replaceItemWithGlbScene(task.id, gltf.scene, false);
+          loaded.push(task.meta);
+          onLoaded?.(task.meta);
+        } catch {
+          // Skip unreadable GLB without blocking remaining models
+        }
+      }
+    };
+
+    await Promise.all([worker(), worker()]);
+    return loaded;
   }
 
   public captureSnapshot(): string {

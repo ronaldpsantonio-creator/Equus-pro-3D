@@ -11,6 +11,7 @@ import {
   LAYERS,
   LayerCode,
   LayerState,
+  LoadedModelMeta,
   QuizProgress,
   ScreenLabel,
   SexFilter,
@@ -53,12 +54,15 @@ export default function App() {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<EquineSceneManager | null>(null);
   const glbInputRef = useRef<HTMLInputElement | null>(null);
+  const batchGlbInputRef = useRef<HTMLInputElement | null>(null);
 
   const [structures, setStructures] = useState<StructureRecord[]>([]);
   const [byId, setById] = useState<Record<string, StructureRecord>>({});
   const [byTraceabilityId, setByTraceabilityId] = useState<Record<string, StructureRecord>>({});
   const [report, setReport] = useState<InventoryReport | null>(null);
   const [mounted3DCount, setMounted3DCount] = useState(0);
+  const [loadedModelMeta, setLoadedModelMeta] = useState<Record<string, LoadedModelMeta>>({});
+  const [batchNotice, setBatchNotice] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [contextLost, setContextLost] = useState(false);
 
@@ -156,6 +160,13 @@ export default function App() {
         setReport(res.report);
         const { mounted3DCount: count } = manager.populateCatalog(res.structures);
         setMounted3DCount(count);
+
+        manager.loadManifestModels(res.byTraceabilityId, (meta) => {
+          if (!active) return;
+          setLoadedModelMeta((prev) => ({ ...prev, [meta.id]: meta }));
+          setMounted3DCount(manager.getMounted3DCount());
+          setModelBump((n) => n + 1);
+        });
       })
       .catch((err: unknown) => {
         if (!active) return;
@@ -338,13 +349,44 @@ export default function App() {
       e.target.value = '';
       if (!file || !selectedId || !sceneRef.current) return;
       try {
-        await sceneRef.current.loadCustomGlb(selectedId, file);
+        const meta = await sceneRef.current.loadCustomGlb(selectedId, file);
+        setLoadedModelMeta((prev) => ({ ...prev, [meta.id]: meta }));
+        setMounted3DCount(sceneRef.current.getMounted3DCount());
         setModelBump((n) => n + 1);
       } catch {
         setLoadError('No se pudo leer el archivo .glb seleccionado.');
       }
     },
     [selectedId],
+  );
+
+  const handleBatchGlbChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      e.target.value = '';
+      if (files.length === 0 || !sceneRef.current) return;
+      const result = await sceneRef.current.loadGlbFilesBatch(files, byTraceabilityId);
+      if (result.loaded.length > 0) {
+        setLoadedModelMeta((prev) => {
+          const next = { ...prev };
+          for (const m of result.loaded) next[m.id] = m;
+          return next;
+        });
+        setMounted3DCount(sceneRef.current.getMounted3DCount());
+        setModelBump((n) => n + 1);
+      }
+      const partsMsg: string[] = [];
+      partsMsg.push(`${result.loaded.length} GLB cargado${result.loaded.length === 1 ? '' : 's'}`);
+      if (result.unmatched.length > 0) {
+        partsMsg.push(`${result.unmatched.length} sin ID coincidente`);
+      }
+      if (result.errors.length > 0) {
+        partsMsg.push(`${result.errors.length} con error de lectura`);
+      }
+      setBatchNotice(partsMsg.join(' · '));
+      window.setTimeout(() => setBatchNotice(null), 6000);
+    },
+    [byTraceabilityId],
   );
 
   const hasMeshFn = useCallback(
@@ -415,6 +457,7 @@ export default function App() {
       <TopBar
         report={report}
         mounted3DCount={mounted3DCount}
+        loadedGlbCount={Object.keys(loadedModelMeta).length}
         sex={sex}
         onSexChange={(nextSex) => {
           setSex(nextSex);
@@ -431,12 +474,18 @@ export default function App() {
         onToggleHud={() => setHudHidden((h) => !h)}
       />
 
-      {/* Load Error / WebGL Context Lost Banner */}
-      {(loadError || contextLost) && (
-        <div className="fixed top-20 left-1/2 z-30 -translate-x-1/2 rounded-lg border border-rose-500/50 bg-rose-950/95 px-4 py-2 text-xs text-rose-100 shadow-lg">
+      {/* Load Error / WebGL Context Lost / GLB Batch Notice Banner */}
+      {(loadError || contextLost || batchNotice) && (
+        <div
+          className={`fixed top-20 left-1/2 z-30 -translate-x-1/2 rounded-lg border px-4 py-2 text-xs shadow-lg ${
+            loadError || contextLost
+              ? 'border-rose-500/50 bg-rose-950/95 text-rose-100'
+              : 'border-teal-500/50 bg-teal-950/95 text-teal-100'
+          }`}
+        >
           {contextLost
             ? 'Contexto WebGL suspendido temporalmente. Restaurando visor 3D…'
-            : loadError}
+            : loadError || batchNotice}
         </div>
       )}
 
@@ -448,13 +497,15 @@ export default function App() {
         onTabChange={setActiveTab}
         hudHidden={hudHidden}
         selectedStructure={selectedStructure}
-        selectedModelState={selectedId ? getModelStateFn(selectedId) : 'pendiente'}
-        selectedHasMesh={selectedId ? hasMeshFn(selectedId) : false}
+        selectedModelState={selectedStructure ? getModelStateFn(selectedStructure.id) : 'pendiente'}
+        selectedModelMeta={selectedStructure ? loadedModelMeta[selectedStructure.id] : undefined}
+        selectedHasMesh={selectedStructure ? hasMeshFn(selectedStructure.id) : false}
         isolated={isolated}
-        onFocusSelected={() => selectedId && sceneRef.current?.focusOnStructure(selectedId)}
+        onFocusSelected={() => selectedStructure && sceneRef.current?.focusOnStructure(selectedStructure.id)}
         onIsolateSelected={handleIsolateSelected}
         onShowAll={handleShowAll}
         onUploadGlb={handleUploadGlbClick}
+        onUploadBatchGlb={() => batchGlbInputRef.current?.click()}
         onClearSelection={() => setSelectedId(null)}
         report={report}
         systems={systems}
@@ -479,6 +530,7 @@ export default function App() {
         favorites={favorites}
         notes={notes}
         verified={verified}
+        loadedModelMeta={loadedModelMeta}
         hasMeshFn={hasMeshFn}
         getModelStateFn={getModelStateFn}
         isVisibleOverrideFn={isVisibleOverrideFn}
@@ -507,13 +559,21 @@ export default function App() {
         }}
       />
 
-      {/* Hidden GLB loader input */}
+      {/* Hidden GLB loader inputs */}
       <input
         ref={glbInputRef}
         type="file"
         accept=".glb"
         className="hidden"
         onChange={handleGlbFileChange}
+      />
+      <input
+        ref={batchGlbInputRef}
+        type="file"
+        accept=".glb"
+        multiple
+        className="hidden"
+        onChange={handleBatchGlbChange}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import {
   formatRevisionEstado,
   getCatalogSystem,
   LAYERS,
+  LoadedModelMeta,
   SexFilter,
   StructureRecord,
   SYSTEMS,
@@ -21,6 +22,7 @@ interface CatalogAndFichaTabProps {
   favorites: Record<string, boolean>;
   notes: Record<string, string>;
   verified: Record<string, boolean>;
+  loadedModelMeta: Record<string, LoadedModelMeta>;
   hasMeshFn: (id: string) => boolean;
   getModelStateFn: (id: string) => 'esquemático' | 'cargado' | 'pendiente';
   isVisibleOverrideFn: (id: string) => boolean;
@@ -44,6 +46,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
   favorites,
   notes,
   verified,
+  loadedModelMeta,
   hasMeshFn,
   getModelStateFn,
   isVisibleOverrideFn,
@@ -306,12 +309,33 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                 <span>
                   Modelo 3D:{' '}
                   {getModelStateFn(selected.id) === 'cargado'
-                    ? `GLB verificado (${selected.licencia || 'sin documentar'})`
+                    ? `GLB verificado (${loadedModelMeta[selected.id]?.licencia || selected.licencia || 'licencia sin documentar'})`
                     : getModelStateFn(selected.id) === 'esquemático'
-                      ? 'representación anatómica procedural'
+                      ? 'representación anatómica procedural (esquemática, no equivale a malla verificada)'
                       : 'pendiente de modelo 3D'}
                 </span>
               </div>
+              {getModelStateFn(selected.id) === 'cargado' && loadedModelMeta[selected.id] && (
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-emerald-300/90">
+                  <span className="font-mono">
+                    {loadedModelMeta[selected.id].origin === 'repo'
+                      ? loadedModelMeta[selected.id].path
+                      : `Local: ${loadedModelMeta[selected.id].path}`}
+                  </span>
+                  {loadedModelMeta[selected.id].fuente && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>Fuente: {loadedModelMeta[selected.id].fuente}</span>
+                    </>
+                  )}
+                </div>
+              )}
+              {getModelStateFn(selected.id) !== 'cargado' && selected.model && (
+                <div className="mt-1 text-[11px] text-slate-500">
+                  Ruta esperada para GLB:{' '}
+                  <span className="font-mono text-slate-400">public/{selected.model}</span>
+                </div>
+              )}
             </div>
 
             {plate && (

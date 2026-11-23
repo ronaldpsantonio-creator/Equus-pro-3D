@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "description": "Índice automático de modelos 3D (.glb) reales en public/models/equino/. Generado por npm run models:index o npm run validate:catalog.",
+  "models": {}
+}

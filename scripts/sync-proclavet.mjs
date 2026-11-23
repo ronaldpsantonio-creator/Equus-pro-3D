@@ -12,6 +12,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { indexEquineModels } from './index-models.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,6 +94,29 @@ async function fetchText(url) {
     throw new Error(`Error HTTP ${res.status} al consultar ${url}`);
   }
   return res.text();
+}
+
+async function fetchRemoteModelTree() {
+  try {
+    const res = await fetch(
+      'https://api.github.com/repos/ronaldpsantonio-creator/ProClaVet-core/git/trees/main?recursive=1',
+      { headers: { 'User-Agent': 'Equus-pro-3D-sync/1.0' } },
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const tree = Array.isArray(data?.tree) ? data.tree : [];
+    return tree
+      .filter(
+        (item) =>
+          item?.type === 'blob' &&
+          typeof item.path === 'string' &&
+          item.path.startsWith('models/equino/') &&
+          (item.path.toLowerCase().endsWith('.glb') || item.path.toLowerCase().endsWith('.meta.json')),
+      )
+      .map((item) => item.path);
+  } catch {
+    return [];
+  }
 }
 
 function validateRecord(rec, fileName, idx, seenIds, errors, warnings) {
@@ -263,7 +287,35 @@ async function main() {
     for (const [plate, svg] of plateTexts.entries()) {
       await writeIfChanged(path.join(platesDir, plate), svg);
     }
+
+    const remoteModelPaths = await fetchRemoteModelTree();
+    for (const relModelPath of remoteModelPaths) {
+      try {
+        const res = await fetch(`${DEFAULT_BASE_URL}/${relModelPath}`, {
+          headers: { 'User-Agent': 'Equus-pro-3D-sync/1.0' },
+        });
+        if (!res.ok) continue;
+        const buf = Buffer.from(await res.arrayBuffer());
+        const target = path.join(ROOT_DIR, 'public', relModelPath);
+        await fs.mkdir(path.dirname(target), { recursive: true });
+        let same = false;
+        try {
+          const prevBuf = await fs.readFile(target);
+          same = prevBuf.equals(buf);
+        } catch {
+          // new model file
+        }
+        if (!same) {
+          await fs.writeFile(target, buf);
+          updatedFiles++;
+        }
+      } catch {
+        // skip transient model fetch error
+      }
+    }
   }
+
+  const { count: modelCount } = await indexEquineModels();
 
   console.log('\nResumen de validación ProClaVet:');
   for (const row of perFileStats) {
@@ -272,6 +324,7 @@ async function main() {
     );
   }
   console.log(`\nTotal: ${totalRecords} registros, ${seenIds.size} IDs únicos, ${totalFichas} fichas.`);
+  console.log(`Modelos GLB indexados en public/models/equino/: ${modelCount}`);
   if (warnings.length > 0) {
     console.log(`Avisos de trazabilidad autorreferenciada (tolerados): ${warnings.length}`);
   }

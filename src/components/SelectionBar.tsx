@@ -4,6 +4,7 @@ import {
   formatRevisionEstado,
   getCatalogSystem,
   LAYERS,
+  LoadedModelMeta,
   StructureRecord,
   SYSTEMS,
 } from '../types/proclavet';
@@ -11,6 +12,7 @@ import {
 interface SelectionBarProps {
   structure: StructureRecord | null;
   modelState: 'esquemático' | 'cargado' | 'pendiente';
+  modelMeta?: LoadedModelMeta;
   hasMesh: boolean;
   blindMode: boolean;
   isolated: boolean;
@@ -25,6 +27,7 @@ interface SelectionBarProps {
 export const SelectionBar: React.FC<SelectionBarProps> = ({
   structure,
   modelState,
+  modelMeta,
   hasMesh,
   blindMode,
   isolated,
@@ -66,7 +69,7 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
           <span aria-hidden="true">·</span>
           <span>
             {modelState === 'cargado'
-              ? 'GLB verificado'
+              ? `GLB verificado${modelMeta?.licencia ? ` (${modelMeta.licencia})` : ''}`
               : modelState === 'esquemático'
                 ? 'Malla 3D anatómica'
                 : 'Sin malla 3D'}

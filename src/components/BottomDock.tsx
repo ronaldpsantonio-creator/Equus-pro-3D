@@ -18,6 +18,7 @@ import {
   LAYERS,
   LayerCode,
   LayerState,
+  LoadedModelMeta,
   QuizProgress,
   SexFilter,
   StructureRecord,
@@ -42,12 +43,14 @@ interface BottomDockProps {
   // Selection bar props
   selectedStructure: StructureRecord | null;
   selectedModelState: 'esquemático' | 'cargado' | 'pendiente';
+  selectedModelMeta?: LoadedModelMeta;
   selectedHasMesh: boolean;
   isolated: boolean;
   onFocusSelected: () => void;
   onIsolateSelected: () => void;
   onShowAll: () => void;
   onUploadGlb: () => void;
+  onUploadBatchGlb: () => void;
   onClearSelection: () => void;
 
   // Systems & Layers
@@ -78,6 +81,7 @@ interface BottomDockProps {
   favorites: Record<string, boolean>;
   notes: Record<string, string>;
   verified: Record<string, boolean>;
+  loadedModelMeta: Record<string, LoadedModelMeta>;
   hasMeshFn: (id: string) => boolean;
   getModelStateFn: (id: string) => 'esquemático' | 'cargado' | 'pendiente';
   isVisibleOverrideFn: (id: string) => boolean;
@@ -104,12 +108,14 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     hudHidden,
     selectedStructure,
     selectedModelState,
+    selectedModelMeta,
     selectedHasMesh,
     isolated,
     onFocusSelected,
     onIsolateSelected,
     onShowAll,
     onUploadGlb,
+    onUploadBatchGlb,
     onClearSelection,
     report,
     systems,
@@ -134,6 +140,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     favorites,
     notes,
     verified,
+    loadedModelMeta,
     hasMeshFn,
     getModelStateFn,
     isVisibleOverrideFn,
@@ -157,6 +164,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
         <SelectionBar
           structure={selectedStructure}
           modelState={selectedModelState}
+          modelMeta={selectedModelMeta}
           hasMesh={selectedHasMesh}
           blindMode={blindMode}
           isolated={isolated}
@@ -409,9 +417,20 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                       type="button"
                       onClick={onUploadGlb}
                       className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-slate-500 whitespace-nowrap"
+                      title="Cargar un archivo .glb sobre la estructura seleccionada"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       <span>Probar .glb</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={onUploadBatchGlb}
+                      className="flex items-center gap-1.5 rounded-lg border border-teal-500/40 bg-teal-950/50 px-2.5 py-1 text-xs font-medium text-teal-200 hover:border-teal-400/70 whitespace-nowrap"
+                      title="Seleccionar múltiples archivos <ID>.glb y vincularlos automáticamente por ID o trazabilidad"
+                    >
+                      <Upload className="h-3.5 w-3.5" />
+                      <span>Lote .glb</span>
                     </button>
                   </div>
                 </div>
@@ -452,6 +471,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 favorites={favorites}
                 notes={notes}
                 verified={verified}
+                loadedModelMeta={loadedModelMeta}
                 hasMeshFn={hasMeshFn}
                 getModelStateFn={getModelStateFn}
                 isVisibleOverrideFn={isVisibleOverrideFn}
