@@ -29,6 +29,7 @@ export type LayerCode =
 export type SexFilter = 'all' | 'm' | 'f';
 export type CutawayMode = 'none' | 'left' | 'right';
 export type RenderViewMode = 'anatomico' | 'radiografia' | 'tc';
+export type SceneTheme = 'oscuro' | 'atlas';
 export type ReferenceProjection = 'LM' | 'DP' | 'DV';
 
 export interface MprAxisSlice {

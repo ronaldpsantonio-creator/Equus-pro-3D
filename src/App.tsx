@@ -19,6 +19,7 @@ import {
   QuizProgress,
   ReferencePlaneConfig,
   RenderViewMode,
+  SceneTheme,
   ScreenLabel,
   SexFilter,
   StructureRecord,
@@ -92,6 +93,11 @@ export default function App() {
   const [isolated, setIsolated] = useState(false);
   const [labels, setLabels] = useState<ScreenLabel[]>([]);
   const [renderMode, setRenderMode] = useState<RenderViewMode>('anatomico');
+  const [sceneTheme, setSceneTheme] = useState<SceneTheme>(() =>
+    loadJson<SceneTheme>('va_theme', 'oscuro'),
+  );
+  const [dissectMode, setDissectMode] = useState(false);
+  const dissectModeRef = useRef(false);
   const [mpr, setMpr] = useState<MprSliceState>({
     sagittal: { enabled: false, value: 0 },
     transverse: { enabled: false, value: 0.2 },
@@ -143,6 +149,7 @@ export default function App() {
       blindMode,
       vitalSigns,
       renderMode,
+      sceneTheme,
       mpr,
     }),
     [
@@ -157,9 +164,14 @@ export default function App() {
       blindMode,
       vitalSigns,
       renderMode,
+      sceneTheme,
       mpr,
     ],
   );
+
+  useEffect(() => {
+    dissectModeRef.current = dissectMode;
+  }, [dissectMode]);
 
   // Initialize Three.js scene & load 12 ProClaVet JSON files once
   useEffect(() => {
@@ -169,6 +181,13 @@ export default function App() {
     let active = true;
     const manager = new EquineSceneManager(mount, visualConfig, {
       onSelect: (id) => {
+        if (id && dissectModeRef.current) {
+          manager.setStructureVisible(id, false);
+          setSelectedId(null);
+          setHoveredInfo({ id: null, x: 0, y: 0 });
+          setModelBump((n) => n + 1);
+          return;
+        }
         setSelectedId(id);
       },
       onHover: (id, x, y) => {
@@ -313,7 +332,29 @@ export default function App() {
       dorsal: { enabled: false, value: 1.1 },
     });
     sceneRef.current?.showAllStructures();
+    setModelBump((n) => n + 1);
   }, []);
+
+  const handleRestoreHidden = useCallback(() => {
+    setIsolated(false);
+    sceneRef.current?.showAllStructures();
+    setModelBump((n) => n + 1);
+  }, []);
+
+  const handleHideSelected = useCallback(() => {
+    if (!selectedId) return;
+    sceneRef.current?.setStructureVisible(selectedId, false);
+    setSelectedId(null);
+    setModelBump((n) => n + 1);
+  }, [selectedId]);
+
+  const handleToggleTheme = useCallback(() => {
+    setSceneTheme((prev) => {
+      const next: SceneTheme = prev === 'atlas' ? 'oscuro' : 'atlas';
+      persist('va_theme', next);
+      return next;
+    });
+  }, [persist]);
 
   const handleResetMpr = useCallback(() => {
     setMpr({
@@ -328,6 +369,7 @@ export default function App() {
     setIsolated(true);
     sceneRef.current?.isolateStructure(selectedId);
     sceneRef.current?.focusOnStructure(selectedId);
+    setModelBump((n) => n + 1);
   }, [selectedId]);
 
   const handleSnapshot = useCallback(() => {
@@ -522,6 +564,12 @@ export default function App() {
     [],
   );
 
+  const hiddenCount = useMemo(
+    () => sceneRef.current?.getHiddenStructureCount() ?? 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mounted3DCount, isolated, modelBump],
+  );
+
   const selectedStructure = selectedId
     ? byId[selectedId] || byTraceabilityId[selectedId] || null
     : null;
@@ -530,7 +578,11 @@ export default function App() {
     : null;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#0c1118] text-slate-100 select-none">
+    <div
+      className={`relative h-screen w-screen overflow-hidden text-slate-100 select-none transition-colors ${
+        sceneTheme === 'atlas' && renderMode === 'anatomico' ? 'bg-[#e8edf3]' : 'bg-[#0c1118]'
+      }`}
+    >
       {/* Dedicated WebGL Mount */}
       <div ref={canvasMountRef} className="fixed inset-0 z-0" />
 
@@ -579,6 +631,13 @@ export default function App() {
         onCutawayChange={setCutaway}
         vitalSigns={vitalSigns}
         onToggleVitalSigns={() => setVitalSigns((v) => !v)}
+        dissectMode={dissectMode}
+        onToggleDissectMode={() => setDissectMode((d) => !d)}
+        hiddenCount={hiddenCount}
+        onRestoreHidden={handleRestoreHidden}
+        renderMode={renderMode}
+        sceneTheme={sceneTheme}
+        onToggleTheme={handleToggleTheme}
         onSnapshot={handleSnapshot}
         hudHidden={hudHidden}
         onToggleHud={() => setHudHidden((h) => !h)}
@@ -621,6 +680,12 @@ export default function App() {
         isolated={isolated}
         onFocusSelected={() => selectedStructure && sceneRef.current?.focusOnStructure(selectedStructure.id)}
         onIsolateSelected={handleIsolateSelected}
+        onHideSelected={handleHideSelected}
+        hiddenCount={hiddenCount}
+        dissectMode={dissectMode}
+        onToggleDissectMode={() => setDissectMode((d) => !d)}
+        sceneTheme={sceneTheme}
+        onToggleTheme={handleToggleTheme}
         onShowAll={handleShowAll}
         onUploadGlb={handleUploadGlbClick}
         onUploadBatchGlb={() => batchGlbInputRef.current?.click()}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crosshair, FileText, Focus, Maximize2, Upload, X } from 'lucide-react';
+import { Crosshair, EyeOff, FileText, Focus, Maximize2, Upload, X } from 'lucide-react';
 import {
   formatRevisionEstado,
   getCatalogSystem,
@@ -19,6 +19,7 @@ interface SelectionBarProps {
   onOpenFicha: () => void;
   onFocus: () => void;
   onIsolate: () => void;
+  onHide?: () => void;
   onShowAll: () => void;
   onUploadGlb: () => void;
   onClear: () => void;
@@ -34,6 +35,7 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
   onOpenFicha,
   onFocus,
   onIsolate,
+  onHide,
   onShowAll,
   onUploadGlb,
   onClear,
@@ -148,6 +150,17 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
                 <span>Aislar</span>
               </>
             )}
+          </button>
+        )}
+        {hasMesh && onHide && (
+          <button
+            type="button"
+            onClick={onHide}
+            className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-rose-500/60 hover:text-rose-200 whitespace-nowrap"
+            title="Ocultar esta estructura en el visor 3D (disección manual)"
+          >
+            <EyeOff className="h-3.5 w-3.5" />
+            <span>Ocultar</span>
           </button>
         )}
         <button

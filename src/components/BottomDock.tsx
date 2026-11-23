@@ -25,6 +25,7 @@ import {
   QuizProgress,
   ReferencePlaneConfig,
   RenderViewMode,
+  SceneTheme,
   SexFilter,
   StructureRecord,
   STUDY_PRESETS,
@@ -54,6 +55,12 @@ interface BottomDockProps {
   isolated: boolean;
   onFocusSelected: () => void;
   onIsolateSelected: () => void;
+  onHideSelected: () => void;
+  hiddenCount: number;
+  dissectMode: boolean;
+  onToggleDissectMode: () => void;
+  sceneTheme: SceneTheme;
+  onToggleTheme: () => void;
   onShowAll: () => void;
   onUploadGlb: () => void;
   onUploadBatchGlb: () => void;
@@ -132,6 +139,12 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     isolated,
     onFocusSelected,
     onIsolateSelected,
+    onHideSelected,
+    hiddenCount,
+    dissectMode,
+    onToggleDissectMode,
+    sceneTheme,
+    onToggleTheme,
     onShowAll,
     onUploadGlb,
     onUploadBatchGlb,
@@ -204,6 +217,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
           }}
           onFocus={onFocusSelected}
           onIsolate={onIsolateSelected}
+          onHide={onHideSelected}
           onShowAll={onShowAll}
           onUploadGlb={onUploadGlb}
           onClear={onClearSelection}
@@ -269,7 +283,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                   className="flex items-center gap-1 rounded-lg border border-slate-700/80 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white whitespace-nowrap"
                 >
                   <RotateCcw className="h-3 w-3" />
-                  <span>Mostrar todo</span>
+                  <span>{hiddenCount > 0 ? `Restaurar (${hiddenCount})` : 'Mostrar todo'}</span>
                 </button>
               </div>
             </div>
@@ -423,6 +437,27 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                         </button>
                       ))}
                     </div>
+
+                    <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={dissectMode}
+                        onChange={onToggleDissectMode}
+                        className="h-3.5 w-3.5 accent-amber-500"
+                      />
+                      <span>Disección al clic</span>
+                    </label>
+
+                    <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={sceneTheme === 'atlas'}
+                        onChange={onToggleTheme}
+                        disabled={renderMode !== 'anatomico'}
+                        className="h-3.5 w-3.5 accent-sky-400"
+                      />
+                      <span>Atlas claro</span>
+                    </label>
 
                     <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-300">
                       <input

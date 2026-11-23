@@ -1,6 +1,21 @@
 import React from 'react';
-import { Camera, Eye, EyeOff, HeartPulse } from 'lucide-react';
-import { CutawayMode, InventoryReport, SexFilter } from '../types/proclavet';
+import {
+  Camera,
+  Eye,
+  EyeOff,
+  HeartPulse,
+  Moon,
+  RotateCcw,
+  Scissors,
+  Sun,
+} from 'lucide-react';
+import {
+  CutawayMode,
+  InventoryReport,
+  RenderViewMode,
+  SceneTheme,
+  SexFilter,
+} from '../types/proclavet';
 import { PWAInstallButton } from './PWAInstallButton';
 
 interface TopBarProps {
@@ -13,6 +28,13 @@ interface TopBarProps {
   onCutawayChange: (mode: CutawayMode) => void;
   vitalSigns: boolean;
   onToggleVitalSigns: () => void;
+  dissectMode: boolean;
+  onToggleDissectMode: () => void;
+  hiddenCount: number;
+  onRestoreHidden: () => void;
+  renderMode: RenderViewMode;
+  sceneTheme: SceneTheme;
+  onToggleTheme: () => void;
   onSnapshot: () => void;
   hudHidden: boolean;
   onToggleHud: () => void;
@@ -28,10 +50,19 @@ export const TopBar: React.FC<TopBarProps> = ({
   onCutawayChange,
   vitalSigns,
   onToggleVitalSigns,
+  dissectMode,
+  onToggleDissectMode,
+  hiddenCount,
+  onRestoreHidden,
+  renderMode,
+  sceneTheme,
+  onToggleTheme,
   onSnapshot,
   hudHidden,
   onToggleHud,
 }) => {
+  const isLightBackdrop = sceneTheme === 'atlas' && renderMode === 'anatomico';
+
   if (hudHidden) {
     return (
       <div className="pointer-events-none fixed top-4 right-5 z-20 flex items-center gap-2">
@@ -49,18 +80,30 @@ export const TopBar: React.FC<TopBarProps> = ({
   }
 
   return (
-    <header className="pointer-events-none fixed top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-between gap-4 px-5 py-3.5">
+    <header className="pointer-events-none fixed top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
       {/* Left: Brand & quiet unboxed telemetry */}
       <div className="pointer-events-auto flex flex-col gap-0.5">
         <div className="flex items-baseline gap-3">
-          <h1 className="text-base font-semibold tracking-tight text-slate-50 whitespace-nowrap shrink-0">
+          <h1
+            className={`text-base font-semibold tracking-tight whitespace-nowrap shrink-0 transition-colors ${
+              isLightBackdrop ? 'text-slate-900' : 'text-slate-50'
+            }`}
+          >
             Equus 3D · ProClaVet
           </h1>
-          <span className="hidden sm:inline text-xs text-slate-400 whitespace-nowrap">
+          <span
+            className={`hidden sm:inline text-xs whitespace-nowrap transition-colors ${
+              isLightBackdrop ? 'text-slate-600' : 'text-slate-400'
+            }`}
+          >
             Atlas de Anatomía Equina por Capas
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-mono tabular-nums">
+        <div
+          className={`flex flex-wrap items-center gap-2 text-xs font-mono tabular-nums transition-colors ${
+            isLightBackdrop ? 'text-slate-600' : 'text-slate-400'
+          }`}
+        >
           {report ? (
             <>
               <span>{report.totalRecords.toLocaleString('es-ES')} estructuras</span>
@@ -69,7 +112,9 @@ export const TopBar: React.FC<TopBarProps> = ({
               {loadedGlbCount > 0 && (
                 <>
                   <span aria-hidden="true">·</span>
-                  <span className="text-emerald-300">{loadedGlbCount} GLB</span>
+                  <span className={isLightBackdrop ? 'text-emerald-700' : 'text-emerald-300'}>
+                    {loadedGlbCount} GLB
+                  </span>
                 </>
               )}
               <span aria-hidden="true">·</span>
@@ -84,10 +129,10 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Right: Single-line quick clinical viewport controls */}
-      <div className="pointer-events-auto flex flex-wrap items-center gap-2">
+      <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
         {/* Sex filter */}
         <div
-          className="flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5"
+          className="flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5 shadow-sm"
           role="group"
           aria-label="Filtro por sexo anatómico"
         >
@@ -115,7 +160,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 
         {/* Sagittal cutaway toggle */}
         <div
-          className="hidden md:flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5"
+          className="hidden md:flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5 shadow-sm"
           role="group"
           aria-label="Corte sagital por capas"
         >
@@ -141,11 +186,65 @@ export const TopBar: React.FC<TopBarProps> = ({
           ))}
         </div>
 
+        {/* Interactive Dissection (click to peel/hide structure) */}
+        <button
+          type="button"
+          onClick={onToggleDissectMode}
+          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 shadow-sm ${
+            dissectMode
+              ? 'border-amber-400 bg-amber-500 text-slate-950'
+              : 'border-slate-800 bg-[#0e141d]/95 text-slate-300 hover:border-slate-700 hover:text-white'
+          }`}
+          title="Modo disección: cada clic sobre el caballo oculta esa estructura capa por capa"
+        >
+          <Scissors className="h-3.5 w-3.5" />
+          <span className="hidden xl:inline">Disección</span>
+        </button>
+
+        {/* Restore hidden structures counter */}
+        {hiddenCount > 0 && (
+          <button
+            type="button"
+            onClick={onRestoreHidden}
+            className="flex items-center gap-1 rounded-lg border border-teal-500/60 bg-teal-950/90 px-2.5 py-1.5 text-xs font-medium text-teal-200 shadow-sm transition-colors hover:border-teal-400 hover:text-white whitespace-nowrap shrink-0"
+            title="Restaurar todas las estructuras ocultas"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span className="font-mono tabular-nums">+{hiddenCount}</span>
+          </button>
+        )}
+
+        {/* Biosphera Pearl Atlas Light / Studio Dark backdrop toggle */}
+        <button
+          type="button"
+          onClick={onToggleTheme}
+          disabled={renderMode !== 'anatomico'}
+          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 shadow-sm disabled:opacity-45 ${
+            sceneTheme === 'atlas' && renderMode === 'anatomico'
+              ? 'border-sky-400/70 bg-sky-950/90 text-sky-100 hover:border-sky-300'
+              : 'border-slate-800 bg-[#0e141d]/95 text-slate-300 hover:border-slate-700 hover:text-white'
+          }`}
+          title={
+            renderMode === 'anatomico'
+              ? 'Alternar fondo clínico Atlas Claro (estilo Biosphera) / Estudio Oscuro'
+              : 'Disponible en modo Anatómico'
+          }
+        >
+          {sceneTheme === 'atlas' ? (
+            <Moon className="h-3.5 w-3.5 text-sky-300" />
+          ) : (
+            <Sun className="h-3.5 w-3.5 text-amber-300" />
+          )}
+          <span className="hidden xl:inline">
+            {sceneTheme === 'atlas' ? 'Estudio oscuro' : 'Atlas claro'}
+          </span>
+        </button>
+
         {/* Vital signs toggle */}
         <button
           type="button"
           onClick={onToggleVitalSigns}
-          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 shadow-sm ${
             vitalSigns
               ? 'border-rose-500/60 bg-rose-950/80 text-rose-200'
               : 'border-slate-800 bg-[#0e141d]/95 text-slate-300 hover:border-slate-700 hover:text-white'
@@ -163,7 +262,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           type="button"
           onClick={onSnapshot}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#0e141d]/95 px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-700 hover:text-white whitespace-nowrap shrink-0"
+          className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#0e141d]/95 px-2.5 py-1.5 text-xs font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-700 hover:text-white whitespace-nowrap shrink-0"
           title="Exportar captura PNG del visor"
         >
           <Camera className="h-3.5 w-3.5" />
@@ -174,7 +273,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           type="button"
           onClick={onToggleHud}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#0e141d]/95 px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-700 hover:text-white whitespace-nowrap shrink-0"
+          className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#0e141d]/95 px-2.5 py-1.5 text-xs font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-700 hover:text-white whitespace-nowrap shrink-0"
           title="Ocultar controles (H)"
         >
           <EyeOff className="h-3.5 w-3.5" />
@@ -184,3 +283,4 @@ export const TopBar: React.FC<TopBarProps> = ({
     </header>
   );
 };
+

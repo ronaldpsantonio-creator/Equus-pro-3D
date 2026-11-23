@@ -14,6 +14,7 @@ import {
   MprSliceState,
   ReferencePlaneConfig,
   RenderViewMode,
+  SceneTheme,
   ScreenLabel,
   SexFilter,
   StructureRecord,
@@ -56,6 +57,7 @@ export interface SceneVisualConfig {
   blindMode: boolean;
   vitalSigns: boolean;
   renderMode: RenderViewMode;
+  sceneTheme: SceneTheme;
   mpr: MprSliceState;
 }
 
@@ -190,7 +192,16 @@ export class EquineSceneManager {
   private textureLoader = new THREE.TextureLoader();
 
   private floorGroup: THREE.Group | null = null;
+  private floorMat: THREE.MeshStandardMaterial | null = null;
+  private floorShadowMat: THREE.MeshBasicMaterial | null = null;
+  private gridDark: THREE.GridHelper | null = null;
+  private gridLight: THREE.GridHelper | null = null;
+  private hemiLight: THREE.HemisphereLight;
+  private keyLight: THREE.DirectionalLight;
+  private rimLight: THREE.DirectionalLight;
+
   private bgStandard = new THREE.Color(0x0c1118);
+  private bgAtlas = new THREE.Color(0xe8edf3);
   private bgXray = new THREE.Color(0x04070c);
   private bgCt = new THREE.Color(0x070b11);
 
@@ -201,6 +212,7 @@ export class EquineSceneManager {
   private activeClippingPlanes: THREE.Plane[] = [];
   private lastClipCount = 0;
   private lastRenderMode: RenderViewMode = 'anatomico';
+  private lastSceneTheme: SceneTheme = 'oscuro';
 
   private sagittalGuide: THREE.LineLoop;
   private transverseGuide: THREE.LineLoop;
@@ -299,28 +311,28 @@ export class EquineSceneManager {
     pmrem.dispose();
 
     // 3-Point Warm/Cool Studio Lighting
-    const hemi = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.76);
-    this.scene.add(hemi);
+    this.hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.76);
+    this.scene.add(this.hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff4e0, 1.55);
-    keyLight.position.set(3.2, 4.8, -3.5);
-    keyLight.castShadow = !this.isSoftwareGl;
+    this.keyLight = new THREE.DirectionalLight(0xfff4e0, 1.55);
+    this.keyLight.position.set(3.2, 4.8, -3.5);
+    this.keyLight.castShadow = !this.isSoftwareGl;
     const shadowRes = this.isSoftwareGl ? 1024 : 2048;
-    keyLight.shadow.mapSize.set(shadowRes, shadowRes);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 14;
+    this.keyLight.shadow.mapSize.set(shadowRes, shadowRes);
+    this.keyLight.shadow.camera.near = 0.5;
+    this.keyLight.shadow.camera.far = 14;
     const d = 2.4;
-    keyLight.shadow.camera.left = -d;
-    keyLight.shadow.camera.right = d;
-    keyLight.shadow.camera.top = d;
-    keyLight.shadow.camera.bottom = -d;
-    keyLight.shadow.bias = -0.0005;
-    keyLight.shadow.normalBias = 0.02;
-    this.scene.add(keyLight);
+    this.keyLight.shadow.camera.left = -d;
+    this.keyLight.shadow.camera.right = d;
+    this.keyLight.shadow.camera.top = d;
+    this.keyLight.shadow.camera.bottom = -d;
+    this.keyLight.shadow.bias = -0.0005;
+    this.keyLight.shadow.normalBias = 0.02;
+    this.scene.add(this.keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.68);
-    rimLight.position.set(-3.5, 2.8, 3.2);
-    this.scene.add(rimLight);
+    this.rimLight = new THREE.DirectionalLight(0x93c5fd, 0.68);
+    this.rimLight.position.set(-3.5, 2.8, 3.2);
+    this.scene.add(this.rimLight);
 
     // Procedural textures
     this.textures = createProceduralTextures(this.renderer.capabilities.getMaxAnisotropy());
@@ -394,6 +406,7 @@ export class EquineSceneManager {
       depthWrite: false,
       opacity: 0.78,
     });
+    this.floorShadowMat = shadowMat;
     const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.2), shadowMat);
     shadowPlane.rotation.x = -Math.PI / 2;
     shadowPlane.position.set(-0.05, 0.002, 0);
@@ -408,17 +421,27 @@ export class EquineSceneManager {
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
     });
+    this.floorMat = floorMat;
     const floor = new THREE.Mesh(new THREE.CircleGeometry(14, 48), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0;
     floor.receiveShadow = true;
     fg.add(floor);
 
-    const grid = new THREE.GridHelper(8, 16, 0x334155, 0x1e293b);
-    grid.position.y = 0.001;
-    (grid.material as THREE.Material).transparent = true;
-    (grid.material as THREE.Material).opacity = 0.35;
-    fg.add(grid);
+    const gridDark = new THREE.GridHelper(8, 16, 0x334155, 0x1e293b);
+    gridDark.position.y = 0.001;
+    (gridDark.material as THREE.Material).transparent = true;
+    (gridDark.material as THREE.Material).opacity = 0.35;
+    this.gridDark = gridDark;
+    fg.add(gridDark);
+
+    const gridLight = new THREE.GridHelper(8, 16, 0x94a3b8, 0xcbd5e1);
+    gridLight.position.y = 0.001;
+    (gridLight.material as THREE.Material).transparent = true;
+    (gridLight.material as THREE.Material).opacity = 0.42;
+    gridLight.visible = false;
+    this.gridLight = gridLight;
+    fg.add(gridLight);
 
     this.floorGroup = fg;
     this.scene.add(fg);
@@ -645,6 +668,14 @@ export class EquineSceneManager {
 
   public isStructureVisibleOverride(id: string): boolean {
     return this.items[id]?.visibleOverride ?? true;
+  }
+
+  public getHiddenStructureCount(): number {
+    let count = 0;
+    for (const it of Object.values(this.items)) {
+      if (it.hasMesh && !it.visibleOverride) count++;
+    }
+    return count;
   }
 
   public showAllStructures(): void {
@@ -964,28 +995,80 @@ export class EquineSceneManager {
   public applyVisualConfig(nextConfig: SceneVisualConfig, immediate = false): void {
     const prevVital = this.config.vitalSigns;
     this.config = nextConfig;
-    const { layers, systems, sex, cutaway, selectedId, hoveredId, renderMode, mpr } = nextConfig;
+    const { layers, systems, sex, cutaway, selectedId, hoveredId, renderMode, sceneTheme, mpr } =
+      nextConfig;
 
     if (immediate) {
       this.currentExplode = nextConfig.explode / 100;
     }
 
-    // Update scene backdrop & floor visibility for imaging modes
+    // Update scene backdrop, floor, & lighting balance for imaging mode / theme
     const modeChanged = renderMode !== this.lastRenderMode;
+    const themeChanged = sceneTheme !== this.lastSceneTheme;
     this.lastRenderMode = renderMode;
+    this.lastSceneTheme = sceneTheme;
+
     if (renderMode === 'radiografia') {
       this.scene.background = this.bgXray;
-      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgXray);
+      if (this.scene.fog instanceof THREE.FogExp2) {
+        this.scene.fog.color.copy(this.bgXray);
+        this.scene.fog.density = 0.055;
+      }
       if (this.floorGroup) this.floorGroup.visible = false;
+      this.renderer.toneMappingExposure = 1.12;
     } else if (renderMode === 'tc') {
       this.scene.background = this.bgCt;
-      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgCt);
+      if (this.scene.fog instanceof THREE.FogExp2) {
+        this.scene.fog.color.copy(this.bgCt);
+        this.scene.fog.density = 0.055;
+      }
       if (this.floorGroup) this.floorGroup.visible = true;
+      if (this.floorMat) this.floorMat.color.setHex(0x0f1621);
+      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.78;
+      if (this.gridDark) this.gridDark.visible = true;
+      if (this.gridLight) this.gridLight.visible = false;
+      this.hemiLight.intensity = 0.76;
+      this.hemiLight.color.setHex(0xdbeafe);
+      this.hemiLight.groundColor.setHex(0x1e293b);
+      this.keyLight.intensity = 1.55;
+      this.rimLight.intensity = 0.68;
+      this.renderer.toneMappingExposure = 1.12;
+    } else if (sceneTheme === 'atlas') {
+      this.scene.background = this.bgAtlas;
+      if (this.scene.fog instanceof THREE.FogExp2) {
+        this.scene.fog.color.copy(this.bgAtlas);
+        this.scene.fog.density = 0.022;
+      }
+      if (this.floorGroup) this.floorGroup.visible = true;
+      if (this.floorMat) this.floorMat.color.setHex(0xdfe5ee);
+      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.36;
+      if (this.gridDark) this.gridDark.visible = false;
+      if (this.gridLight) this.gridLight.visible = true;
+      this.hemiLight.intensity = 0.92;
+      this.hemiLight.color.setHex(0xffffff);
+      this.hemiLight.groundColor.setHex(0xcbd5e1);
+      this.keyLight.intensity = 1.42;
+      this.rimLight.intensity = 0.72;
+      this.renderer.toneMappingExposure = 1.05;
     } else {
       this.scene.background = this.bgStandard;
-      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgStandard);
+      if (this.scene.fog instanceof THREE.FogExp2) {
+        this.scene.fog.color.copy(this.bgStandard);
+        this.scene.fog.density = 0.055;
+      }
       if (this.floorGroup) this.floorGroup.visible = true;
+      if (this.floorMat) this.floorMat.color.setHex(0x0f1621);
+      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.78;
+      if (this.gridDark) this.gridDark.visible = true;
+      if (this.gridLight) this.gridLight.visible = false;
+      this.hemiLight.intensity = 0.76;
+      this.hemiLight.color.setHex(0xdbeafe);
+      this.hemiLight.groundColor.setHex(0x1e293b);
+      this.keyLight.intensity = 1.55;
+      this.rimLight.intensity = 0.68;
+      this.renderer.toneMappingExposure = 1.12;
     }
+    void themeChanged;
 
     // Update MPR clipping planes & guide lines
     this.activeClippingPlanes.length = 0;
@@ -1048,13 +1131,11 @@ export class EquineSceneManager {
       if (it.group.visible) {
         it.group.traverse((ch) => {
           if (ch !== it.group && ch.userData.side) {
+            const sliceable =
+              s.layer === 'pel' || s.layer === 'msu' || s.layer === 'mpr' || s.layer === 'fas';
             const hideChild =
-              (cutaway === 'left' &&
-                ch.userData.side === 'left' &&
-                (s.layer === 'pel' || s.layer === 'msu')) ||
-              (cutaway === 'right' &&
-                ch.userData.side === 'right' &&
-                (s.layer === 'pel' || s.layer === 'msu'));
+              (cutaway === 'left' && ch.userData.side === 'left' && sliceable) ||
+              (cutaway === 'right' && ch.userData.side === 'right' && sliceable);
             ch.visible = !hideChild;
           }
         });
