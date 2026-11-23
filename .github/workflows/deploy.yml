@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 22
       - name: Instalar dependencias
-        run: npm install
+        run: npm install --legacy-peer-deps
       - name: Compilar aplicación Vite
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
