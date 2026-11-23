@@ -112,10 +112,20 @@ export async function indexEquineModels() {
     const licencia = sidecarMeta.licencia || matched?.licencia || prevEntry.licencia;
     const fuente = sidecarMeta.fuente || matched?.fuente || prevEntry.fuente;
     const notas = sidecarMeta.notas || prevEntry.notas;
+    const modalidadRespaldo = sidecarMeta.modalidad_respaldo || prevEntry.modalidad_respaldo;
+    const resolucionCorte = sidecarMeta.resolucion_corte || prevEntry.resolucion_corte;
+    const proyeccionReferencia =
+      sidecarMeta.proyeccion_referencia || prevEntry.proyeccion_referencia;
+    const calibracionAnatomica =
+      sidecarMeta.calibracion_anatomica || prevEntry.calibracion_anatomica;
 
     if (licencia) entry.licencia = String(licencia);
     if (fuente) entry.fuente = String(fuente);
     if (notas) entry.notas = String(notas);
+    if (modalidadRespaldo) entry.modalidad_respaldo = String(modalidadRespaldo);
+    if (resolucionCorte) entry.resolucion_corte = String(resolucionCorte);
+    if (proyeccionReferencia) entry.proyeccion_referencia = String(proyeccionReferencia);
+    if (calibracionAnatomica) entry.calibracion_anatomica = String(calibracionAnatomica);
     if (baseName !== targetId) entry.archivo_original_id = baseName;
 
     nextModels[targetId] = entry;

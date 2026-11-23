@@ -14,6 +14,7 @@ import {
 import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import {
+  createCoffinBoneMesh,
   createLongBoneMesh,
   createOrganMesh,
   createTubeCurveMesh,
@@ -30,6 +31,7 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
   const parts: BuiltPart[] = [];
   const boneMat = () => createTissueMaterial('bone', tex);
   const darkBoneMat = () => createTissueMaterial('bone_dark', tex);
+  const teethMat = () => createTissueMaterial('teeth', tex);
   const cartMat = () => createTissueMaterial('cartilage', tex);
   const ligMat = () => createTissueMaterial('ligament', tex);
 
@@ -119,13 +121,47 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       side,
     );
     push(
-      `equ.ske.cra.012-${tag}`, // Maxilar
-      createLongBoneMesh(V3(1.24, 1.53, 0.056 * sd), V3(1.48, 1.40, 0.042 * sd), 0.048, 0.042, boneMat(), 0.65),
+      `equ.ske.cra.012-${tag}`, // Maxilar + cresta facial + arcada premolar/molar superior
+      (() => {
+        const g = new THREE.Group();
+        g.add(createLongBoneMesh(V3(1.24, 1.53, 0.056 * sd), V3(1.46, 1.41, 0.042 * sd), 0.046, 0.04, boneMat(), 0.65));
+        // Cresta facial equina prominente
+        g.add(createLongBoneMesh(V3(1.20, 1.59, 0.072 * sd), V3(1.33, 1.52, 0.062 * sd), 0.009, 0.011, darkBoneMat(), 0.55));
+        // Muelas hipsodontas superiores (P2-M3) separadas del grupo incisivo por el diastema
+        for (let m = 0; m < 6; m++) {
+          const mt = m / 5;
+          g.add(
+            createOrganMesh(
+              V3(THREE.MathUtils.lerp(1.22, 1.35, mt), THREE.MathUtils.lerp(1.50, 1.44, mt), 0.036 * sd),
+              [0.011, 0.014, 0.01],
+              teethMat(),
+              [0, 0, -0.45],
+              8,
+            ),
+          );
+        }
+        return g;
+      })(),
       side,
     );
     push(
-      `equ.ske.cra.013-${tag}`, // Incisivo (premaxila)
-      createOrganMesh(V3(1.52, 1.37, 0.024 * sd), [0.048, 0.028, 0.024], boneMat(), [0, 0, -0.45]),
+      `equ.ske.cra.013-${tag}`, // Incisivo (premaxila + incisivos superiores I1-I3)
+      (() => {
+        const g = new THREE.Group();
+        g.add(createOrganMesh(V3(1.51, 1.38, 0.022 * sd), [0.048, 0.026, 0.022], boneMat(), [0, 0, -0.45]));
+        for (let inc = 0; inc < 3; inc++) {
+          g.add(
+            createOrganMesh(
+              V3(1.545 - inc * 0.008, 1.355, (0.008 + inc * 0.012) * sd),
+              [0.007, 0.012, 0.006],
+              teethMat(),
+              [0, 0, -0.2],
+              8,
+            ),
+          );
+        }
+        return g;
+      })(),
       side,
     );
     push(
@@ -139,16 +175,16 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       side,
     );
     push(
-      `equ.ske.cra.017-${tag}`, // Hemimandíbula (vertical ramus + horizontal body)
+      `equ.ske.cra.017-${tag}`, // Hemimandíbula (rama vertical ancha + cuerpo horizontal + dientes)
       (() => {
         const g = new THREE.Group();
         const ramus = createLongBoneMesh(
           HEAD.jawAngle(sd),
           V3(1.10, 1.65, 0.068 * sd),
-          0.034,
-          0.044,
+          0.036,
+          0.046,
           boneMat(),
-          0.42,
+          0.4,
         );
         const body = createLongBoneMesh(
           HEAD.jawAngle(sd),
@@ -159,6 +195,30 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
           0.45,
         );
         g.add(ramus, body);
+        // Arcada premolar/molar inferior + incisivos inferiores tras el diastema
+        for (let m = 0; m < 6; m++) {
+          const mt = m / 5;
+          g.add(
+            createOrganMesh(
+              V3(THREE.MathUtils.lerp(1.20, 1.33, mt), THREE.MathUtils.lerp(1.48, 1.42, mt), 0.034 * sd),
+              [0.01, 0.013, 0.009],
+              teethMat(),
+              [0, 0, -0.45],
+              8,
+            ),
+          );
+        }
+        for (let inc = 0; inc < 3; inc++) {
+          g.add(
+            createOrganMesh(
+              V3(1.525 - inc * 0.008, 1.33, (0.008 + inc * 0.011) * sd),
+              [0.007, 0.011, 0.006],
+              teethMat(),
+              [0, 0, -0.7],
+              8,
+            ),
+          );
+        }
         return g;
       })(),
       side,
@@ -339,7 +399,7 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     push(`equ.ske.mto.016-${tag}`, createLongBoneMesh(fl.pasternMid, fl.hoofCenter.clone().add(V3(-0.01, 0.02, 0)), 0.02, 0.024, boneMat()), side);
     push(
       `equ.ske.mto.017-${tag}`,
-      createOrganMesh(fl.hoofCenter.clone().add(V3(0.01, 0.008, 0)), [0.036, 0.022, 0.034], darkBoneMat(), undefined, 12),
+      createCoffinBoneMesh(fl.hoofCenter.clone().add(V3(0.004, 0.008, 0)), darkBoneMat()),
       side,
     );
     push(
@@ -421,7 +481,7 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     push(`equ.ske.mpe.016-${tag}`, createLongBoneMesh(hl.pasternMid, hl.hoofCenter.clone().add(V3(-0.01, 0.02, 0)), 0.02, 0.024, boneMat()), side);
     push(
       `equ.ske.mpe.017-${tag}`,
-      createOrganMesh(hl.hoofCenter.clone().add(V3(0.01, 0.008, 0)), [0.036, 0.022, 0.034], darkBoneMat(), undefined, 12),
+      createCoffinBoneMesh(hl.hoofCenter.clone().add(V3(0.004, 0.008, 0)), darkBoneMat()),
       side,
     );
     push(

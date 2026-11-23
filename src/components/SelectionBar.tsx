@@ -69,7 +69,7 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
           <span aria-hidden="true">·</span>
           <span>
             {modelState === 'cargado'
-              ? `GLB verificado${modelMeta?.licencia ? ` (${modelMeta.licencia})` : ''}`
+              ? `GLB verificado${modelMeta?.modalidad_respaldo ? ` · ${modelMeta.modalidad_respaldo}` : ''}${modelMeta?.licencia ? ` (${modelMeta.licencia})` : ''}`
               : modelState === 'esquemático'
                 ? 'Malla 3D anatómica'
                 : 'Sin malla 3D'}

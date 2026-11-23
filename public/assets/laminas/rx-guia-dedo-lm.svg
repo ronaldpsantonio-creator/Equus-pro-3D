@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" width="900" height="900">
+  <defs>
+    <radialGradient id="distalVig" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#111c26" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#020508" stop-opacity="0.95"/>
+    </radialGradient>
+  </defs>
+  <rect width="900" height="900" fill="url(#distalVig)"/>
+  <!-- Fine 1 cm calibration grid -->
+  <g stroke="#22d3ee" stroke-opacity="0.14" stroke-width="1">
+    <path d="M0 150H900 M0 300H900 M0 450H900 M0 600H900 M0 750H900"/>
+    <path d="M150 0V900 M300 0V900 M450 0V900 M600 0V900 M750 0V900"/>
+  </g>
+  <!-- Ground plane -->
+  <line x1="80" y1="790" x2="820" y2="790" stroke="#38bdf8" stroke-opacity="0.6" stroke-width="2.5"/>
+  <!-- Schematic LM Distal Limb Radiographic Calibration Axes (McIII -> P1 -> P2 -> P3 + Navicular) -->
+  <g fill="none" stroke="#e2e8f0" stroke-opacity="0.75" stroke-width="2.5">
+    <!-- Metacarpus III vertical axis -->
+    <line x1="415" y1="90" x2="415" y2="410"/>
+    <!-- Podophalangeal axis (~52 deg from horizontal) -->
+    <line x1="415" y1="410" x2="670" y2="788" stroke="#f59e0b" stroke-width="3"/>
+    <!-- Dorsal hoof wall parallel line (~50-52 deg) -->
+    <line x1="510" y1="530" x2="682" y2="788" stroke="#22d3ee" stroke-dasharray="6 5" stroke-width="2"/>
+  </g>
+  <!-- Schematic silhouettes of P1, P2, P3, Proximal Sesamoid, Navicular -->
+  <g fill="#cbd5e1" fill-opacity="0.14" stroke="#bae6fd" stroke-opacity="0.55" stroke-width="1.8">
+    <rect x="385" y="100" width="60" height="295" rx="18"/>
+    <ellipse cx="360" cy="395" rx="22" ry="30"/>
+    <path d="M405 420 L488 538 L452 560 L375 440 Z"/>
+    <path d="M465 552 L538 648 L502 672 L435 574 Z"/>
+    <path d="M510 668 L672 778 L495 772 L478 688 Z"/>
+    <ellipse cx="458" cy="655" rx="18" ry="11" transform="rotate(-35 458 655)"/>
+  </g>
+  <!-- Labels -->
+  <g fill="#7dd3fc" font-family="monospace" font-size="18" font-weight="bold">
+    <text x="640" y="70">DORSAL (+X)</text>
+    <text x="48" y="70">PALMAR (-X)</text>
+    <text x="435" y="250" fill="#e2e8f0" font-size="16">Mc III</text>
+    <text x="475" y="478" fill="#f59e0b" font-size="16">P1 (Cuartilla)</text>
+    <text x="530" y="598" fill="#f59e0b" font-size="16">P2 (Corona)</text>
+    <text x="615" y="725" fill="#22d3ee" font-size="16">P3 · Eje ~52°</text>
+    <text x="275" y="662" fill="#cbd5e1" font-size="15">Sesamoideo distal (Navicular)</text>
+    <text x="220" y="395" fill="#cbd5e1" font-size="15">Sesamoideos prox.</text>
+    <text x="48" y="845" font-size="13" font-weight="normal" fill="#94a3b8">
+      Guía esquemática de calibración distal (Proyección LM) · Referencia eje podofalángico · No diagnóstica
+    </text>
+  </g>
+</svg>

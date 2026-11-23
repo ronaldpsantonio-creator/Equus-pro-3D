@@ -617,24 +617,76 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                 </span>
               </div>
               {getModelStateFn(selected.id) === 'cargado' && loadedModelMeta[selected.id] && (
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-emerald-300/90">
-                  <span className="font-mono">
-                    {loadedModelMeta[selected.id].origin === 'repo'
-                      ? loadedModelMeta[selected.id].path
-                      : `Local: ${loadedModelMeta[selected.id].path}`}
-                  </span>
-                  {loadedModelMeta[selected.id].fuente && (
-                    <>
-                      <span aria-hidden="true">·</span>
-                      <span>Fuente: {loadedModelMeta[selected.id].fuente}</span>
-                    </>
+                <div className="mt-1 space-y-0.5 text-[11px] text-emerald-300/90">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono">
+                      {loadedModelMeta[selected.id].origin === 'repo'
+                        ? loadedModelMeta[selected.id].path
+                        : `Local: ${loadedModelMeta[selected.id].path}`}
+                    </span>
+                    {loadedModelMeta[selected.id].fuente && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span>Fuente: {loadedModelMeta[selected.id].fuente}</span>
+                      </>
+                    )}
+                    {loadedModelMeta[selected.id].modalidad_respaldo && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span className="text-cyan-300">
+                          Respaldo: {loadedModelMeta[selected.id].modalidad_respaldo}
+                          {loadedModelMeta[selected.id].resolucion_corte
+                            ? ` (${loadedModelMeta[selected.id].resolucion_corte})`
+                            : ''}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {(loadedModelMeta[selected.id].proyeccion_referencia ||
+                    loadedModelMeta[selected.id].calibracion_anatomica ||
+                    loadedModelMeta[selected.id].notas) && (
+                    <div className="text-slate-300">
+                      {[
+                        loadedModelMeta[selected.id].proyeccion_referencia
+                          ? `Proyección: ${loadedModelMeta[selected.id].proyeccion_referencia}`
+                          : null,
+                        loadedModelMeta[selected.id].calibracion_anatomica,
+                        loadedModelMeta[selected.id].notas,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </div>
                   )}
                 </div>
               )}
-              {getModelStateFn(selected.id) !== 'cargado' && selected.model && (
-                <div className="mt-1 text-[11px] text-slate-500">
-                  Ruta esperada para GLB:{' '}
-                  <span className="font-mono text-slate-400">public/{selected.model}</span>
+              {getModelStateFn(selected.id) !== 'cargado' && (
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                  <span>
+                    Ruta esperada para GLB:{' '}
+                    <span className="font-mono text-slate-400">
+                      public/{selected.model || `models/equino/${getCatalogSystem(selected)}/${selected.id}.glb`}
+                    </span>
+                  </span>
+                  {!blindMode && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadJsonFile(`${selected.id}.meta.json`, {
+                          licencia: 'CC BY 4.0',
+                          fuente: 'Segmentación DICOM / Colección Veterinaria',
+                          modalidad_respaldo: 'TC + Rx',
+                          resolucion_corte: '0.625 mm',
+                          proyeccion_referencia: 'LM / DP',
+                          calibracion_anatomica: `Alineado en coordenadas globales ProClaVet (${selected.es})`,
+                          notas: 'Pendiente de completar datos del estudio imagenológico',
+                        })
+                      }
+                      className="text-cyan-400/90 hover:text-cyan-300 underline-offset-2 hover:underline"
+                      title="Descargar plantilla de metadatos imagenológicos (.meta.json) para acompañar al .glb"
+                    >
+                      Plantilla .meta.json
+                    </button>
+                  )}
                 </div>
               )}
             </div>

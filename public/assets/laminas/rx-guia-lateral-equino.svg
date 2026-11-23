@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 840" width="1200" height="840">
+  <defs>
+    <radialGradient id="rxVig" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0d1720" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#03070b" stop-opacity="0.92"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="840" fill="url(#rxVig)"/>
+  <!-- Metric calibration grid (10 cm spacing mapped to 3.30m width x 2.31m height) -->
+  <g stroke="#22d3ee" stroke-opacity="0.14" stroke-width="1">
+    <path d="M0 120H1200 M0 240H1200 M0 360H1200 M0 480H1200 M0 600H1200 M0 720H1200"/>
+    <path d="M120 0V840 M240 0V840 M360 0V840 M480 0V840 M600 0V840 M720 0V840 M840 0V840 M960 0V840 M1080 0V840"/>
+  </g>
+  <!-- Ground baseline Y=0 -->
+  <line x1="60" y1="780" x2="1140" y2="780" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="8 6"/>
+  <!-- Anatomical axis reference lines (Lateromedial equine silhouette & joint angles) -->
+  <g fill="none" stroke="#bae6fd" stroke-opacity="0.55" stroke-width="2">
+    <!-- Cervical S-axis C1-C7 + Cranium -->
+    <path d="M1010 210 L895 110 C820 120, 770 190, 725 275"/>
+    <!-- Thoracolumbar & Sacral axis T1-S5 -->
+    <path d="M725 275 Q520 250 375 262 Q285 265 215 288"/>
+    <!-- Scapula -> Shoulder -> Elbow -> Carpus -> Fetlock -> Hoof -->
+    <path d="M645 215 L715 350 L660 442 L680 578 L684 685 L710 778" stroke="#f59e0b" stroke-opacity="0.72" stroke-width="2.5"/>
+    <!-- Pelvis -> Hip -> Stifle -> Hock -> Fetlock -> Hoof -->
+    <path d="M315 245 L280 328 L335 442 L262 566 L276 685 L306 778" stroke="#f59e0b" stroke-opacity="0.72" stroke-width="2.5"/>
+  </g>
+  <!-- Reference angle markers -->
+  <g fill="#f59e0b" font-family="monospace" font-size="16">
+    <circle cx="715" cy="350" r="5"/>
+    <text x="728" y="346">Hombro ~105°</text>
+    <circle cx="660" cy="442" r="5"/>
+    <text x="565" y="454">Codo ~140°</text>
+    <circle cx="684" cy="685" r="5"/>
+    <text x="700" y="688">Menudillo ~145°</text>
+    <circle cx="280" cy="328" r="5"/>
+    <text x="165" y="330">Cadera ~105°</text>
+    <circle cx="335" cy="442" r="5"/>
+    <text x="348" y="446">Babilla ~135°</text>
+    <circle cx="262" cy="566" r="5"/>
+    <text x="145" y="568">Corvejón ~150°</text>
+  </g>
+  <!-- Directional & Calibration Labels -->
+  <g fill="#7dd3fc" font-family="monospace" font-size="18" font-weight="bold">
+    <text x="48" y="52">CAUDAL (-X)</text>
+    <text x="990" y="52">CRANEAL (+X)</text>
+    <text x="48" y="762">SUELO / VENTRAL (Y = 0.00 m)</text>
+    <text x="48" y="818" font-size="14" font-weight="normal" fill="#94a3b8">
+      Guía esquemática de ejes goniométricos equinos (Proyección Lateromedial · Escala 1:1) · No diagnóstica
+    </text>
+  </g>
+</svg>

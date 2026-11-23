@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
   CutawayMode,
@@ -10,6 +11,9 @@ import {
   LayerState,
   LoadedModelMeta,
   ModelManifest,
+  MprSliceState,
+  ReferencePlaneConfig,
+  RenderViewMode,
   ScreenLabel,
   SexFilter,
   StructureRecord,
@@ -19,6 +23,11 @@ import { buildMuscularAndTegumentaryParts } from './builders/buildMuscularAndTeg
 import { buildSkeletalAndArticularParts, BuiltPart } from './builders/buildSkeletalAndArticular';
 import { buildVisceraAndNeuroParts } from './builders/buildVisceraAndNeuro';
 import { createProceduralTextures, ProceduralTextureSet } from './textures';
+
+interface MeshMaterialBackup {
+  mesh: THREE.Mesh;
+  original: THREE.Material | THREE.Material[];
+}
 
 export interface SceneItemRuntime {
   record: StructureRecord;
@@ -31,6 +40,8 @@ export interface SceneItemRuntime {
   visibleOverride: boolean;
   materials: THREE.MeshStandardMaterial[];
   baseColorHex: number[];
+  meshBackups: MeshMaterialBackup[];
+  xrayMaterials: THREE.ShaderMaterial[];
 }
 
 export interface SceneVisualConfig {
@@ -44,6 +55,8 @@ export interface SceneVisualConfig {
   showLabels: boolean;
   blindMode: boolean;
   vitalSigns: boolean;
+  renderMode: RenderViewMode;
+  mpr: MprSliceState;
 }
 
 export interface SceneCallbacks {
@@ -63,6 +76,89 @@ const _camLookTarget = new THREE.Vector3(0.1, 0.95, 0);
 const LAYER_ORDER: Record<LayerCode, number> = Object.fromEntries(
   LAYERS.map((l, idx) => [l.code, idx]),
 ) as Record<LayerCode, number>;
+
+const XRAY_VERTEX_SHADER = `
+#include <common>
+#include <clipping_planes_pars_vertex>
+varying vec3 vNormalView;
+varying vec3 vViewPos;
+void main() {
+  #include <begin_vertex>
+  #include <project_vertex>
+  #include <clipping_planes_vertex>
+  vNormalView = normalize(normalMatrix * normal);
+  vViewPos = -mvPosition.xyz;
+}
+`;
+
+const XRAY_FRAGMENT_SHADER = `
+#include <common>
+#include <clipping_planes_pars_fragment>
+uniform vec3 uColor;
+uniform float uDensity;
+uniform float uOpacity;
+uniform float uSelected;
+uniform float uHovered;
+varying vec3 vNormalView;
+varying vec3 vViewPos;
+void main() {
+  #include <clipping_planes_fragment>
+  vec3 V = normalize(vViewPos);
+  float ndotv = abs(dot(normalize(vNormalView), V));
+  float rim = pow(1.0 - clamp(ndotv, 0.0, 1.0), 1.45);
+  float core = mix(0.08, 0.42, uDensity) * (0.35 + 0.65 * ndotv);
+  float intensity = clamp(core + rim * (0.48 + 0.52 * uDensity), 0.04, 1.0);
+  vec3 highlight = mix(uColor, vec3(0.10, 0.92, 0.80), uSelected * 0.72);
+  highlight = mix(highlight, vec3(0.96, 0.65, 0.14), uHovered * 0.55 * (1.0 - uSelected));
+  float alpha = clamp(intensity * uOpacity * (0.28 + 0.72 * uDensity), 0.03, 0.95);
+  gl_FragColor = vec4(highlight * (0.72 + 0.68 * rim), alpha);
+}
+`;
+
+function getXraySpecForLayer(layer: LayerCode): { color: number; density: number } {
+  switch (layer) {
+    case 'oss':
+      return { color: 0xeaf4ff, density: 1.0 };
+    case 'art':
+      return { color: 0xbae6fd, density: 0.6 };
+    case 'org':
+    case 'vas':
+      return { color: 0x7dd3fc, density: 0.36 };
+    case 'ner':
+      return { color: 0xfde047, density: 0.32 };
+    case 'msu':
+    case 'mpr':
+    case 'fas':
+      return { color: 0x60a5fa, density: 0.22 };
+    case 'pel':
+    case 'cav':
+    default:
+      return { color: 0x38bdf8, density: 0.12 };
+  }
+}
+
+function getCtColorForLayer(layer: LayerCode, baseHex: number): number {
+  switch (layer) {
+    case 'oss':
+      return 0xf8fafc;
+    case 'art':
+      return 0x7dd3fc;
+    case 'vas':
+      return 0xef4444;
+    case 'ner':
+      return 0xfacc15;
+    case 'org':
+      return 0xcbd5e1;
+    case 'msu':
+    case 'mpr':
+      return 0x94a3b8;
+    case 'fas':
+    case 'pel':
+      return 0x475569;
+    default:
+      return baseHex;
+  }
+}
 
 function detectSoftwareWebGL(): boolean {
   try {
@@ -89,7 +185,35 @@ export class EquineSceneManager {
   private controls: OrbitControls;
   private textures: ProceduralTextureSet;
   private envRT: THREE.WebGLRenderTarget | null = null;
-  private gltfLoader = new GLTFLoader();
+  private dracoLoader: DRACOLoader;
+  private gltfLoader: GLTFLoader;
+  private textureLoader = new THREE.TextureLoader();
+
+  private floorGroup: THREE.Group | null = null;
+  private bgStandard = new THREE.Color(0x0c1118);
+  private bgXray = new THREE.Color(0x04070c);
+  private bgCt = new THREE.Color(0x070b11);
+
+  // MPR CT-style clipping planes & visual slice guides
+  private sagittalPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.45);
+  private transversePlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 1.65);
+  private dorsalPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 2.05);
+  private activeClippingPlanes: THREE.Plane[] = [];
+  private lastClipCount = 0;
+  private lastRenderMode: RenderViewMode = 'anatomico';
+
+  private sagittalGuide: THREE.LineLoop;
+  private transverseGuide: THREE.LineLoop;
+  private dorsalGuide: THREE.LineLoop;
+
+  // Calibrated Radiographic / CT Reference Plane
+  private referenceGroup: THREE.Group;
+  private referenceMesh: THREE.Mesh;
+  private referenceFrame: THREE.LineLoop;
+  private referenceMat: THREE.MeshBasicMaterial;
+  private referenceTexture: THREE.Texture | null = null;
+  private currentRefUrl: string | null = null;
+  private referenceAspect = 1.4;
 
   private items: Record<string, SceneItemRuntime> = {};
   private clickableMeshes: THREE.Object3D[] = [];
@@ -139,6 +263,7 @@ export class EquineSceneManager {
     this.renderer.setSize(width, height, false);
     this.renderer.shadowMap.enabled = !this.isSoftwareGl;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.localClippingEnabled = true;
     this.renderer.domElement.style.display = 'block';
     this.renderer.domElement.style.width = '100%';
     this.renderer.domElement.style.height = '100%';
@@ -146,9 +271,8 @@ export class EquineSceneManager {
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    const bgColor = 0x0c1118;
-    this.scene.background = new THREE.Color(bgColor);
-    this.scene.fog = new THREE.FogExp2(bgColor, 0.055);
+    this.scene.background = this.bgStandard.clone();
+    this.scene.fog = new THREE.FogExp2(0x0c1118, 0.055);
 
     this.camera = new THREE.PerspectiveCamera(40, width / height, 0.05, 60);
     this.camera.position.copy(_camPosTarget);
@@ -157,10 +281,16 @@ export class EquineSceneManager {
     this.controls.target.copy(_camLookTarget);
     this.controls.enableDamping = !this.isSoftwareGl;
     this.controls.dampingFactor = 0.06;
-    this.controls.minDistance = 0.65;
+    this.controls.minDistance = 0.45;
     this.controls.maxDistance = 8.5;
     this.controls.maxPolarAngle = Math.PI * 0.52;
     this.controls.update();
+
+    // Local offline Draco decoder for CT-segmented .glb models
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath(`${import.meta.env.BASE_URL}draco/`);
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.setDRACOLoader(this.dracoLoader);
 
     // Procedural Studio Environment Map
     const pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -169,13 +299,14 @@ export class EquineSceneManager {
     pmrem.dispose();
 
     // 3-Point Warm/Cool Studio Lighting
-    const hemi = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.72);
+    const hemi = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.76);
     this.scene.add(hemi);
 
     const keyLight = new THREE.DirectionalLight(0xfff4e0, 1.55);
     keyLight.position.set(3.2, 4.8, -3.5);
     keyLight.castShadow = !this.isSoftwareGl;
-    keyLight.shadow.mapSize.set(1024, 1024);
+    const shadowRes = this.isSoftwareGl ? 1024 : 2048;
+    keyLight.shadow.mapSize.set(shadowRes, shadowRes);
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 14;
     const d = 2.4;
@@ -187,7 +318,7 @@ export class EquineSceneManager {
     keyLight.shadow.normalBias = 0.02;
     this.scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.65);
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.68);
     rimLight.position.set(-3.5, 2.8, 3.2);
     this.scene.add(rimLight);
 
@@ -197,22 +328,77 @@ export class EquineSceneManager {
     // Studio floor at Y = 0
     this.buildStudioFloor();
 
+    // MPR slice visual indicator frames
+    this.sagittalGuide = this.createSliceGuideRect(3.3, 2.1, 0x22d3ee);
+    this.sagittalGuide.position.set(0.1, 1.05, 0);
+    this.transverseGuide = this.createSliceGuideRect(1.0, 2.1, 0xf59e0b);
+    this.transverseGuide.rotation.y = Math.PI / 2;
+    this.transverseGuide.position.set(0, 1.05, 0);
+    this.dorsalGuide = this.createSliceGuideRect(3.3, 1.0, 0x34d399);
+    this.dorsalGuide.rotation.x = Math.PI / 2;
+    this.dorsalGuide.position.set(0.1, 1.0, 0);
+    this.scene.add(this.sagittalGuide, this.transverseGuide, this.dorsalGuide);
+
+    // Calibrated Radiographic / CT Reference Plane
+    this.referenceGroup = new THREE.Group();
+    this.referenceGroup.visible = false;
+    this.referenceMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.78,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    this.referenceMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), this.referenceMat);
+    const frameGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-0.5, -0.5, 0),
+      new THREE.Vector3(0.5, -0.5, 0),
+      new THREE.Vector3(0.5, 0.5, 0),
+      new THREE.Vector3(-0.5, 0.5, 0),
+    ]);
+    this.referenceFrame = new THREE.LineLoop(
+      frameGeo,
+      new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.55 }),
+    );
+    this.referenceGroup.add(this.referenceMesh, this.referenceFrame);
+    this.scene.add(this.referenceGroup);
+
     // Events
     this.bindEvents();
   }
 
+  private createSliceGuideRect(w: number, h: number, color: number): THREE.LineLoop {
+    const hw = w * 0.5;
+    const hh = h * 0.5;
+    const geo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-hw, -hh, 0),
+      new THREE.Vector3(hw, -hh, 0),
+      new THREE.Vector3(hw, hh, 0),
+      new THREE.Vector3(-hw, hh, 0),
+    ]);
+    const mat = new THREE.LineBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.55,
+    });
+    const loop = new THREE.LineLoop(geo, mat);
+    loop.visible = false;
+    return loop;
+  }
+
   private buildStudioFloor(): void {
+    const fg = new THREE.Group();
     const shadowMat = new THREE.MeshBasicMaterial({
       map: this.textures.floorShadow,
       transparent: true,
       depthWrite: false,
-      opacity: 0.75,
+      opacity: 0.78,
     });
     const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.2), shadowMat);
     shadowPlane.rotation.x = -Math.PI / 2;
     shadowPlane.position.set(-0.05, 0.002, 0);
     shadowPlane.renderOrder = 1;
-    this.scene.add(shadowPlane);
+    fg.add(shadowPlane);
 
     const floorMat = new THREE.MeshStandardMaterial({
       color: 0x0f1621,
@@ -226,20 +412,103 @@ export class EquineSceneManager {
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0;
     floor.receiveShadow = true;
-    this.scene.add(floor);
+    fg.add(floor);
 
     const grid = new THREE.GridHelper(8, 16, 0x334155, 0x1e293b);
     grid.position.y = 0.001;
     (grid.material as THREE.Material).transparent = true;
     (grid.material as THREE.Material).opacity = 0.35;
-    this.scene.add(grid);
+    fg.add(grid);
+
+    this.floorGroup = fg;
+    this.scene.add(fg);
+  }
+
+  private buildXrayMaterialForLayer(layer: LayerCode): THREE.ShaderMaterial {
+    const spec = getXraySpecForLayer(layer);
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(spec.color) },
+        uDensity: { value: spec.density },
+        uOpacity: { value: 1.0 },
+        uSelected: { value: 0.0 },
+        uHovered: { value: 0.0 },
+      },
+      vertexShader: XRAY_VERTEX_SHADER,
+      fragmentShader: XRAY_FRAGMENT_SHADER,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      clipping: true,
+    });
+  }
+
+  private captureMeshMaterialsForItem(
+    group: THREE.Group,
+    id: string,
+    layer: LayerCode,
+    cloneStandardMaterials: boolean,
+  ): {
+    mats: THREE.MeshStandardMaterial[];
+    baseColorHex: number[];
+    meshBackups: MeshMaterialBackup[];
+    xrayMaterials: THREE.ShaderMaterial[];
+  } {
+    const mats: THREE.MeshStandardMaterial[] = [];
+    const baseColorHex: number[] = [];
+    const meshBackups: MeshMaterialBackup[] = [];
+    const xrayMaterials: THREE.ShaderMaterial[] = [];
+
+    group.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const m = obj as THREE.Mesh;
+        if (Array.isArray(m.material)) {
+          m.material = m.material.map((mm) => {
+            const mat = cloneStandardMaterials ? mm.clone() : mm;
+            mat.transparent = true;
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              mats.push(mat);
+              baseColorHex.push(mat.color.getHex());
+            }
+            return mat;
+          });
+        } else if (m.material instanceof THREE.MeshStandardMaterial) {
+          const mat = cloneStandardMaterials
+            ? (m.material.clone() as THREE.MeshStandardMaterial)
+            : m.material;
+          mat.transparent = true;
+          m.material = mat;
+          mats.push(mat);
+          baseColorHex.push(mat.color.getHex());
+        } else {
+          const fallbackMat = new THREE.MeshStandardMaterial({
+            color: 0xe2dcd0,
+            roughness: 0.55,
+            transparent: true,
+          });
+          m.material = fallbackMat;
+          mats.push(fallbackMat);
+          baseColorHex.push(fallbackMat.color.getHex());
+        }
+
+        meshBackups.push({ mesh: m, original: m.material });
+        const xrayMat = this.buildXrayMaterialForLayer(layer);
+        xrayMaterials.push(xrayMat);
+
+        m.userData.id = id;
+        m.castShadow = true;
+        m.receiveShadow = true;
+        this.clickableMeshes.push(m);
+      }
+    });
+
+    return { mats, baseColorHex, meshBackups, xrayMaterials };
   }
 
   public populateCatalog(structures: StructureRecord[]): {
     mounted3DCount: number;
     matchedIds: Set<string>;
   } {
-    // Build all procedural anatomical 3D parts
     const builtParts: BuiltPart[] = [
       ...buildSkeletalAndArticularParts(this.textures),
       ...buildMuscularAndTegumentaryParts(this.textures),
@@ -259,9 +528,6 @@ export class EquineSceneManager {
       group.userData.id = s.id;
 
       const part = builtMap.get(s.id);
-      const mats: THREE.MeshStandardMaterial[] = [];
-      const baseColorHex: number[] = [];
-
       let center = new THREE.Vector3(0, 1, 0);
       let side: 'left' | 'right' | 'center' =
         s.id.endsWith('-i') ? 'left' : s.id.endsWith('-d') ? 'right' : 'center';
@@ -293,29 +559,13 @@ export class EquineSceneManager {
         matchedIds.add(s.id);
       }
 
-      group.traverse((obj) => {
-        if ((obj as THREE.Mesh).isMesh) {
-          const m = obj as THREE.Mesh;
-          if (Array.isArray(m.material)) {
-            m.material = m.material.map((mm) => mm.clone());
-            m.material.forEach((mm) => {
-              if (mm instanceof THREE.MeshStandardMaterial) {
-                mats.push(mm);
-                baseColorHex.push(mm.color.getHex());
-              }
-            });
-          } else if (m.material instanceof THREE.MeshStandardMaterial) {
-            const cloned = m.material.clone() as THREE.MeshStandardMaterial;
-            m.material = cloned;
-            mats.push(cloned);
-            baseColorHex.push(cloned.color.getHex());
-          }
-          m.userData.id = s.id;
-          this.clickableMeshes.push(m);
-        }
-      });
+      const { mats, baseColorHex, meshBackups, xrayMaterials } = this.captureMeshMaterialsForItem(
+        group,
+        s.id,
+        s.layer,
+        true,
+      );
 
-      // Radial + lateral explosion direction anchored around equine torso center (0.05, 1.05, 0)
       const explodeDir = center.clone().sub(_v3.set(0.05, 1.05, 0));
       if (explodeDir.lengthSq() < 0.001) explodeDir.set(0, 0.2, 0);
       explodeDir.normalize();
@@ -332,6 +582,8 @@ export class EquineSceneManager {
         visibleOverride: true,
         materials: mats,
         baseColorHex,
+        meshBackups,
+        xrayMaterials,
       };
     }
 
@@ -415,12 +667,75 @@ export class EquineSceneManager {
     if (!it || !it.hasMesh) return;
     const worldCenter = it.center.clone().add(it.group.position);
     const offset = this.camera.position.clone().sub(this.controls.target);
-    const dist = THREE.MathUtils.clamp(offset.length(), 0.9, 2.2);
+    const dist = THREE.MathUtils.clamp(offset.length(), 0.75, 2.2);
     offset.normalize().multiplyScalar(dist);
     _camLookTarget.copy(worldCenter);
     _camPosTarget.copy(worldCenter).add(offset);
     this.cameraAnimating = true;
     this.startLoopIfActive();
+  }
+
+  public setReferencePlane(cfg: ReferencePlaneConfig): void {
+    if (!cfg.visible || !cfg.imageUrl) {
+      this.referenceGroup.visible = false;
+      this.requestRender();
+      return;
+    }
+
+    const applyTransform = () => {
+      const baseH = 2.25 * cfg.scale;
+      const w = baseH * this.referenceAspect;
+      this.referenceMesh.scale.set(w, baseH, 1);
+      this.referenceFrame.scale.set(w, baseH, 1);
+      this.referenceMat.opacity = THREE.MathUtils.clamp(cfg.opacity / 100, 0.05, 1);
+
+      if (cfg.projection === 'LM') {
+        this.referenceGroup.rotation.set(0, 0, 0);
+        this.referenceGroup.position.set(0.18 + cfg.offsetX, 1.12 + cfg.offsetY, 0.62);
+      } else if (cfg.projection === 'DP') {
+        this.referenceGroup.rotation.set(0, Math.PI / 2, 0);
+        this.referenceGroup.position.set(-1.55, 1.12 + cfg.offsetY, cfg.offsetX);
+      } else {
+        this.referenceGroup.rotation.set(-Math.PI / 2, 0, 0);
+        this.referenceGroup.position.set(0.15 + cfg.offsetX, 0.018, cfg.offsetY);
+      }
+      this.referenceGroup.visible = true;
+      this.requestRender();
+    };
+
+    if (this.currentRefUrl === cfg.imageUrl && this.referenceTexture) {
+      applyTransform();
+      return;
+    }
+
+    this.currentRefUrl = cfg.imageUrl;
+    this.textureLoader.load(
+      cfg.imageUrl,
+      (tex) => {
+        if (this.disposed) {
+          tex.dispose();
+          return;
+        }
+        this.referenceTexture?.dispose();
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = Math.min(this.renderer.capabilities.getMaxAnisotropy() || 1, 8);
+        this.referenceTexture = tex;
+        this.referenceMat.map = tex;
+        this.referenceMat.needsUpdate = true;
+        const img = tex.image as { width?: number; height?: number } | undefined;
+        if (img?.width && img?.height) {
+          this.referenceAspect = img.width / img.height;
+        } else {
+          this.referenceAspect = 1.4;
+        }
+        applyTransform();
+      },
+      undefined,
+      () => {
+        this.referenceGroup.visible = false;
+        this.requestRender();
+      },
+    );
   }
 
   private replaceItemWithGlbScene(
@@ -431,7 +746,6 @@ export class EquineSceneManager {
     const it = this.items[id];
     if (!it) return;
 
-    // Capture existing anatomical bounding reference before removing procedural mesh
     const hadProcedural = it.hasMesh && it.group.children.length > 0;
     let prevCenter: THREE.Vector3 | null = null;
     let prevMaxDim = 0;
@@ -444,8 +758,9 @@ export class EquineSceneManager {
       }
     }
 
-    // Remove & dispose previous meshes and purge stale clickableMeshes entries
     this.clickableMeshes = this.clickableMeshes.filter((m) => m.userData.id !== id);
+    it.xrayMaterials.forEach((xm) => xm.dispose());
+
     while (it.group.children.length > 0) {
       const ch = it.group.children[0];
       ch.traverse((obj) => {
@@ -462,7 +777,6 @@ export class EquineSceneManager {
       it.group.remove(ch);
     }
 
-    // Auto-align isolated local bone/organ GLBs exported around origin or in cm/mm
     if (autoFitIsolated && prevCenter && prevMaxDim > 0.005) {
       const rawBox = new THREE.Box3().setFromObject(gltfScene);
       if (!rawBox.isEmpty()) {
@@ -483,45 +797,17 @@ export class EquineSceneManager {
       }
     }
 
-    it.materials = [];
-    it.baseColorHex = [];
     it.group.add(gltfScene);
-
-    gltfScene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        const m = obj as THREE.Mesh;
-        if (Array.isArray(m.material)) {
-          m.material = m.material.map((mm) => {
-            const cloned = mm.clone();
-            cloned.transparent = true;
-            if (cloned instanceof THREE.MeshStandardMaterial) {
-              it.materials.push(cloned);
-              it.baseColorHex.push(cloned.color.getHex());
-            }
-            return cloned;
-          });
-        } else if (m.material instanceof THREE.MeshStandardMaterial) {
-          const cloned = m.material.clone() as THREE.MeshStandardMaterial;
-          cloned.transparent = true;
-          m.material = cloned;
-          it.materials.push(cloned);
-          it.baseColorHex.push(cloned.color.getHex());
-        } else {
-          const fallbackMat = new THREE.MeshStandardMaterial({
-            color: 0xe2dcd0,
-            roughness: 0.55,
-            transparent: true,
-          });
-          m.material = fallbackMat;
-          it.materials.push(fallbackMat);
-          it.baseColorHex.push(fallbackMat.color.getHex());
-        }
-        m.userData.id = id;
-        m.castShadow = true;
-        m.receiveShadow = true;
-        this.clickableMeshes.push(m);
-      }
-    });
+    const captured = this.captureMeshMaterialsForItem(
+      gltfScene,
+      id,
+      it.record.layer,
+      true,
+    );
+    it.materials = captured.mats;
+    it.baseColorHex = captured.baseColorHex;
+    it.meshBackups = captured.meshBackups;
+    it.xrayMaterials = captured.xrayMaterials;
 
     if (id === 'equ.car.cor.001') this.heartGroup = gltfScene;
     if (id.startsWith('equ.res.pul.001')) this.lungGroups.push(gltfScene);
@@ -571,9 +857,7 @@ export class EquineSceneManager {
 
     for (const file of files) {
       const baseName = file.name.replace(/\.glb$/i, '').trim();
-      const targetId = this.items[baseName]
-        ? baseName
-        : byTraceabilityId[baseName]?.id;
+      const targetId = this.items[baseName] ? baseName : byTraceabilityId[baseName]?.id;
       if (targetId && this.items[targetId]) {
         matchedTasks.push({ id: targetId, file });
       } else {
@@ -639,6 +923,10 @@ export class EquineSceneManager {
           licencia: entry.licencia || this.items[targetId].record.licencia,
           fuente: entry.fuente || this.items[targetId].record.fuente,
           notas: entry.notas,
+          modalidad_respaldo: entry.modalidad_respaldo,
+          resolucion_corte: entry.resolucion_corte,
+          proyeccion_referencia: entry.proyeccion_referencia,
+          calibracion_anatomica: entry.calibracion_anatomica,
         },
       });
     }
@@ -676,11 +964,61 @@ export class EquineSceneManager {
   public applyVisualConfig(nextConfig: SceneVisualConfig, immediate = false): void {
     const prevVital = this.config.vitalSigns;
     this.config = nextConfig;
-    const { layers, systems, sex, cutaway, selectedId, hoveredId } = nextConfig;
+    const { layers, systems, sex, cutaway, selectedId, hoveredId, renderMode, mpr } = nextConfig;
 
     if (immediate) {
       this.currentExplode = nextConfig.explode / 100;
     }
+
+    // Update scene backdrop & floor visibility for imaging modes
+    const modeChanged = renderMode !== this.lastRenderMode;
+    this.lastRenderMode = renderMode;
+    if (renderMode === 'radiografia') {
+      this.scene.background = this.bgXray;
+      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgXray);
+      if (this.floorGroup) this.floorGroup.visible = false;
+    } else if (renderMode === 'tc') {
+      this.scene.background = this.bgCt;
+      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgCt);
+      if (this.floorGroup) this.floorGroup.visible = true;
+    } else {
+      this.scene.background = this.bgStandard;
+      if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.bgStandard);
+      if (this.floorGroup) this.floorGroup.visible = true;
+    }
+
+    // Update MPR clipping planes & guide lines
+    this.activeClippingPlanes.length = 0;
+    if (mpr.sagittal.enabled) {
+      this.sagittalPlane.constant = mpr.sagittal.value;
+      this.activeClippingPlanes.push(this.sagittalPlane);
+      this.sagittalGuide.position.z = mpr.sagittal.value;
+      this.sagittalGuide.visible = true;
+    } else {
+      this.sagittalGuide.visible = false;
+    }
+
+    if (mpr.transverse.enabled) {
+      this.transversePlane.constant = mpr.transverse.value;
+      this.activeClippingPlanes.push(this.transversePlane);
+      this.transverseGuide.position.x = mpr.transverse.value;
+      this.transverseGuide.visible = true;
+    } else {
+      this.transverseGuide.visible = false;
+    }
+
+    if (mpr.dorsal.enabled) {
+      this.dorsalPlane.constant = mpr.dorsal.value;
+      this.activeClippingPlanes.push(this.dorsalPlane);
+      this.dorsalGuide.position.y = mpr.dorsal.value;
+      this.dorsalGuide.visible = true;
+    } else {
+      this.dorsalGuide.visible = false;
+    }
+
+    const clipCountChanged = this.activeClippingPlanes.length !== this.lastClipCount;
+    this.lastClipCount = this.activeClippingPlanes.length;
+    const clipPlanesForMat = this.activeClippingPlanes.length > 0 ? this.activeClippingPlanes : null;
 
     const ex = this.currentExplode;
 
@@ -697,47 +1035,83 @@ export class EquineSceneManager {
       const baseVis =
         layerState.on && systems[sysKey] !== false && sexOk && it.visibleOverride;
 
-      // Cutaway check for whole-part sidedness
       const hidePartByCutaway =
-        (cutaway === 'left' && it.side === 'left' && (s.layer === 'pel' || s.layer === 'msu' || s.layer === 'fas' || s.id.startsWith('equ.ske.cos.'))) ||
-        (cutaway === 'right' && it.side === 'right' && (s.layer === 'pel' || s.layer === 'msu' || s.layer === 'fas' || s.id.startsWith('equ.ske.cos.')));
+        (cutaway === 'left' &&
+          it.side === 'left' &&
+          (s.layer === 'pel' || s.layer === 'msu' || s.layer === 'fas' || s.id.startsWith('equ.ske.cos.'))) ||
+        (cutaway === 'right' &&
+          it.side === 'right' &&
+          (s.layer === 'pel' || s.layer === 'msu' || s.layer === 'fas' || s.id.startsWith('equ.ske.cos.')));
 
       it.group.visible = baseVis && !hidePartByCutaway;
 
-      // Per-child side cutaway (for bilateral single records like Piel or Masetero)
       if (it.group.visible) {
         it.group.traverse((ch) => {
           if (ch !== it.group && ch.userData.side) {
             const hideChild =
-              (cutaway === 'left' && ch.userData.side === 'left' && (s.layer === 'pel' || s.layer === 'msu')) ||
-              (cutaway === 'right' && ch.userData.side === 'right' && (s.layer === 'pel' || s.layer === 'msu'));
+              (cutaway === 'left' &&
+                ch.userData.side === 'left' &&
+                (s.layer === 'pel' || s.layer === 'msu')) ||
+              (cutaway === 'right' &&
+                ch.userData.side === 'right' &&
+                (s.layer === 'pel' || s.layer === 'msu'));
             ch.visible = !hideChild;
           }
         });
       }
 
-      // Exploded position
       this.applyItemExplosion(it, ex);
 
-      // Opacity, selection & hover highlight
       const op = layerState.op / 100;
       const isSel = selectedId === s.id;
       const isHov = hoveredId === s.id;
 
-      it.materials.forEach((m) => {
-        m.opacity = isSel ? Math.max(op, 0.88) : op;
-        m.depthWrite = op > 0.85;
-        if (isSel) {
-          m.emissive.setHex(0x14b8a6);
-          m.emissiveIntensity = 0.65;
-        } else if (isHov) {
-          m.emissive.setHex(0xf59e0b);
-          m.emissiveIntensity = 0.35;
-        } else {
-          m.emissive.setHex(s.layer === 'ner' ? 0x3a2800 : 0x000000);
-          m.emissiveIntensity = s.layer === 'ner' ? 0.22 : 0;
-        }
-      });
+      if (renderMode === 'radiografia') {
+        it.meshBackups.forEach((bk, idx) => {
+          const xm = it.xrayMaterials[idx];
+          if (xm) {
+            if (bk.mesh.material !== xm) {
+              bk.mesh.material = xm;
+            }
+            xm.uniforms.uOpacity.value = isSel ? Math.max(op, 0.92) : op;
+            xm.uniforms.uSelected.value = isSel ? 1.0 : 0.0;
+            xm.uniforms.uHovered.value = isHov ? 1.0 : 0.0;
+            xm.clippingPlanes = clipPlanesForMat;
+            if (clipCountChanged || modeChanged) xm.needsUpdate = true;
+          }
+        });
+      } else {
+        it.meshBackups.forEach((bk) => {
+          if (bk.mesh.material !== bk.original) {
+            bk.mesh.material = bk.original;
+          }
+        });
+
+        it.materials.forEach((m, idx) => {
+          const baseHex = it.baseColorHex[idx] ?? 0xe2dcd0;
+          if (renderMode === 'tc') {
+            m.color.setHex(getCtColorForLayer(s.layer, baseHex));
+          } else {
+            m.color.setHex(baseHex);
+          }
+          m.opacity = isSel ? Math.max(op, 0.88) : op;
+          m.depthWrite = op > 0.85;
+          m.clippingPlanes = clipPlanesForMat;
+          m.clipShadows = true;
+          if (clipCountChanged || modeChanged) m.needsUpdate = true;
+
+          if (isSel) {
+            m.emissive.setHex(0x14b8a6);
+            m.emissiveIntensity = 0.65;
+          } else if (isHov) {
+            m.emissive.setHex(0xf59e0b);
+            m.emissiveIntensity = 0.35;
+          } else {
+            m.emissive.setHex(s.layer === 'ner' ? 0x3a2800 : 0x000000);
+            m.emissiveIntensity = s.layer === 'ner' ? 0.22 : 0;
+          }
+        });
+      }
     });
 
     const needsContinuous =
@@ -754,9 +1128,8 @@ export class EquineSceneManager {
 
   private applyItemExplosion(it: SceneItemRuntime, ex: number): void {
     const layerIdx = LAYER_ORDER[it.record.layer] ?? 4;
-    // Outward lateral separation based on anatomical side + layer depth
     const sideSign = it.side === 'left' ? -1 : it.side === 'right' ? 1 : 0;
-    const lateralLayerFactor = (9 - layerIdx) * 0.065; // outer layers move farther out
+    const lateralLayerFactor = (9 - layerIdx) * 0.065;
     const zOffset = sideSign * ex * (0.18 + lateralLayerFactor);
     const yOffset = (layerIdx === 0 ? 0.14 : layerIdx <= 3 ? 0.06 : 0) * ex;
 
@@ -829,6 +1202,16 @@ export class EquineSceneManager {
         cur = cur.parent;
       }
       if (!visible) continue;
+      // Ignore hits on the clipped-away half of active MPR planes
+      let clippedOut = false;
+      for (const plane of this.activeClippingPlanes) {
+        if (plane.distanceToPoint(hit.point) < 0) {
+          clippedOut = true;
+          break;
+        }
+      }
+      if (clippedOut) continue;
+
       const id = hit.object.userData.id as string | undefined;
       if (id && this.items[id]?.group.visible) {
         return id;
@@ -937,7 +1320,6 @@ export class EquineSceneManager {
   private stepTransitions(dt: number): boolean {
     let active = false;
 
-    // 1. Explode layer damping
     const targetEx = this.config.explode / 100;
     if (Math.abs(this.currentExplode - targetEx) > 0.0015) {
       this.currentExplode = THREE.MathUtils.damp(this.currentExplode, targetEx, 7.5, dt);
@@ -951,7 +1333,6 @@ export class EquineSceneManager {
       this.currentExplode = targetEx;
     }
 
-    // 2. Camera preset / focus damping
     if (this.cameraAnimating) {
       const posDist = this.camera.position.distanceTo(_camPosTarget);
       const tgtDist = this.controls.target.distanceTo(_camLookTarget);
@@ -967,10 +1348,8 @@ export class EquineSceneManager {
       }
     }
 
-    // 3. Subtle equine physiological vital signs (~38 BPM heartbeat & ~14 breaths/min)
     if (this.config.vitalSigns) {
       this.vitalClock += dt;
-      // Resting equine heart rate ~38 bpm -> 0.63 Hz
       const beatPhase = (this.vitalClock * 0.63) % 1;
       const pulse =
         Math.exp(-Math.pow((beatPhase - 0.12) / 0.05, 2)) * 0.055 +
@@ -978,7 +1357,6 @@ export class EquineSceneManager {
       if (this.heartGroup) {
         this.heartGroup.scale.setScalar(1 + pulse);
       }
-      // Resting equine breathing ~14 breaths/min -> 0.23 Hz
       const breath = 1 + Math.sin(this.vitalClock * 0.23 * Math.PI * 2) * 0.025;
       for (const lg of this.lungGroups) {
         lg.scale.set(1 + (breath - 1) * 0.4, breath, breath);
@@ -1061,6 +1439,10 @@ export class EquineSceneManager {
     dom.removeEventListener('webglcontextrestored', this.onContextRestored);
     window.removeEventListener('resize', this.onResize);
 
+    Object.values(this.items).forEach((it) => {
+      it.xrayMaterials.forEach((xm) => xm.dispose());
+    });
+
     this.scene.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
         const m = obj as THREE.Mesh;
@@ -1073,6 +1455,19 @@ export class EquineSceneManager {
       }
     });
 
+    this.sagittalGuide.geometry.dispose();
+    (this.sagittalGuide.material as THREE.Material).dispose();
+    this.transverseGuide.geometry.dispose();
+    (this.transverseGuide.material as THREE.Material).dispose();
+    this.dorsalGuide.geometry.dispose();
+    (this.dorsalGuide.material as THREE.Material).dispose();
+    this.referenceMesh.geometry.dispose();
+    this.referenceFrame.geometry.dispose();
+    (this.referenceFrame.material as THREE.Material).dispose();
+    this.referenceMat.dispose();
+    this.referenceTexture?.dispose();
+
+    this.dracoLoader.dispose();
     this.textures.dispose();
     this.envRT?.dispose();
     this.controls.dispose();

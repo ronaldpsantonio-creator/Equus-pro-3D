@@ -28,6 +28,30 @@ export type LayerCode =
 
 export type SexFilter = 'all' | 'm' | 'f';
 export type CutawayMode = 'none' | 'left' | 'right';
+export type RenderViewMode = 'anatomico' | 'radiografia' | 'tc';
+export type ReferenceProjection = 'LM' | 'DP' | 'DV';
+
+export interface MprAxisSlice {
+  enabled: boolean;
+  value: number; // -1..1 normalized or world meters
+}
+
+export interface MprSliceState {
+  sagittal: MprAxisSlice; // Z (-0.45 .. +0.45 m)
+  transverse: MprAxisSlice; // X (-1.50 .. +1.65 m)
+  dorsal: MprAxisSlice; // Y (0.00 .. +2.05 m)
+}
+
+export interface ReferencePlaneConfig {
+  visible: boolean;
+  projection: ReferenceProjection;
+  opacity: number; // 0..100
+  scale: number; // 0.3..2.5
+  offsetX: number; // meters
+  offsetY: number; // meters
+  imageUrl: string | null;
+  label: string;
+}
 
 export interface FichaData {
   ubicacion?: string;
@@ -87,6 +111,10 @@ export interface LoadedModelMeta {
   licencia?: string;
   fuente?: string;
   notas?: string;
+  modalidad_respaldo?: string;
+  resolucion_corte?: string;
+  proyeccion_referencia?: string;
+  calibracion_anatomica?: string;
 }
 
 export interface ModelManifestEntry {
@@ -94,6 +122,10 @@ export interface ModelManifestEntry {
   licencia?: string;
   fuente?: string;
   notas?: string;
+  modalidad_respaldo?: string;
+  resolucion_corte?: string;
+  proyeccion_referencia?: string;
+  calibracion_anatomica?: string;
   archivo_original_id?: string;
 }
 

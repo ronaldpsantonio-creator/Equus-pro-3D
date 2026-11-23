@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Layers,
   RotateCcw,
+  ScanLine,
   Sliders,
   Upload,
 } from 'lucide-react';
@@ -20,7 +21,10 @@ import {
   LayerCode,
   LayerState,
   LoadedModelMeta,
+  MprSliceState,
   QuizProgress,
+  ReferencePlaneConfig,
+  RenderViewMode,
   SexFilter,
   StructureRecord,
   STUDY_PRESETS,
@@ -29,10 +33,11 @@ import {
   SystemCode,
 } from '../types/proclavet';
 import { CatalogAndFichaTab } from './CatalogAndFichaTab';
+import { ImagingTab } from './ImagingTab';
 import { QuizTab } from './QuizTab';
 import { SelectionBar } from './SelectionBar';
 
-export type DockTab = 'sistemas' | 'capas' | 'camaras' | 'ficha' | 'quiz';
+export type DockTab = 'sistemas' | 'capas' | 'imagenologia' | 'camaras' | 'ficha' | 'quiz';
 
 interface BottomDockProps {
   collapsed: boolean;
@@ -73,6 +78,16 @@ interface BottomDockProps {
 
   // Camera
   onSelectCameraPreset: (preset: CameraPreset) => void;
+
+  // Imaging (TC / Rx / MPR / Calibrated Plane)
+  renderMode: RenderViewMode;
+  onRenderModeChange: (mode: RenderViewMode) => void;
+  mpr: MprSliceState;
+  onMprChange: (next: MprSliceState) => void;
+  onResetMpr: () => void;
+  referencePlane: ReferencePlaneConfig;
+  onReferencePlaneChange: (next: ReferencePlaneConfig) => void;
+  onUploadReferenceImage: () => void;
 
   // Catalog & Ficha
   structures: StructureRecord[];
@@ -137,6 +152,14 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     blindMode,
     onToggleBlindMode,
     onSelectCameraPreset,
+    renderMode,
+    onRenderModeChange,
+    mpr,
+    onMprChange,
+    onResetMpr,
+    referencePlane,
+    onReferencePlaneChange,
+    onUploadReferenceImage,
     structures,
     byId,
     byTraceabilityId,
@@ -217,6 +240,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                   [
                     ['sistemas', 'Sistemas y planos', Layers],
                     ['capas', 'Capas y disección', Sliders],
+                    ['imagenologia', 'TC y Rx', ScanLine],
                     ['camaras', 'Cámaras', Camera],
                     ['ficha', 'Catálogo y ficha', BookOpen],
                     ['quiz', 'Autoevaluación', GraduationCap],
@@ -444,7 +468,27 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
               </div>
             )}
 
-            {/* Tab 3: Camera Presets */}
+            {/* Tab 3: Imaging (TC / Rx / MPR) */}
+            {activeTab === 'imagenologia' && (
+              <ImagingTab
+                renderMode={renderMode}
+                onRenderModeChange={onRenderModeChange}
+                mpr={mpr}
+                onMprChange={onMprChange}
+                onResetMpr={onResetMpr}
+                referencePlane={referencePlane}
+                onReferencePlaneChange={onReferencePlaneChange}
+                onUploadReferenceImage={onUploadReferenceImage}
+                onSelectPresetCamera={(mode) => {
+                  const targetPreset = CAMERA_PRESETS.find((p) =>
+                    mode === 'distal' ? p.id === 'casco' : p.id === 'lat-izq',
+                  );
+                  if (targetPreset) onSelectCameraPreset(targetPreset);
+                }}
+              />
+            )}
+
+            {/* Tab 4: Camera Presets */}
             {activeTab === 'camaras' && (
               <div className="space-y-2.5">
                 <div className="text-[11px] text-slate-400">

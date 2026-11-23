@@ -15,7 +15,10 @@ import {
   LayerCode,
   LayerState,
   LoadedModelMeta,
+  MprSliceState,
   QuizProgress,
+  ReferencePlaneConfig,
+  RenderViewMode,
   ScreenLabel,
   SexFilter,
   StructureRecord,
@@ -58,6 +61,8 @@ export default function App() {
   const sceneRef = useRef<EquineSceneManager | null>(null);
   const glbInputRef = useRef<HTMLInputElement | null>(null);
   const batchGlbInputRef = useRef<HTMLInputElement | null>(null);
+  const refImageInputRef = useRef<HTMLInputElement | null>(null);
+  const refBlobUrlRef = useRef<string | null>(null);
 
   const [structures, setStructures] = useState<StructureRecord[]>([]);
   const [byId, setById] = useState<Record<string, StructureRecord>>({});
@@ -86,6 +91,22 @@ export default function App() {
   const [vitalSigns, setVitalSigns] = useState(false);
   const [isolated, setIsolated] = useState(false);
   const [labels, setLabels] = useState<ScreenLabel[]>([]);
+  const [renderMode, setRenderMode] = useState<RenderViewMode>('anatomico');
+  const [mpr, setMpr] = useState<MprSliceState>({
+    sagittal: { enabled: false, value: 0 },
+    transverse: { enabled: false, value: 0.2 },
+    dorsal: { enabled: false, value: 1.1 },
+  });
+  const [referencePlane, setReferencePlane] = useState<ReferencePlaneConfig>({
+    visible: false,
+    projection: 'LM',
+    opacity: 75,
+    scale: 1.0,
+    offsetX: 0,
+    offsetY: 0,
+    imageUrl: null,
+    label: '',
+  });
 
   // HUD / Dock state
   const [hudHidden, setHudHidden] = useState(false);
@@ -121,6 +142,8 @@ export default function App() {
       showLabels,
       blindMode,
       vitalSigns,
+      renderMode,
+      mpr,
     }),
     [
       layers,
@@ -133,6 +156,8 @@ export default function App() {
       showLabels,
       blindMode,
       vitalSigns,
+      renderMode,
+      mpr,
     ],
   );
 
@@ -192,6 +217,19 @@ export default function App() {
   useEffect(() => {
     sceneRef.current?.applyVisualConfig(visualConfig);
   }, [visualConfig, modelBump]);
+
+  // Sync calibrated Radiographic / CT reference plane
+  useEffect(() => {
+    sceneRef.current?.setReferencePlane(referencePlane);
+  }, [referencePlane]);
+
+  useEffect(() => {
+    return () => {
+      if (refBlobUrlRef.current) {
+        URL.revokeObjectURL(refBlobUrlRef.current);
+      }
+    };
+  }, []);
 
   // Keyboard shortcut H to toggle HUD (Zen mode)
   useEffect(() => {
@@ -268,7 +306,21 @@ export default function App() {
     setCutaway('none');
     setExplode(0);
     setIsolated(false);
+    setRenderMode('anatomico');
+    setMpr({
+      sagittal: { enabled: false, value: 0 },
+      transverse: { enabled: false, value: 0.2 },
+      dorsal: { enabled: false, value: 1.1 },
+    });
     sceneRef.current?.showAllStructures();
+  }, []);
+
+  const handleResetMpr = useCallback(() => {
+    setMpr({
+      sagittal: { enabled: false, value: 0 },
+      transverse: { enabled: false, value: 0.2 },
+      dorsal: { enabled: false, value: 1.1 },
+    });
   }, []);
 
   const handleIsolateSelected = useCallback(() => {
@@ -430,6 +482,23 @@ export default function App() {
     [byTraceabilityId],
   );
 
+  const handleRefImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (refBlobUrlRef.current) {
+      URL.revokeObjectURL(refBlobUrlRef.current);
+    }
+    const url = URL.createObjectURL(file);
+    refBlobUrlRef.current = url;
+    setReferencePlane((prev) => ({
+      ...prev,
+      visible: true,
+      imageUrl: url,
+      label: `Placa local: ${file.name}`,
+    }));
+  }, []);
+
   const hasMeshFn = useCallback(
     (id: string) => sceneRef.current?.hasMesh(id) ?? false,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -572,6 +641,14 @@ export default function App() {
         blindMode={blindMode}
         onToggleBlindMode={() => setBlindMode((v) => !v)}
         onSelectCameraPreset={handleSelectCameraPreset}
+        renderMode={renderMode}
+        onRenderModeChange={setRenderMode}
+        mpr={mpr}
+        onMprChange={setMpr}
+        onResetMpr={handleResetMpr}
+        referencePlane={referencePlane}
+        onReferencePlaneChange={setReferencePlane}
+        onUploadReferenceImage={() => refImageInputRef.current?.click()}
         structures={structures}
         byId={byId}
         byTraceabilityId={byTraceabilityId}
@@ -626,6 +703,13 @@ export default function App() {
         multiple
         className="hidden"
         onChange={handleBatchGlbChange}
+      />
+      <input
+        ref={refImageInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        className="hidden"
+        onChange={handleRefImageChange}
       />
     </div>
   );
