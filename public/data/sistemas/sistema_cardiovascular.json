@@ -39,7 +39,26 @@
         ],
         "c": 11680328
       },
-      "model": "models/equino/organs/equ.car.cor.001.glb"
+      "model": "models/equino/organs/equ.car.cor.001.glb",
+      "ficha": {
+        "ubicacion": "Mediastino medio de la cavidad torácica, entre los espacios intercostales 3.º y 6.º (aproximadamente 3/5 a la izquierda del plano mediano), con el eje mayor inclinado ventrocaudalmente hacia el esternón.",
+        "descripcion": "Órgano muscular hueco tetracameral (atrios derecho e izquierdo, ventrículos derecho e izquierdo) de forma cónica algo asimétrica, alojado en el saco pericárdico fibroso y seroso.",
+        "relaciones": "Lateralmente se relaciona con la cara mediastínica de ambos pulmones (escotadura cardíaca mayor a la izquierda); dorsalmente con los grandes vasos, tráquea y esófago; ventralmente con el esternón y cartílagos costales mediante el ligamento esternopericárdico.",
+        "accidentes": "Base cardíaca dorsal, vértice (apex cordis) próximo al 6.º cartílago costal izquierdo, surco coronario, surcos interventriculares paraconal (izquierdo) y subsinusal (derecho), aurículas y orejuelas.",
+        "articulaciones": "No articula con piezas óseas; se mantiene suspendido por los grandes vasos de la base y fijado ventralmente por el ligamento esternopericárdico al esternón.",
+        "inserciones": "El miocardio se ancla en el esqueleto fibroso del corazón (anillos fibrosos atrioventriculares y arteriales, trígonos fibrosos y cartílagos/huesos cardíacos en équidos adultos/añosos).",
+        "irrigacion": "Arterias coronarias izquierda (ramas interventricular paraconal y circunfleja) y derecha (rama interventricular subsinusal), originadas en los senos aórticos; drenaje venoso por la gran vena cardíaca hacia el seno coronario.",
+        "inervacion": "Plexo cardíaco autónomo: simpático (nervios cardíacos cervicales y torácicos, cronotropo/inotropo positivo) y parasimpático (ramos cardíacos del nervio vago X, cronotropo negativo).",
+        "funcion": "Bomba muscular doble que impulsa la sangre desoxigenada hacia la circulación pulmonar (ventrículo derecho) y la sangre oxigenada hacia la circulación sistémica (ventrículo izquierdo).",
+        "especie": "En el caballo adulto representa ~0,7–1 % del peso corporal (hasta >1 % en caballos de carreras); presenta con frecuencia cartílago o tejido óseo en el trígono fibroso derecho. Frecuencia basal en reposo de 28–40 lpm y frecuentes bloqueos auriculoventriculares de segundo grado fisiológicos.",
+        "clinica": "Auscultación óptima del choque de punta y área mitral en 5.º espacio intercostal izquierdo, aórtica en 4.º izquierdo, pulmonar en 3.º izquierdo y tricuspídea en 3.º–4.º derecho. Sede de soplos fisiológicos de eyección, insuficiencias valvulares y fibrilación atrial.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.cor.002",
@@ -522,7 +541,26 @@
       "es": "Aorta ascendente",
       "la": "Aorta ascendens",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Mediastino medio y craneal, emergiendo de la base del ventrículo izquierdo dorsalmente y continuándose hacia el arco aórtico frente al 4.º espacio intercostal.",
+        "descripcion": "Tronco arterial elástico inicial de la circulación sistémica, dilatado en su origen formando el bulbo aórtico y los tres senos aórticos de Valsalva.",
+        "relaciones": "Cubierta inicialmente por el pericardio fibroso; se sitúa a la derecha del tronco pulmonar y cranealmente al atrio derecho antes de emitir el tronco braquiocefálico.",
+        "accidentes": "Bulbo de la aorta, senos aórticos (izquierdo, derecho y no coronario) y unión sinotubular.",
+        "articulaciones": "Sin uniones articulares; se continúa estructuralmente con el anillo fibroso aórtico y el arco aórtico.",
+        "inserciones": "Fijada al esqueleto fibroso del corazón mediante el anillo valvular aórtico y envuelta en su origen por la lámina serosa visceral del pericardio.",
+        "irrigacion": "Da origen inmediato a las arterias coronarias derecha e izquierda; su propia pared recibe irrigación de vasa vasorum de ramas mediastínicas y coronarias.",
+        "inervacion": "Fibras autónomas del plexo cardíaco y aórtico; barorreceptores y terminaciones aferentes viscerales.",
+        "funcion": "Conduce y amortigua pulsátilmente la sangre eyectada por el ventrículo izquierdo mediante distensión elástica sistólica y retroceso diastólico.",
+        "especie": "En el caballo, el tronco braquiocefálico se origina muy próximo a la continuación del arco aórtico, constituyendo un vaso único para cabeza, cuello y ambos miembros torácicos.",
+        "clinica": "La ruptura de la raíz o senos aórticos (seno derecho hacia ventrículo/atrio derecho) es una causa reconocida de muerte súbita o taquicardia/insuficiencia cardíaca aguda en sementales y caballos de deporte.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.tpa.006",
@@ -543,14 +581,52 @@
       "es": "Aorta torácica",
       "la": "Aorta thoracica",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Mediastino dorsal y plano mediano ligeramente izquierdo, extendiéndose desde el arco aórtico (T5–T6) hasta el hiato aórtico del diafragma (T17–T18).",
+        "descripcion": "Gran arteria elástica de conducción que cursa ventral a los cuerpos vertebrales torácicos en dirección caudal.",
+        "relaciones": "Dorsalmente con los cuerpos vertebrales torácicos y el conducto torácico; ventralmente con el esófago y la tráquea/bronquio principal izquierdo; a la derecha con la vena ácigos derecha.",
+        "accidentes": "Orificios de las arterias intercostales dorsales (a partir de la 5.ª–6.ª), arteria broncoesofágica y ramas frénicas craneales.",
+        "articulaciones": "Relación topográfica ventral con las articulaciones costovertebrales y discos intervertebrales torácicos.",
+        "inserciones": "Rodeada por tejido conectivo mediastínico dorsal y atravesando el hiato aórtico entre los pilares del diafragma.",
+        "irrigacion": "Emite las arterias intercostales dorsales, broncoesofágica y ramas mediastínicas; su pared está nutrida por vasa vasorum intercostales.",
+        "inervacion": "Plexo aórtico torácico simpático y filetes aferentes viscerales.",
+        "funcion": "Transporta sangre arterial hacia la pared torácica, bronquios, esófago y hacia la cavidad abdominal.",
+        "especie": "En el equino cruza a lo largo de 13–14 cuerpos vertebrales torácicos debido a la presencia de 18 pares de costillas, emitiendo el tronco broncoesofágico dorsal al bronquio principal.",
+        "clinica": "El tronco celíaco y la aorta caudal son referencias en ecografía transesofágica o torácica y en disección de mediastino caudal; la rotura traumática torácica tras caídas graves resulta fatal.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.tpa.009",
       "es": "Aorta abdominal",
       "la": "Aorta abdominalis",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Espacio retroperitoneal sublumbar, ventral a los cuerpos vertebrales desde el hiato aórtico (T18) hasta su cuadrifurcación terminal bajo L5–L6.",
+        "descripcion": "Continuación caudal de la aorta descendente tras atravesar el diafragma; arteria musculoelástica de gran calibre.",
+        "relaciones": "A la derecha con la vena cava caudal; dorsalmente con los cuerpos vertebrales lumbares y músculos psoas; ventralmente con el páncreas, raíz del mesenterio y peritoneo parietal dorsal.",
+        "accidentes": "Origen impar del tronco celíaco (T18–L1), arteria mesentérica craneal (L1) y mesentérica caudal (L4); ramas pares renales, gonadales, lumbares e ilíacas externas e internas en la terminación.",
+        "articulaciones": "Topografía ventral respecto a los cuerpos vertebrales lumbares y la articulación lumbosacra en su bifurcación.",
+        "inserciones": "Inmersa en la fascia ilíaca/retroperitoneal sublumbar.",
+        "irrigacion": "Provee toda la irrigación arterial abdominal, pélvica y de los miembros pélvicos; pared irrigada por vasa vasorum lumbares.",
+        "inervacion": "Plexos celíaco, mesentérico craneal, renal y aórtico abdominal del sistema nervioso autónomo.",
+        "funcion": "Distribuye el flujo sanguíneo oxigenado a las vísceras abdominales, riñones, paredes lumbares, pelvis y miembros pélvicos.",
+        "especie": "En el caballo, la aorta abdominal no termina formando un tronco común con la arteria sacra mediana prominente, sino que suele cuadrifurcarse directamente en dos arterias ilíacas externas y dos ilíacas internas (troncos terminales).",
+        "clinica": "La arteria mesentérica craneal en su raíz aórtica es el sitio clásico de arteritis verminosa por larvas migratorias de Strongylus vulgaris (aneurismas mesentéricos y tromboembolismo). Su cuadrifurcación es palpable vía transrectal para diagnosticar trombosis aortoilíaca.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.tpa.010",
@@ -627,14 +703,52 @@
       "es": "Arteria carótida común (izquierda)",
       "la": "Arteria carotis communis",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región ventral y lateral izquierda del cuello, en el ángulo formado entre la tráquea y el músculo largo del cuello, desde la apertura torácica craneal hasta la región laríngea/parotídea.",
+        "descripcion": "Tronco arterial largo izquierdo originado del tronco bicarotídeo, encargado del aporte sanguíneo principal a la cabeza y porción craneal del cuello.",
+        "relaciones": "Incluida en la vaina carotídea junto con el tronco vagosimpático y el nervio laríngeo recurrente izquierdo; medialmente contacta con la tráquea (y en el lado izquierdo, dorsalmente con el esófago en gran parte de su trayecto); superficialmente separada de la vena yugular externa por el músculo omohioideo en el tercio craneal del cuello.",
+        "accidentes": "Trayecto cervical rectilíneo con escasas ramas colaterales musculares, tiroideas craneal y caudal, terminando en una trifurcación en arterias carótida interna, carótida externa y occipital.",
+        "articulaciones": "Sin uniones articulares; discurre medialmente a la fascia cervical profunda.",
+        "inserciones": "Envuelta por tejido conectivo de la vaina carotídea.",
+        "irrigacion": "Emite ramas musculares cervicales, esofágicas, traqueales y las arterias tiroideas craneal y caudal antes de su trifurcación.",
+        "inervacion": "Plexo carotídeo simpático perivascular y quimiorreceptores/barorreceptores en el seno y cuerpo carotídeos cercanos a la bifurcación.",
+        "funcion": "Aporta el principal flujo arterial oxigenado hacia el encéfalo (vía carótida interna), estructuras faciales, lengua, faringe y glándulas salivales.",
+        "especie": "En el caballo, ambas carótidas comunes nacen de un tronco bicarotídeo corto derivado del tronco braquiocefálico. Además, el músculo omohioideo se interpone en los dos tercios craneales del cuello entre la vena yugular externa y la arteria carótida común, protegiéndola durante la venopunción.",
+        "clinica": "Riesgo de punción accidental intraarterial en venopunción yugular baja (tercio caudal del cuello, donde falta el músculo omohioideo) o en inyecciones perivasculares; su relación con la bolsa gutural (especialmente carótida interna y externa tras la trifurcación) es crítica en micosis de bolsas guturales.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.acc.002-d",
       "es": "Arteria carótida común (derecha)",
       "la": "Arteria carotis communis",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región ventral y lateral derecha del cuello, en el ángulo formado entre la tráquea y el músculo largo del cuello, desde la apertura torácica craneal hasta la región laríngea/parotídea.",
+        "descripcion": "Tronco arterial largo derecho originado del tronco bicarotídeo, encargado del aporte sanguíneo principal a la cabeza y porción craneal del cuello.",
+        "relaciones": "Incluida en la vaina carotídea junto con el tronco vagosimpático y el nervio laríngeo recurrente derecho; medialmente contacta con la tráquea (y en el lado izquierdo, dorsalmente con el esófago en gran parte de su trayecto); superficialmente separada de la vena yugular externa por el músculo omohioideo en el tercio craneal del cuello.",
+        "accidentes": "Trayecto cervical rectilíneo con escasas ramas colaterales musculares, tiroideas craneal y caudal, terminando en una trifurcación en arterias carótida interna, carótida externa y occipital.",
+        "articulaciones": "Sin uniones articulares; discurre medialmente a la fascia cervical profunda.",
+        "inserciones": "Envuelta por tejido conectivo de la vaina carotídea.",
+        "irrigacion": "Emite ramas musculares cervicales, esofágicas, traqueales y las arterias tiroideas craneal y caudal antes de su trifurcación.",
+        "inervacion": "Plexo carotídeo simpático perivascular y quimiorreceptores/barorreceptores en el seno y cuerpo carotídeos cercanos a la bifurcación.",
+        "funcion": "Aporta el principal flujo arterial oxigenado hacia el encéfalo (vía carótida interna), estructuras faciales, lengua, faringe y glándulas salivales.",
+        "especie": "En el caballo, ambas carótidas comunes nacen de un tronco bicarotídeo corto derivado del tronco braquiocefálico. Además, el músculo omohioideo se interpone en los dos tercios craneales del cuello entre la vena yugular externa y la arteria carótida común, protegiéndola durante la venopunción.",
+        "clinica": "Riesgo de punción accidental intraarterial en venopunción yugular baja (tercio caudal del cuello, donde falta el músculo omohioideo) o en inyecciones perivasculares; su relación con la bolsa gutural (especialmente carótida interna y externa tras la trifurcación) es crítica en micosis de bolsas guturales.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.acc.003-i",
@@ -1362,14 +1476,52 @@
       "es": "Arteria axilar (izquierda)",
       "la": "Arteria axillaris",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región axilar izquierda, rodeando craneoventralmente el borde craneal de la primera costilla desde la cavidad torácica hacia la cara medial de la articulación del hombro.",
+        "descripcion": "Tronco arterial principal de irrigación del miembro torácico izquierdo, continuación directa de la arteria subclavia izquierda a nivel de la primera costilla.",
+        "relaciones": "Acompañada por la vena axilar y los fascículos del plexo braquial izquierdo; medialmente se relaciona con los músculos escaleno ventral y serrato ventral, y lateralmente con el músculo subescapular.",
+        "accidentes": "Emite las arterias torácica externa, supraescapular y subescapular (tronco principal para la cintura escapular y brazo caudal) antes de continuarse como arteria braquial.",
+        "articulaciones": "Cruza medialmente a la articulación escapulohumeral (hombro).",
+        "inserciones": "Fijada por tejido conjuntivo fascial axilar.",
+        "irrigacion": "Irriga los músculos pectorales, subescapular, supraespinoso, infraespinoso, deltoides, tríceps braquial y todo el miembro torácico distal vía arteria braquial.",
+        "inervacion": "Plexo simpático vasomotor perivascular procedente de ramos del ganglio cervicotorácico (estrellado).",
+        "funcion": "Conduce el aporte arterial completo hacia la musculatura de la espalda, brazo, antebrazo y pie del miembro torácico.",
+        "especie": "En el caballo, a diferencia del perro, la arteria supraescapular suele ser una rama prominente de la axilar o braquial que pasa entre el supraespinoso y subescapular, y la torácica lateral es reducida o inconstante.",
+        "clinica": "Las heridas penetrantes axilares o fracturas de primera costilla pueden lesionarla con hemorragia masiva en el espacio axilar y enfisema subcutáneo secundario.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.amt.001-d",
       "es": "Arteria axilar (derecha)",
       "la": "Arteria axillaris",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región axilar derecha, rodeando craneoventralmente el borde craneal de la primera costilla desde la cavidad torácica hacia la cara medial de la articulación del hombro.",
+        "descripcion": "Tronco arterial principal de irrigación del miembro torácico derecho, continuación directa de la arteria subclavia derecha a nivel de la primera costilla.",
+        "relaciones": "Acompañada por la vena axilar y los fascículos del plexo braquial derecho; medialmente se relaciona con los músculos escaleno ventral y serrato ventral, y lateralmente con el músculo subescapular.",
+        "accidentes": "Emite las arterias torácica externa, supraescapular y subescapular (tronco principal para la cintura escapular y brazo caudal) antes de continuarse como arteria braquial.",
+        "articulaciones": "Cruza medialmente a la articulación escapulohumeral (hombro).",
+        "inserciones": "Fijada por tejido conjuntivo fascial axilar.",
+        "irrigacion": "Irriga los músculos pectorales, subescapular, supraespinoso, infraespinoso, deltoides, tríceps braquial y todo el miembro torácico distal vía arteria braquial.",
+        "inervacion": "Plexo simpático vasomotor perivascular procedente de ramos del ganglio cervicotorácico (estrellado).",
+        "funcion": "Conduce el aporte arterial completo hacia la musculatura de la espalda, brazo, antebrazo y pie del miembro torácico.",
+        "especie": "En el caballo, a diferencia del perro, la arteria supraescapular suele ser una rama prominente de la axilar o braquial que pasa entre el supraespinoso y subescapular, y la torácica lateral es reducida o inconstante.",
+        "clinica": "Las heridas penetrantes axilares o fracturas de primera costilla pueden lesionarla con hemorragia masiva en el espacio axilar y enfisema subcutáneo secundario.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.amt.002-i",
@@ -1768,14 +1920,52 @@
       "es": "Arteria ilíaca externa (izquierda)",
       "la": "Arteria iliaca externa",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región sublumbar y pélvica izquierda, originándose en la cuadrifurcación de la aorta abdominal bajo L5–L6 y descendiendo oblicuamente hacia la laguna vascular del canal femoral.",
+        "descripcion": "Arteria parietal y terminal par mayor izquierda encargada de la irrigación principal del miembro pélvico.",
+        "relaciones": "Cursa ventromedial al cuerpo del ilion y al músculo psoas menor; acompañada caudomedialmente por la vena ilíaca externa izquierda y relacionada con los linfonodos ilíacos mediales.",
+        "accidentes": "Origina la arteria circunfleja ilíaca profunda (o nace próxima a ella), la arteria uterina en la yegua (desde su porción proximal o tronco pudendoepigástrico según variante) y el tronco pudendoepigástrico antes de convertirse en arteria femoral.",
+        "articulaciones": "Relación craneomedial próxima a la articulación sacroilíaca y borde craneal del pubis.",
+        "inserciones": "Discurre bajo el peritoneo parietal pélvico apoyada sobre la fascia ilíaca.",
+        "irrigacion": "Provee irrigación al miembro pélvico entero (vía femoral), pared abdominal ventral (epigástrica caudal) y aparato genital/inguinal (pudenda externa y cremastérica/uterina).",
+        "inervacion": "Fibras simpáticas vasomotoras del plexo ilíaco.",
+        "funcion": "Suministra el flujo sanguíneo arterial de alto volumen necesario para la musculatura propulsora y el pie del miembro pélvico.",
+        "especie": "En la yegua es característica su participación como origen frecuente de la arteria uterina (arteria uterina media), vaso voluminoso cuya pulsación («frémito uterino») cambia notablemente durante la gestación.",
+        "clinica": "Palpable por vía transrectal para evaluar simetría y amplitud de pulso en casos de claudicación en caliente/frío por tromboembolismo aortoilíaco, así como para valorar el frémito de la arteria uterina en obstetricia equina.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.amp.001-d",
       "es": "Arteria ilíaca externa (derecha)",
       "la": "Arteria iliaca externa",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Región sublumbar y pélvica derecha, originándose en la cuadrifurcación de la aorta abdominal bajo L5–L6 y descendiendo oblicuamente hacia la laguna vascular del canal femoral.",
+        "descripcion": "Arteria parietal y terminal par mayor derecha encargada de la irrigación principal del miembro pélvico.",
+        "relaciones": "Cursa ventromedial al cuerpo del ilion y al músculo psoas menor; acompañada caudomedialmente por la vena ilíaca externa derecha y relacionada con los linfonodos ilíacos mediales.",
+        "accidentes": "Origina la arteria circunfleja ilíaca profunda (o nace próxima a ella), la arteria uterina en la yegua (desde su porción proximal o tronco pudendoepigástrico según variante) y el tronco pudendoepigástrico antes de convertirse en arteria femoral.",
+        "articulaciones": "Relación craneomedial próxima a la articulación sacroilíaca y borde craneal del pubis.",
+        "inserciones": "Discurre bajo el peritoneo parietal pélvico apoyada sobre la fascia ilíaca.",
+        "irrigacion": "Provee irrigación al miembro pélvico entero (vía femoral), pared abdominal ventral (epigástrica caudal) y aparato genital/inguinal (pudenda externa y cremastérica/uterina).",
+        "inervacion": "Fibras simpáticas vasomotoras del plexo ilíaco.",
+        "funcion": "Suministra el flujo sanguíneo arterial de alto volumen necesario para la musculatura propulsora y el pie del miembro pélvico.",
+        "especie": "En la yegua es característica su participación como origen frecuente de la arteria uterina (arteria uterina media), vaso voluminoso cuya pulsación («frémito uterino») cambia notablemente durante la gestación.",
+        "clinica": "Palpable por vía transrectal para evaluar simetría y amplitud de pulso en casos de claudicación en caliente/frío por tromboembolismo aortoilíaco, así como para valorar el frémito de la arteria uterina en obstetricia equina.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.amp.002-i",
@@ -2481,14 +2671,52 @@
       "es": "Vena yugular externa (izquierda)",
       "la": "Vena jugularis externa",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Surco yugular izquierdo del cuello, formada caudalmente a la glándula parótida por la confluencia de las venas linguofacial y maxilar, hasta la entrada torácica donde se une a la vena subclavia.",
+        "descripcion": "Vena superficial de gran calibre izquierda, único colector yugular principal en el caballo adulto (al estar ausente o vestigial la vena yugular interna).",
+        "relaciones": "Alojada en el surco yugular entre el músculo braquiocefálico dorsalmente y el músculo esternocefálico ventralmente; cubierta solo por piel, tejido subcutáneo y músculo cutáneo del cuello. Medialmente separada de la arteria carótida común por el músculo omohioideo en los dos tercios craneales.",
+        "accidentes": "Confluencia linguofacial-maxilar, válvulas venosas semilunares y desembocadura en el confluente venoso craneal (vena cava craneal).",
+        "articulaciones": "Trayecto paralelo a la columna cervical desde la región mandibular hasta la apertura torácica craneal.",
+        "inserciones": "Sostenida por la fascia cervical superficial.",
+        "irrigacion": "Drena la sangre venosa de la cabeza y gran parte del cuello.",
+        "inervacion": "Inervación vasomotora simpática perivenosa escasa.",
+        "funcion": "Retorna casi la totalidad de la sangre venosa de la cabeza, encéfalo y estructuras cervicales hacia la vena cava craneal.",
+        "especie": "El caballo carece funcionalmente de vena yugular interna desarrollada; por ello, la vena yugular externa asume todo el drenaje cefálico. Además, la presencia del músculo omohioideo la aísla de la carótida en la zona de venopunción craneal.",
+        "clinica": "Vía clínica de elección en equinos para extracción de sangre, administración endovenosa y colocación de catéteres (preferentemente en el tercio craneal/medio donde el omohioideo protege la carótida). La tromboflebitis yugular bilateral puede provocar edema cefálico grave.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.vcc.001-d",
       "es": "Vena yugular externa (derecha)",
       "la": "Vena jugularis externa",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Surco yugular derecho del cuello, formada caudalmente a la glándula parótida por la confluencia de las venas linguofacial y maxilar, hasta la entrada torácica donde se une a la vena subclavia.",
+        "descripcion": "Vena superficial de gran calibre derecha, único colector yugular principal en el caballo adulto (al estar ausente o vestigial la vena yugular interna).",
+        "relaciones": "Alojada en el surco yugular entre el músculo braquiocefálico dorsalmente y el músculo esternocefálico ventralmente; cubierta solo por piel, tejido subcutáneo y músculo cutáneo del cuello. Medialmente separada de la arteria carótida común por el músculo omohioideo en los dos tercios craneales.",
+        "accidentes": "Confluencia linguofacial-maxilar, válvulas venosas semilunares y desembocadura en el confluente venoso craneal (vena cava craneal).",
+        "articulaciones": "Trayecto paralelo a la columna cervical desde la región mandibular hasta la apertura torácica craneal.",
+        "inserciones": "Sostenida por la fascia cervical superficial.",
+        "irrigacion": "Drena la sangre venosa de la cabeza y gran parte del cuello.",
+        "inervacion": "Inervación vasomotora simpática perivenosa escasa.",
+        "funcion": "Retorna casi la totalidad de la sangre venosa de la cabeza, encéfalo y estructuras cervicales hacia la vena cava craneal.",
+        "especie": "El caballo carece funcionalmente de vena yugular interna desarrollada; por ello, la vena yugular externa asume todo el drenaje cefálico. Además, la presencia del músculo omohioideo la aísla de la carótida en la zona de venopunción craneal.",
+        "clinica": "Vía clínica de elección en equinos para extracción de sangre, administración endovenosa y colocación de catéteres (preferentemente en el tercio craneal/medio donde el omohioideo protege la carótida). La tromboflebitis yugular bilateral puede provocar edema cefálico grave.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.vcc.002-i",
@@ -2866,14 +3094,52 @@
       "es": "Vena cava craneal",
       "la": "Vena cava cranialis",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Mediastino craneal, desde la entrada del tórax (confluencia de las venas yugulares externas y subclavias) hasta la pared craneodorsal del atrio derecho.",
+        "descripcion": "Tronco venoso corto y de amplio lumen formado por la unión de las venas braquiocefálicas o confluente yugulosubclavio.",
+        "relaciones": "Ventral a la tráquea y al tronco braquiocefálico arterial; a la izquierda relacionada con el conducto torácico en su desembocadura y los linfonodos mediastínicos craneales.",
+        "accidentes": "Seno venoso de confluencia y desembocadura de las venas torácicas internas, vertebral, costocervical y conducto torácico/linfático derecho.",
+        "articulaciones": "Sin relaciones articulares directas.",
+        "inserciones": "Envuelta por tejido conjuntivo del mediastino craneal y pericardio en su terminación.",
+        "irrigacion": "Vasa vasorum mediastínicos.",
+        "inervacion": "Plexo autónomo cardíaco y mediastínico.",
+        "funcion": "Recoge la sangre venosa de la cabeza, cuello, miembros torácicos y pared torácica craneal y la vierte al atrio derecho.",
+        "especie": "En el caballo, al no existir venas yugulares internas desarrolladas, la vena cava craneal se forma directamente por las dos venas yugulares externas y ambas subclavias en un confluente corto en el plano mediano.",
+        "clinica": "Importante en la medición de la presión venosa central mediante cateterismo largo desde la vena yugular externa.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.vtr.002",
       "es": "Vena cava caudal",
       "la": "Vena cava caudalis",
       "sys": "car",
-      "layer": "vas"
+      "layer": "vas",
+      "ficha": {
+        "ubicacion": "Desde la confluencia de las venas ilíacas comunes bajo L5–L6, recorriendo el techo abdominal a la derecha de la aorta, pasando por el borde dorsal del hígado y el foramen de la vena cava del diafragma hasta el atrio derecho.",
+        "descripcion": "El tronco venoso de mayor calibre y longitud del organismo, encargado del retorno venoso caudal al corazón.",
+        "relaciones": "En abdomen se sitúa a la derecha de la aorta abdominal y dorsal al colon/duodeno; en su tramo hepático atraviesa un surco profundo o túnel parcial del borde dorsal del hígado recibiendo las venas hepáticas; en tórax discurre dentro del pliegue de la vena cava acompañado por el nervio frénico derecho.",
+        "accidentes": "Desembocaduras de las venas ilíacas comunes, renales, gonadales (derecha directa), lumbares y venas hepáticas; foramen de la vena cava en el centro tendinoso del diafragma.",
+        "articulaciones": "Relación ventral con cuerpos vertebrales lumbares.",
+        "inserciones": "Adherida al centro tendinoso del diafragma en el foramen homónimo y al surco hepático.",
+        "irrigacion": "Vasa vasorum retroperitoneales y frénicos.",
+        "inervacion": "Fibras simpáticas vasomotoras esplácnicas.",
+        "funcion": "Drena la sangre venosa de los miembros pélvicos, pelvis, paredes abdominales, riñones, gónadas e hígado (sangre portal procesada) hacia el atrio derecho.",
+        "especie": "El paso torácico de la vena cava caudal por un pliegue pleural propio (plica venae cavae) delimita el receso mediastínico que aloja al lóbulo accesorio del pulmón derecho.",
+        "clinica": "Puede sufrir trombosis séptica secundaria a abscesos hepáticos o neumonía/pleuroneumonía craneocaudal y comprimirse por masas mediastínicas caudales o ascitis a tensión.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.vtr.003",
@@ -4129,7 +4395,26 @@
       "es": "Bazo",
       "la": "Splen (Lien)",
       "sys": "car",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Cuadrante abdominal craneal izquierdo, aplicada contra la pared costal izquierda (espacios intercostales 9.º–17.º/18.º) y el flanco dorsal izquierdo, dorsocaudal al estómago.",
+        "descripcion": "Órgano linfoide y reservorio sanguíneo parenquimatoso de forma falciforme o triangular alargada (base dorsal ancha y vértice ventral estrecho), color azul-violáceo en fresco y recubierto por cápsula fibromuscular elástica.",
+        "relaciones": "Cara parietal convexa aplicada al diafragma y pared costal izquierda; cara visceral relacionada cranealmente con la curvatura mayor del estómago (ligamento gastroesplénico), dorsomedialmente con el riñón izquierdo (ligamento nefroesplénico) y caudal/ventralmente con el colon menor, yeyuno y colon dorsal/ventral izquierdo.",
+        "accidentes": "Base dorsal redondeada bajo los últimos arcos costales y extremidad dorsal del riñón izquierdo; vértice ventral dirigido hacia el suelo abdominal izquierdo; hilio esplénico longitudinal en la cara visceral.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Fijado por el ligamento nefroesplénico (entre base del bazo y polo lateral del riñón izquierdo, formando un espacio/repisa anatómica) y el ligamento gastroesplénico.",
+        "irrigacion": "Arteria esplénica (rama de mayor calibre del tronco celíaco) ingresando por el hilio esplénico; drenaje venoso por la vena esplénica hacia la vena porta.",
+        "inervacion": "Plexo esplénico predominantemente simpático (contracción esplénica mediada por receptores alfa-adrenérgicos) junto con fibras vagales.",
+        "funcion": "Reservorio eritrocitario contráctil que libera hematíes concentrados en ejercicio o estrés; filtración hemática, fagocitosis de eritrocitos senescentes, hematopoyesis fetal y respuesta inmunitaria humoral y celular.",
+        "especie": "El caballo posee un bazo grande y ricamente dotado de músculo liso capsular y trabecular, capaz de almacenar hasta un tercio o más del volumen eritrocitario circulante y elevar el hematocrito desde ~32 % en reposo hasta >55 % en ejercicio máximo.",
+        "clinica": "El espacio delimitado entre el bazo y el riñón izquierdo por el ligamento nefroesplénico es el sitio del atrapamiento nefroesplénico del colon mayor izquierdo (causa frecuente de cólico equino). El borde caudal esplénico es fácilmente palpable por vía rectal junto a la pared abdominal izquierda y evaluable por ecografía.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.car.lor.002",

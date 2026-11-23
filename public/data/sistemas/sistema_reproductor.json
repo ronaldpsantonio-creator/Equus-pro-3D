@@ -344,7 +344,26 @@
       "la": "Testis",
       "sys": "rep",
       "layer": "org",
-      "sex": "m"
+      "sex": "m",
+      "ficha": {
+        "ubicacion": "Interior de la bolsa escrotal en la región inguinal izquierda, con su eje mayor orientado horizontalmente en dirección craniocaudal.",
+        "descripcion": "Gónada masculina par ovoidea izquierda (aprox. 10–12 × 6–7 × 5 cm en semental adulto), revestida por la túnica albugínea fibrosa y la túnica vaginal visceral, y coronada dorsalmente por el epidídimo.",
+        "relaciones": "Dorsalmente unido al epidídimo (cabeza craneal, cuerpo dorsal y cola caudal) y al cordón espermático; medialmente separado del testículo derecho por el septo escrotal.",
+        "accidentes": "Extremidades craneal (capitada) y caudal (caudada), bordes libre (ventral) y epididimario (dorsal), mediastino testicular poco desarrollado, lobulillos testiculares y túbulos seminíferos.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Suspendido por el cordón espermático y el mesorquio; fijado en su polo caudal al epidídimo y al fondo escrotal por el ligamento propio del testículo y ligamento de la cola del epidídimo.",
+        "irrigacion": "Arteria testicular (larga y muy flexuosa desde la aorta abdominal formando el cono vascular con el plexo pampiniforme venoso para termorregulación). La vena testicular izquierda drena frecuentemente a la vena renal izquierda o cerca de ella.",
+        "inervacion": "Plexo testicular autónomo (simpático y parasimpático) y fibras aferentes viscerales sensibles a la tracción y presión.",
+        "funcion": "Espermatogénesis (túbulos seminíferos) y esteroidogénesis/secreción de testosterona y estrógenos (células intersticiales de Leydig).",
+        "especie": "En el semental el eje mayor testicular es horizontal (no vertical como en el toro) y la cola del epidídimo apunta caudalmente; además, las células de Leydig producen grandes cantidades de estrógenos además de andrógenos. El testículo izquierdo suele ubicarse ligeramente más caudal o voluminoso.",
+        "clinica": "El criptorquidismo (más común abdominal izquierdo o inguinal derecho), la torsión del cordón espermático (causa de cólico escrotal agudo), la hernia inguinal estrangulada y la orquitis/hidrocele son afecciones mayores evaluadas por palpación y ecografía escrotal y rectal.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.tes.001-d",
@@ -352,7 +371,26 @@
       "la": "Testis",
       "sys": "rep",
       "layer": "org",
-      "sex": "m"
+      "sex": "m",
+      "ficha": {
+        "ubicacion": "Interior de la bolsa escrotal en la región inguinal derecha, con su eje mayor orientado horizontalmente en dirección craniocaudal.",
+        "descripcion": "Gónada masculina par ovoidea derecha (aprox. 10–12 × 6–7 × 5 cm en semental adulto), revestida por la túnica albugínea fibrosa y la túnica vaginal visceral, y coronada dorsalmente por el epidídimo.",
+        "relaciones": "Dorsalmente unido al epidídimo (cabeza craneal, cuerpo dorsal y cola caudal) y al cordón espermático; medialmente separado del testículo izquierdo por el septo escrotal.",
+        "accidentes": "Extremidades craneal (capitada) y caudal (caudada), bordes libre (ventral) y epididimario (dorsal), mediastino testicular poco desarrollado, lobulillos testiculares y túbulos seminíferos.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Suspendido por el cordón espermático y el mesorquio; fijado en su polo caudal al epidídimo y al fondo escrotal por el ligamento propio del testículo y ligamento de la cola del epidídimo.",
+        "irrigacion": "Arteria testicular (larga y muy flexuosa desde la aorta abdominal formando el cono vascular con el plexo pampiniforme venoso para termorregulación). La vena testicular derecha drena directamente a la vena cava caudal.",
+        "inervacion": "Plexo testicular autónomo (simpático y parasimpático) y fibras aferentes viscerales sensibles a la tracción y presión.",
+        "funcion": "Espermatogénesis (túbulos seminíferos) y esteroidogénesis/secreción de testosterona y estrógenos (células intersticiales de Leydig).",
+        "especie": "En el semental el eje mayor testicular es horizontal (no vertical como en el toro) y la cola del epidídimo apunta caudalmente; además, las células de Leydig producen grandes cantidades de estrógenos además de andrógenos. El testículo izquierdo suele ubicarse ligeramente más caudal o voluminoso.",
+        "clinica": "El criptorquidismo (más común abdominal izquierdo o inguinal derecho), la torsión del cordón espermático (causa de cólico escrotal agudo), la hernia inguinal estrangulada y la orquitis/hidrocele son afecciones mayores evaluadas por palpación y ecografía escrotal y rectal.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.tes.002-i",
@@ -824,7 +862,26 @@
       "la": "Penis",
       "sys": "rep",
       "layer": "org",
-      "sex": "m"
+      "sex": "m",
+      "ficha": {
+        "ubicacion": "Desde la arcada isquiática de la pelvis, cursa cranealmente entre los muslos por la región perineal y subpúbica hasta la región umbilical en el interior del prepucio.",
+        "descripcion": "Órgano copulador masculino de tipo musculocavernoso (vascular), desprovisto de hueso peneano y sin flexura sigmoidea; se divide en raíz, cuerpo y glande bien desarrollado.",
+        "relaciones": "Ventralmente en la raíz cubierto por el músculo bulboesponjoso; ventral al cuerpo cursa el músculo retractor del pene par; cranealmente el glande está alojado en la lámina interna del prepucio (con pliegue prepucial doble característico del caballo).",
+        "accidentes": "Pilares del pene, cuerpo cavernoso con trabéculas eréctiles prominentes, cuerpo esponjoso que rodea la uretra peneana, glande en forma de seta (corona del glande), fosa del glande con seno uretral y proceso uretral libre (~2 cm).",
+        "articulaciones": "Sin relaciones articulares; fijado al arco isquiático.",
+        "inserciones": "Fijado a la tuberosidad isquiática por ambos pilares (envueltos por los músculos isquiocavernosos) y sostenido bajo la sínfisis pélvica por el ligamento suspensorio del pene.",
+        "irrigacion": "Arterias profundas del pene (desde la pudenda interna) y arteria dorsal del pene (desde las arterias pudenda externa y obturatriz); drenaje venoso por la vena dorsal del pene.",
+        "inervacion": "Nervio dorsal del pene (rama sensitiva del nervio pudendo, crucial para la eyaculación), fibras parasimpáticas pélvicas (vasodilatación/erección) y simpáticas hipogástricas (detumescencia y emisión).",
+        "funcion": "Conduce la orina en la micción y deposita el semen en el útero/cérvix durante la cópula mediante ingurgitación eréctil vascular masiva.",
+        "especie": "A diferencia del pene fibroelástico de los rumiantes, el pene equino es musculocavernoso y duplica ampliamente su longitud y diámetro durante la erección, formando un glande muy ensanchado («en campaña/flor») y un proceso uretral proyectado dentro de la fosa del glande donde puede acumularse esmegma («habón»).",
+        "clinica": "El seno uretral acumula esmegma endurecido («bean/habón») que causa disuria si no se limpia periódicamente; además es susceptible a parafimosis tras sedación con fenotiazínicos (acepromacina), priapismo, carcinomas de células escamosas en glande/prepucio y habronemosis cutánea.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.pen.002",
@@ -1024,7 +1081,26 @@
       "la": "Ovarium",
       "sys": "rep",
       "layer": "org",
-      "sex": "f"
+      "sex": "f",
+      "ficha": {
+        "ubicacion": "Región sublumbar izquierda (nivel de L4–L5), suspendido caudalmente al riñón izquierdo dentro de la cavidad abdominal mediante el mesovario.",
+        "descripcion": "Gónada femenina par arriñonada de gran tamaño izquierda (~5–8 × 3–5 cm según fase estral), con disposición invertida respecto a otros mamíferos: zona parenquimatosa (corteza folicular) interna y zona vascular externa.",
+        "relaciones": "Cranealmente cerca del riñón izquierdo; medial y ventralmente en contacto con las asas intestinales/colon; abrazado lateralmente por las fimbrias del infundíbulo de la tuba uterina.",
+        "accidentes": "Fosa de la ovulación (única depresión revestida de epitelio germinal donde ovulan exclusivamente los folículos maduros), borde mesovárico dorsal con el hilio, cuerpos lúteos inmersos en el interior y bolsa ovárica estrecha.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Suspendido por el mesovario del ligamento ancho y conectado al extremo del cuerno uterino mediante el ligamento propio del ovario.",
+        "irrigacion": "Arteria ovárica (desde la aorta abdominal), altamente espiralada; drenaje venoso por la vena ovárica formando plexo satélite (drenaje a la vena renal izquierda o aorta distal).",
+        "inervacion": "Plexo ovárico autónomo (simpático lumbar y parasimpático).",
+        "funcion": "Ovogénesis, maduración folicular, ovulación restringida a la fosa ovulatoria y secreción cíclica de estrógenos y progesterona.",
+        "especie": "Anatomía ovárica única en los équidos: el ovario presenta forma de judía debido a la fosa de la ovulación y la inversión cortical (corteza en el interior salvo en la fosa, cubierta externa por túnica albugínea/serosa vascularizada), por lo que los cuerpos lúteos no protruyen externamente como en la vaca.",
+        "clinica": "Palpable y ecografiable por vía transrectal durante todo el ciclo estral (los folículos preovulatorios alcanzan 35–45 mm y se reblandecen antes de ovular por la fosa); sede frecuente de quistes anovulatorios hemorrágicos, hematomas ováricos y tumores de células de la granulosa (con atrofia del ovario contralateral).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.ova.001-d",
@@ -1032,7 +1108,26 @@
       "la": "Ovarium",
       "sys": "rep",
       "layer": "org",
-      "sex": "f"
+      "sex": "f",
+      "ficha": {
+        "ubicacion": "Región sublumbar derecha (nivel de L4–L5), suspendido caudalmente al riñón derecho dentro de la cavidad abdominal mediante el mesovario.",
+        "descripcion": "Gónada femenina par arriñonada de gran tamaño derecha (~5–8 × 3–5 cm según fase estral), con disposición invertida respecto a otros mamíferos: zona parenquimatosa (corteza folicular) interna y zona vascular externa.",
+        "relaciones": "Cranealmente cerca del riñón derecho; medial y ventralmente en contacto con las asas intestinales/colon; abrazado lateralmente por las fimbrias del infundíbulo de la tuba uterina.",
+        "accidentes": "Fosa de la ovulación (única depresión revestida de epitelio germinal donde ovulan exclusivamente los folículos maduros), borde mesovárico dorsal con el hilio, cuerpos lúteos inmersos en el interior y bolsa ovárica estrecha.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Suspendido por el mesovario del ligamento ancho y conectado al extremo del cuerno uterino mediante el ligamento propio del ovario.",
+        "irrigacion": "Arteria ovárica (desde la aorta abdominal), altamente espiralada; drenaje venoso por la vena ovárica formando plexo satélite (drenaje directo a la vena cava caudal).",
+        "inervacion": "Plexo ovárico autónomo (simpático lumbar y parasimpático).",
+        "funcion": "Ovogénesis, maduración folicular, ovulación restringida a la fosa ovulatoria y secreción cíclica de estrógenos y progesterona.",
+        "especie": "Anatomía ovárica única en los équidos: el ovario presenta forma de judía debido a la fosa de la ovulación y la inversión cortical (corteza en el interior salvo en la fosa, cubierta externa por túnica albugínea/serosa vascularizada), por lo que los cuerpos lúteos no protruyen externamente como en la vaca.",
+        "clinica": "Palpable y ecografiable por vía transrectal durante todo el ciclo estral (los folículos preovulatorios alcanzan 35–45 mm y se reblandecen antes de ovular por la fosa); sede frecuente de quistes anovulatorios hemorrágicos, hematomas ováricos y tumores de células de la granulosa (con atrofia del ovario contralateral).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.ova.002-i",
@@ -1456,7 +1551,26 @@
       "la": "Uterus",
       "sys": "rep",
       "layer": "org",
-      "sex": "f"
+      "sex": "f",
+      "ficha": {
+        "ubicacion": "Cavidad abdominal caudal (cuernos y cuerpo craneal) y cavidad pélvica (cuerpo caudal y cuello/cérvix), dorsal a la vejiga urinaria y ventral al recto.",
+        "descripcion": "Órgano muscular hueco bipartido en forma de «Y» o «T» suave (sin velo uterino extenso), formado por dos cuernos uterinos divergentes curvos (~20–25 cm), un cuerpo uterino relativamente largo y ancho (~18–20 cm) y un cuello uterino cilíndrico grueso (~5–7 cm) con pliegues mucosos longitudinales.",
+        "relaciones": "Dorsalmente con el recto y colon menor; ventralmente con la vejiga urinaria y asas del yeyuno/colon mayor; cranealmente sus cuernos se incurvan dorsalmente hacia los ovarios.",
+        "accidentes": "Cuernos uterinos con extremidades romas (sin espiralización marcada), cuerpo uterino espacioso, orificio interno del útero, canal cervical rectilíneo con pliegues longitudinales y porción vaginal del cuello proyectada hacia el fórnix vaginal.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Suspendido dorsolateralmente por los ligamentos anchos del útero (mesometrio) fijados a la región sublumbar y paredes pélvicas, además del ligamento redondo.",
+        "irrigacion": "Arteria uterina (procedente de la arteria ilíaca externa en la yegua, muy gruesa y tortuosa), complementada cranealmente por la rama uterina de la arteria ovárica y caudalmente por la arteria vaginal.",
+        "inervacion": "Plexo uterovaginal (autónomo simpático vía hipogástrico y parasimpático vía nervios pélvicos).",
+        "funcion": "Recepción y transporte espermático, anidación del embrión tras la fijación (día 16), placentación difusa epiteliocorial completa durante los ~340 días de gestación y expulsión del feto en el parto.",
+        "especie": "La yegua posee un cuerpo uterino comparativamente mucho más largo que los rumiantes o carnívoros (casi equivalente en longitud a los cuernos) y un cuello uterino corto, blando durante el estro (relajado y edematoso) y firme/cerrado en diestro y gestación, carente de anillos cartilaginosos rígidos.",
+        "clinica": "El edema endometrial en rueda de carro durante el celo y la presencia de líquido libre o quistes endometriales son hallazgos ecográficos clave en reproducción equina; también sufre endometritis poscubrición, torsión uterina preparto y rotura de la arteria uterina media en yeguas añosas durante el parto.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.rep.ute.002-i",

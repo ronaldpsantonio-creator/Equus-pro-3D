@@ -24,7 +24,26 @@
       "es": "Encéfalo",
       "la": "Encephalon",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Cavidad craneal del neurocráneo, protegido por las meninges (duramadre, aracnoides, piamadre) y el líquido cefalorraquídeo, limitado rostralmente por la lámina cribosa del etmoides y caudalmente por el foramen magno.",
+        "descripcion": "Centro integrador supremo del sistema nervioso central, formado por el prosencéfalo (telencéfalo/hemisferios cerebrales y diencéfalo), mesencéfalo y rombencéfalo (puente, cerebelo y médula oblongada).",
+        "relaciones": "Separado de los huesos frontal, parietal, temporal y occipital por los senos venosos durales y meninges; la hoz del cerebro separa ambos hemisferios y el tentorio membranoso/óseo del cerebelo separa el cerebro del cerebelo.",
+        "accidentes": "Hemisferios cerebrales fuertemente circunvolucionados (giros y surcos), bulbos olfatorios voluminosos, cuerpo calloso, tálamo/hipotálamo, cuerpos cuadrigéminos, puente, médula oblongada y sistema ventricular (ventrículos laterales, 3.º y 4.º).",
+        "articulaciones": "Protegido dentro de la cavidad craneal ósea.",
+        "inserciones": "Suspendido por las prolongaciones de la duramadre (hoz del cerebro y tienda del cerebelo) y trabéculas aracnoideas.",
+        "irrigacion": "Círculo arterial cerebral (polígono de Willis) nutrido principalmente por las arterias carótidas internas (con menor contribución basilar en equinos); drenaje por senos venosos durales hacia las venas emisarias.",
+        "inervacion": "Origina los pares craneales I–XII; piamadre y duramadre craneal reciben sensibilidad trigeminal (V) y autónoma perivascular.",
+        "funcion": "Procesamiento sensorial consciente, control motor voluntario, coordinación postural, memoria, comportamiento, regulación autónoma cardiorrespiratoria y endocrina.",
+        "especie": "En el caballo destaca el gran desarrollo de los bulbos olfatorios y la compleja girificación neocortical (~600–700 g en un caballo adulto, alrededor de 0,12 % del peso corporal), así como un tentorio óseo del cerebelo prominente.",
+        "clinica": "Sede de encefalomielitis equinas (EEE/WEE/VEE, virus del Nilo Occidental), mieloencefalitis protozoaria equina (EPM por Sarcocystis neurona), encefalopatía hepática, leucoencefalomalacia por fumonisinas y traumatismo craneoencefálico por caídas hacia atrás.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.enc.002",
@@ -1375,7 +1394,26 @@
       "es": "Cerebelo",
       "la": "Cerebellum",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Fosa craneal caudal, dorsal al puente y a la médula oblongada (cubriendo el techo del 4.º ventrículo) y caudal a los lóbulos occipitales cerebrales, separado por el tentorio del cerebelo.",
+        "descripcion": "Órgano del metencéfalo constituido por un vermis mediano y dos hemisferios cerebelosos laterales con corteza plegada en folias finas y sustancia blanca arborizada (arbor vitae).",
+        "relaciones": "Ventralmente limita con el 4.º ventrículo y pedúnculos cerebelosos (rostral, medio y caudal); dorsal y caudalmente con la escama del occipital; rostralmente con el tentorio del cerebelo.",
+        "accidentes": "Vermis cerebeloso, hemisferios cerebelosos, lóbulos rostral, caudal y floculonodular, fisura prima y tres pares de pedúnculos cerebelosos.",
+        "articulaciones": "Alojado en la fosa cerebelosa caudal del neurocráneo.",
+        "inserciones": "Rodeado por piamadre y aracnoides en la cisterna cerebelomedular (cisterna magna) caudalmente.",
+        "irrigacion": "Arterias cerebelosas rostrales y caudales procedentes de la arteria basilar y ramas terminales de la carótida interna.",
+        "inervacion": "Recibe aferencias propioceptivas medulares (tractos espinocerebelosos), vestibulares y corticopontinas; eferencias por núcleos profundos hacia tálamo y núcleos vestibulares/rojos.",
+        "funcion": "Coordina el equilibrio, tono muscular postural, precisión, rango y cronometría de los movimientos (sinergia motora) sin iniciar el movimiento por sí mismo.",
+        "especie": "Presenta un desarrollo muy refinado en relación con la locomoción rápida de los équidos.",
+        "clinica": "La abiotrofia cerebelosa equina (particularmente en potros árabes, herencia autosómica recesiva) causa degeneración posnatal de células de Purkinje con ataxia cerebelosa, hipermetría, temblor de intención y ausencia de respuesta de amenaza con visión conservada.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.met.009",
@@ -2943,7 +2981,26 @@
       "es": "Médula espinal",
       "la": "Medulla spinalis",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Interior del canal vertebral a lo largo de la columna, desde el foramen magno (C1) hasta el cono medular en la región sacra craneal (aprox. S1–S2 en el caballo adulto).",
+        "descripcion": "Cordón nervioso cilíndrico algo aplanado dorsoventralmente perteneciente al sistema nervioso central, organizado metaméricamente en segmentos (8 cervicales, 18 torácicos, 6 lumbares, 5 sacros y 5+ caudales/coccígeos), con sustancia gris central en H/mariposa y cordones de sustancia blanca periféricos.",
+        "relaciones": "Envuelta por piamadre, espacio subaracnoideo con LCR, aracnoides, duramadre y tejido adiposo/plexo venoso vertebral interno en el espacio epidural.",
+        "accidentes": "Intumescencia cervical (C6–T2 para el plexo braquial), intumescencia lumbosacra (L4–S2 para el plexo lumbosacro), surco mediano dorsal, fisura mediana ventral, cono medular y filum terminale.",
+        "articulaciones": "Discurre protegida por el arco y cuerpo de todas las vértebras y discos intervertebrales.",
+        "inserciones": "Estabilizada dentro del saco dural por los ligamentos denticulados laterales y las raíces nerviosas espinales.",
+        "irrigacion": "Arteria espinal ventral única y arterias espinales dorsales nutridas segmentariamente por ramas espinales de las arterias vertebrales, intercostales dorsales, lumbares y sacras; drenaje por los plexos venosos vertebrales internos.",
+        "inervacion": "Conduce vías ascendentes sensitivas y descendentes motoras; las meninges reciben ramos meníngeos recurrentes de los nervios espinales.",
+        "funcion": "Conduce impulsos nerviosos entre el encéfalo y el tronco/miembros e integra arcos reflejos espinales segmentarios e intersegmentarios.",
+        "especie": "El caballo posee 18 segmentos medulares torácicos y su cono medular se extiende más caudalmente que en carnívoros (llegando al sacro craneal, por lo que la punción lumbosacra penetra al espacio subaracnoideo justo craneal al sacro, mientras que la epidural caudal entre Cd1–Cd2 queda lejos del cono).",
+        "clinica": "La compresión medular cervical (mielopatía estenótica cervical o «síndrome de Wobbler»), la mieloencefalitis por herpesvirus equino tipo 1 (EHV-1), la EPM y las fracturas vertebrales producen ataxia propioceptiva general y paresia de los miembros.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.med.002",
@@ -4364,14 +4421,52 @@
       "es": "Nervio vago (X) (izquierdo)",
       "la": "N. vagus",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Emerge de la médula oblongada y sale del cráneo por el foramen yugular (izquierdo); desciende por el cuello unido al tronco simpático (tronco vagosimpático) dentro de la vaina carotídea, penetra al tórax, origina el nervio laríngeo recurrente izquierdo y forma los troncos vagales dorsal y ventral a lo largo del esófago hasta el abdomen.",
+        "descripcion": "X par craneal mixto (somatomotor branquial, visceromotor parasimpático y sensitivo visceral/general), componente principal del sistema parasimpático craneosacro en cuello, tórax y abdomen.",
+        "relaciones": "En cuello comparte vaina con el simpático junto a la carótida común izquierda (próxima al esófago). En tórax pasa lateral al arco aórtico donde emite el nervio laríngeo recurrente izquierdo (que rodea ventral y caudalmente al ligamento arterioso/arco aórtico) y se divide en ramos dorsal y ventral que se unen a los derechos.",
+        "accidentes": "Ganglios proximal (yugular) y distal (nodoso), ramos faríngeos, nervio laríngeo craneal, nervio depresor, nervio laríngeo recurrente izquierdo y divisiones en troncos vagales dorsal y ventral.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Envuelto en la vaina carotídea junto al simpático cervical (tronco vagosimpático).",
+        "irrigacion": "Vasa nervorum derivados de las arterias occipital, carótida común, broncoesofágica y gástrica izquierda.",
+        "inervacion": "Nervio propio que aporta fibras eferentes y aferentes a laringe, faringe, esófago, corazón, pulmones y tubo digestivo hasta el colon.",
+        "funcion": "Inervación motora laríngea/faríngea/esofágica, bradicardia e inhibición cardíaca parasimpática, broncoconstricción, motilidad y secreción gastrointestinal.",
+        "especie": "El recorrido sumamente largo del nervio laríngeo recurrente izquierdo alrededor del arco aórtico (>2 m en caballos altos) explica la marcada predisposición izquierda a la neuropatía laríngea recurrente («caballo roncador»). Además, en el cuello equino el vago y el tronco simpático están fusionados en un único cordón (tronco vagosimpático).",
+        "clinica": "La hemiplejia laríngea izquierda (neuropatía laríngea recurrente idiopática) es una causa clásica de intolerancia al ejercicio y ruido inspiratorio («ronquido»); además, lesiones en la bolsa gutural (micosis) afectan los ramos faríngeo/vagal causando disfagia.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.cra.077-d",
       "es": "Nervio vago (X) (derecho)",
       "la": "N. vagus",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Emerge de la médula oblongada y sale del cráneo por el foramen yugular (derecho); desciende por el cuello unido al tronco simpático (tronco vagosimpático) dentro de la vaina carotídea, penetra al tórax, origina el nervio laríngeo recurrente derecho y forma los troncos vagales dorsal y ventral a lo largo del esófago hasta el abdomen.",
+        "descripcion": "X par craneal mixto (somatomotor branquial, visceromotor parasimpático y sensitivo visceral/general), componente principal del sistema parasimpático craneosacro en cuello, tórax y abdomen.",
+        "relaciones": "En cuello discurre en el tronco vagosimpático derecho junto a la carótida derecha. En la apertura torácica emite el nervio laríngeo recurrente derecho alrededor de la arteria subclavia derecha/tronco costocervical, antes de dividirse detrás de la base cardíaca.",
+        "accidentes": "Ganglios proximal (yugular) y distal (nodoso), ramos faríngeos, nervio laríngeo craneal, nervio depresor, nervio laríngeo recurrente derecho y divisiones en troncos vagales dorsal y ventral.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Envuelto en la vaina carotídea junto al simpático cervical (tronco vagosimpático).",
+        "irrigacion": "Vasa nervorum derivados de las arterias occipital, carótida común, broncoesofágica y gástrica izquierda.",
+        "inervacion": "Nervio propio que aporta fibras eferentes y aferentes a laringe, faringe, esófago, corazón, pulmones y tubo digestivo hasta el colon.",
+        "funcion": "Inervación motora laríngea/faríngea/esofágica, bradicardia e inhibición cardíaca parasimpática, broncoconstricción, motilidad y secreción gastrointestinal.",
+        "especie": "Al igual que el izquierdo, forma en el cuello un tronco vagosimpático fusionado, pero su ramo laríngeo recurrente gira mucho más cranealmente alrededor de la arteria subclavia/costocervical derecha.",
+        "clinica": "Lesiones cervicales profundos o guturales derechas afectan la deglución y tono autonómico torácico/abdominal; su preservación en vagotomías o cirugías cervicales es esencial.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.cra.078-i",
@@ -4918,14 +5013,52 @@
       "es": "Plexo braquial (izquierdo)",
       "la": "Plexus brachialis",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Región cervicotorácica y axilar izquierda, saliendo entre los músculos escalenos dorsal y medio desde los ramos ventrales de los nervios espinales C6, C7, C8, T1 y frecuentemente T2.",
+        "descripcion": "Red nerviosa anastomosada izquierda que converge en el espacio axilar alrededor de los vasos axilares para originar los nervios periféricos del miembro torácico y cintura escapular.",
+        "relaciones": "Atraviesa la hendidura interescalénica izquierda dorsal a la arteria y vena axilares; cubierto lateralmente por la escápula y el músculo subescapular, y medialmente apoyado sobre el serrato ventral.",
+        "accidentes": "Raíces C6–T2, troncos nerviosos y origen de los nervios supraescapular, subescapulares, toracodorsal, pectoral craneal/caudal, torácico largo, torácico lateral, musculocutáneo, axilar, radial, mediano y ulnar.",
+        "articulaciones": "Cursa caudal a la columna cervical caudal y medial a la articulación del hombro.",
+        "inserciones": "Inmerso en tejido conjuntivo laxo y graso axilar.",
+        "irrigacion": "Ramas de las arterias axilar, cervical profunda y torácica interna.",
+        "inervacion": "Red periférica somática (motora y sensitiva) y fibras simpáticas posganglionares asociadas.",
+        "funcion": "Proporciona toda la inervación motora y sensitiva de la musculatura extrínseca lateral/pectoral y de los músculos y piel del miembro torácico.",
+        "especie": "En el equino, el nervio supraescapular emerge por la porción craneal del plexo rodeando el cuello de la escápula (sitio vulnerable a trauma directo), mientras que el nervio radial representa la rama más gruesa del plexo.",
+        "clinica": "La avulsión o contusión traumática del plexo (o lesión específica del nervio supraescapular provocando atrofia supra/infraespinosa conocida como «sweeny» o parálisis del nervio radial tras decúbito lateral prolongado en anestesia) produce déficits posturales característicos («codo caído»).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.bra.001-d",
       "es": "Plexo braquial (derecho)",
       "la": "Plexus brachialis",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Región cervicotorácica y axilar derecha, saliendo entre los músculos escalenos dorsal y medio desde los ramos ventrales de los nervios espinales C6, C7, C8, T1 y frecuentemente T2.",
+        "descripcion": "Red nerviosa anastomosada derecha que converge en el espacio axilar alrededor de los vasos axilares para originar los nervios periféricos del miembro torácico y cintura escapular.",
+        "relaciones": "Atraviesa la hendidura interescalénica derecha dorsal a la arteria y vena axilares; cubierto lateralmente por la escápula y el músculo subescapular, y medialmente apoyado sobre el serrato ventral.",
+        "accidentes": "Raíces C6–T2, troncos nerviosos y origen de los nervios supraescapular, subescapulares, toracodorsal, pectoral craneal/caudal, torácico largo, torácico lateral, musculocutáneo, axilar, radial, mediano y ulnar.",
+        "articulaciones": "Cursa caudal a la columna cervical caudal y medial a la articulación del hombro.",
+        "inserciones": "Inmerso en tejido conjuntivo laxo y graso axilar.",
+        "irrigacion": "Ramas de las arterias axilar, cervical profunda y torácica interna.",
+        "inervacion": "Red periférica somática (motora y sensitiva) y fibras simpáticas posganglionares asociadas.",
+        "funcion": "Proporciona toda la inervación motora y sensitiva de la musculatura extrínseca lateral/pectoral y de los músculos y piel del miembro torácico.",
+        "especie": "En el equino, el nervio supraescapular emerge por la porción craneal del plexo rodeando el cuello de la escápula (sitio vulnerable a trauma directo), mientras que el nervio radial representa la rama más gruesa del plexo.",
+        "clinica": "La avulsión o contusión traumática del plexo (o lesión específica del nervio supraescapular provocando atrofia supra/infraespinosa conocida como «sweeny» o parálisis del nervio radial tras decúbito lateral prolongado en anestesia) produce déficits posturales característicos («codo caído»).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.bra.002-i",
@@ -5422,14 +5555,52 @@
       "es": "Nervio ciático (izquierdo)",
       "la": "N. ischiadicus",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Región pélvica, glútea profunda y cara caudal del muslo izquierdo; emerge del plexo lumbosacro (L6, S1, S2) atravesando la escotadura isquiática mayor hacia la cara lateral del ligamento sacrotuberal ancho.",
+        "descripcion": "El nervio periférico de mayor diámetro del cuerpo, mixto (motor y sensitivo), que desciende caudalmente al fémur para dividirse distalmente en los nervios peroneo (fibular) común y tibial.",
+        "relaciones": "Sale sobre el ligamento sacrotuberal ancho y músculo glúteo profundo, cubierto por el glúteo medio y bíceps femoral; cruza lateralmente a los músculos gemelos, obturador interno y cuadrado femoral, quedando entre los músculos isquiotibiales y el aductor antes de bifurcarse hacia el miembro distal.",
+        "accidentes": "Ramos musculares proximales (para isquiotibiales), tronco principal en la escotadura isquiática, nervio cutáneo sural caudal y división terminal en nervios fibular común y tibial.",
+        "articulaciones": "Discurre caudodorsal a la articulación coxofemoral (cadera) y caudal al fémur.",
+        "inserciones": "Rodeado por fascia profunda glútea y femoral.",
+        "irrigacion": "Arterias glúteas craneal y caudal y arteria femoral profunda / circunfleja femoral lateral.",
+        "inervacion": "Inerva los músculos profundos de la cadera, isquiotibiales y (vía tibial y fibular) toda la musculatura distal de la pierna y sensibilidad del pie.",
+        "funcion": "Permite la extensión de la cadera y flexión/extensión de la rodilla, tarso y dedos, además de la propiocepción y sensibilidad cutánea del miembro pélvico distal.",
+        "especie": "En el equino cruza profundamente protegido por la enorme masa del glúteo medio y bíceps femoral, pero pasa inmediatamente adyacente al trocánter mayor y borde caudal femoral.",
+        "clinica": "Puede lesionarse por inyecciones intramusculares mal aplicadas en región glútea profunda o isquiotibial en potros, fracturas ilíacas/isquiáticas o decúbito prolongado; su lesión completa produce incapacidad de soportar peso o flexión dorsal del menudillo y parálisis distal.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.lum.010-d",
       "es": "Nervio ciático (derecho)",
       "la": "N. ischiadicus",
       "sys": "ner",
-      "layer": "ner"
+      "layer": "ner",
+      "ficha": {
+        "ubicacion": "Región pélvica, glútea profunda y cara caudal del muslo derecho; emerge del plexo lumbosacro (L6, S1, S2) atravesando la escotadura isquiática mayor hacia la cara lateral del ligamento sacrotuberal ancho.",
+        "descripcion": "El nervio periférico de mayor diámetro del cuerpo, mixto (motor y sensitivo), que desciende caudalmente al fémur para dividirse distalmente en los nervios peroneo (fibular) común y tibial.",
+        "relaciones": "Sale sobre el ligamento sacrotuberal ancho y músculo glúteo profundo, cubierto por el glúteo medio y bíceps femoral; cruza lateralmente a los músculos gemelos, obturador interno y cuadrado femoral, quedando entre los músculos isquiotibiales y el aductor antes de bifurcarse hacia el miembro distal.",
+        "accidentes": "Ramos musculares proximales (para isquiotibiales), tronco principal en la escotadura isquiática, nervio cutáneo sural caudal y división terminal en nervios fibular común y tibial.",
+        "articulaciones": "Discurre caudodorsal a la articulación coxofemoral (cadera) y caudal al fémur.",
+        "inserciones": "Rodeado por fascia profunda glútea y femoral.",
+        "irrigacion": "Arterias glúteas craneal y caudal y arteria femoral profunda / circunfleja femoral lateral.",
+        "inervacion": "Inerva los músculos profundos de la cadera, isquiotibiales y (vía tibial y fibular) toda la musculatura distal de la pierna y sensibilidad del pie.",
+        "funcion": "Permite la extensión de la cadera y flexión/extensión de la rodilla, tarso y dedos, además de la propiocepción y sensibilidad cutánea del miembro pélvico distal.",
+        "especie": "En el equino cruza profundamente protegido por la enorme masa del glúteo medio y bíceps femoral, pero pasa inmediatamente adyacente al trocánter mayor y borde caudal femoral.",
+        "clinica": "Puede lesionarse por inyecciones intramusculares mal aplicadas en región glútea profunda o isquiotibial en potros, fracturas ilíacas/isquiáticas o decúbito prolongado; su lesión completa produce incapacidad de soportar peso o flexión dorsal del menudillo y parálisis distal.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.ner.lum.011-i",

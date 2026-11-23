@@ -23,7 +23,26 @@
       "es": "Hipófisis (glándula pituitaria)",
       "la": "Hypophysis; Glandula pituitaria",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Base del encéfalo, alojada en la fosa hipofisaria de la silla turca del hueso basisfenoides, suspendida del hipotálamo por el infundíbulo.",
+        "descripcion": "Glándula endocrina impar ovoidea compuesta por adenohipófisis (porción distal, intermedia muy desarrollada y tuberal) y neurohipófisis (porción nerviosa e infundíbulo).",
+        "relaciones": "Dorsalmente cubierta parcialmente por el diafragma de la silla (duramadre) y en relación con el quiasma óptico rostralmente y los cuerpos mamilares caudalmente; lateralmente rodeada por el seno cavernoso y la arteria carótida interna.",
+        "accidentes": "Adenohipófisis (pars distalis, pars intermedia, pars tuberalis), hendidura hipofisaria (a menudo ausente o obliterada en adulto) y lóbulo neural.",
+        "articulaciones": "Alojada en la fosa hipofisaria del basisfenoides.",
+        "inserciones": "Envoltura dural del diafragma de la silla turca.",
+        "irrigacion": "Arterias hipofisarias craneal y caudal (de la carótida interna) formando el sistema porta hipotalamohipofisario; drenaje al seno cavernoso.",
+        "inervacion": "Tracto hipotálamo-hipofisario (axones peptidérgicos de los núcleos supraóptico y paraventricular hacia la neurohipófisis) e inervación dopaminérgica inhibidora tuberoinfundibular sobre la pars intermedia.",
+        "funcion": "Eje maestro endocrino: secreta ACTH, GH, TSH, FSH, LH, prolactina y péptidos derivados de POMC (adenohipófisis), además de liberar oxitocina y vasopresina/ADH (neurohipófisis).",
+        "especie": "En el caballo, la pars intermedia rodea casi completamente el lóbulo nervioso y recibe control tónico inhibitorio dopaminérgico desde el hipotálamo.",
+        "clinica": "La disfunción de la pars intermedia hipofisaria (PPID o síndrome de Cushing equino) por neurodegeneración dopaminérgica en caballos mayores causa hiperplasia/adenoma de la pars intermedia, hirsutismo (hipertricosis), laminitis crónica e inmunosupresión.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.hip.002",
@@ -86,7 +105,26 @@
       "es": "Glándula tiroides",
       "la": "Glandula thyroidea",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Región cervical craneal ventral y lateral a los primeros 2–3 anillos traqueales (inmediatamente caudal a la laringe), formando dos lóbulos laterales conectados por un istmo estrecho.",
+        "descripcion": "Glándula endocrina bilobulada pardo-rojiza y muy vascularizada, constituida por lóbulos derecho e izquierdo ovalados (~4–5 × 2,5 cm) y un istmo fibroso o parcialmente glandular en el adulto.",
+        "relaciones": "Medialmente aplicada a la tráquea y músculo cricofaríngeo; lateralmente cubierta por el músculo esternohioideo, esternotiroideo y omohioideo; en vecindad de la arteria carótida común y nervio laríngeo recurrente; las paratiroides internas/externas se asocian a su polo craneal o vecindad.",
+        "accidentes": "Lóbulos laterales izquierdo y derecho e istmo del tiroides.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Rodeada por cápsula fibrosa propia y fijada a la fascia pretraqueal.",
+        "irrigacion": "Arteria tiroidea craneal (rama gruesa de la carótida común o su bifurcación) y arteria tiroidea caudal (inconstante/menor); venas tiroideas drenando a la vena yugular externa.",
+        "inervacion": "Fibras vasomotoras simpáticas del ganglio cervical craneal y fibras parasimpáticas del nervio laríngeo craneal/vago.",
+        "funcion": "Sintetiza y secreta hormonas tiroideas (T4 y T3) reguladoras de la tasa metabólica basal y el desarrollo, así como calcitonina (células C parafoliculares) en el metabolismo cálcico.",
+        "especie": "En el caballo adulto el istmo suele ser meramente fibroso y delgado (más carnoso en potros), y los lóbulos son firmes y fácilmente palpables inmediatamente detrás de la rama mandibular.",
+        "clinica": "En caballos geriátricos es muy frecuente el adenoma tiroideo benigno unilateral o bilateral (masa indolora palpable detrás de la laringe, rara vez asociado a hipertiroidismo clínico); también es punto de evaluación ecográfica y de hipotiroidismo congénito en potros.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.tir.002",
@@ -156,14 +194,52 @@
       "es": "Glándula suprarrenal (izquierda)",
       "la": "Glandula suprarenalis",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Región retroperitoneal sublumbar izquierda, aplicada craneomedialmente al polo craneal y borde medial del riñón izquierdo (bajo las últimas costillas torácicas / T17–L1).",
+        "descripcion": "Glándula endocrina par y aplanada dorsoventralmente izquierda, diferenciada en corteza periférica (zonas glomerular, fasciculada y reticular) y médula central catecolaminérgica.",
+        "relaciones": "Medialmente en relación estrecha con la aorta abdominal y la arteria mesentérica craneal; lateralmente con el polo craneal del riñón izquierdo; ventralmente con el páncreas y peritoneo parietal dorsal.",
+        "accidentes": "Corteza adrenal, médula adrenal, cara renal cóncava e hilio venoso central.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Incluida en la grasa perirrenal y la fascia sublumbar.",
+        "irrigacion": "Arterias suprarrenales múltiples procedentes de la aorta abdominal, arteria frénica caudal y arteria renal izquierda. Drenaje por la vena suprarrenal hacia la vena cava caudal (lado derecho) o vena renal izquierda.",
+        "inervacion": "Inervación simpática preganglionar directa abundante a través de los nervios esplácnicos mayores y plexo celíaco hacia las células cromafines medulares.",
+        "funcion": "La corteza secreta mineralocorticoides (aldosterona), glucocorticoides (cortisol) y andrógenos suprarrenales; la médula secreta adrenalina y noradrenalina en respuesta al estrés agudo.",
+        "especie": "En el caballo, ambas glándulas son alargadas y aplanadas; la derecha suele estar estrechamente aplicada al borde lateral de la vena cava caudal y al hígado, dificultando su visualización directa.",
+        "clinica": "La insuficiencia o hemorragia adrenal crítica (síndrome de Waterhouse-Friderichsen en sepsis neonatal por endotoxemia en potros) se asocia a shock refractario e hipocortisolemia/disregulación del eje HPA en neonatos enfermos.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.sup.001-d",
       "es": "Glándula suprarrenal (derecha)",
       "la": "Glandula suprarenalis",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Región retroperitoneal sublumbar derecha, aplicada craneomedialmente al polo craneal y borde medial del riñón derecho (bajo las últimas costillas torácicas / T17–L1).",
+        "descripcion": "Glándula endocrina par y aplanada dorsoventralmente derecha, diferenciada en corteza periférica (zonas glomerular, fasciculada y reticular) y médula central catecolaminérgica.",
+        "relaciones": "Medialmente adosada a la vena cava caudal (a menudo muy íntimamente adherida); cranealmente próxima a la impresión renal hepática; lateralmente con el polo craneal del riñón derecho.",
+        "accidentes": "Corteza adrenal, médula adrenal, cara renal cóncava e hilio venoso central.",
+        "articulaciones": "Sin relaciones articulares.",
+        "inserciones": "Incluida en la grasa perirrenal y la fascia sublumbar.",
+        "irrigacion": "Arterias suprarrenales múltiples procedentes de la aorta abdominal, arteria frénica caudal y arteria renal derecha. Drenaje por la vena suprarrenal hacia la vena cava caudal (lado derecho) o vena renal izquierda.",
+        "inervacion": "Inervación simpática preganglionar directa abundante a través de los nervios esplácnicos mayores y plexo celíaco hacia las células cromafines medulares.",
+        "funcion": "La corteza secreta mineralocorticoides (aldosterona), glucocorticoides (cortisol) y andrógenos suprarrenales; la médula secreta adrenalina y noradrenalina en respuesta al estrés agudo.",
+        "especie": "En el caballo, ambas glándulas son alargadas y aplanadas; la derecha suele estar estrechamente aplicada al borde lateral de la vena cava caudal y al hígado, dificultando su visualización directa.",
+        "clinica": "La insuficiencia o hemorragia adrenal crítica (síndrome de Waterhouse-Friderichsen en sepsis neonatal por endotoxemia en potros) se asocia a shock refractario e hipocortisolemia/disregulación del eje HPA en neonatos enfermos.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-23",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.sup.002-i",
