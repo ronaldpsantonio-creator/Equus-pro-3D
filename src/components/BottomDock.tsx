@@ -1,10 +1,13 @@
 import React from 'react';
 import {
+  ArrowLeft,
   BookOpen,
   Camera,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   GraduationCap,
+  Home,
   Layers,
   RotateCcw,
   ScanLine,
@@ -12,10 +15,12 @@ import {
   Upload,
 } from 'lucide-react';
 import {
+  BreadcrumbStep,
   CAMERA_PRESETS,
   CameraPreset,
   CutawayMode,
   FichaData,
+  FichaSubView,
   InventoryReport,
   LAYERS,
   LayerCode,
@@ -117,6 +122,16 @@ interface BottomDockProps {
   onUpdateFichaDraft: (id: string, nextFicha: FichaData) => void;
   onClearFichaDraft: (id: string) => void;
   onVerifyAndNext: (id: string) => void;
+  fichaSubView: FichaSubView;
+  onFichaSubViewChange: (view: FichaSubView) => void;
+
+  // Navigation depth (sequential back + direct home)
+  breadcrumbs: BreadcrumbStep[];
+  canStepBack: boolean;
+  prevStepLabel?: string;
+  onStepBack: () => void;
+  isAtHome: boolean;
+  onGoHome: () => void;
 
   // Quiz
   quizProgress: QuizProgress;
@@ -193,6 +208,14 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     onUpdateFichaDraft,
     onClearFichaDraft,
     onVerifyAndNext,
+    fichaSubView,
+    onFichaSubViewChange,
+    breadcrumbs,
+    canStepBack,
+    prevStepLabel,
+    onStepBack,
+    isAtHome,
+    onGoHome,
     quizProgress,
     getVisible3DIdsFn,
     onQuizProgressChange,
@@ -214,6 +237,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
           onOpenFicha={() => {
             if (collapsed) onToggleCollapse();
             onTabChange('ficha');
+            if (fichaSubView !== 'ficha') onFichaSubViewChange('ficha');
           }}
           onFocus={onFocusSelected}
           onIsolate={onIsolateSelected}
@@ -247,6 +271,71 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
         {/* Dock container */}
         {!collapsed && (
           <div className="rounded-xl border border-slate-700/80 bg-[#0e141d]/95 p-3.5 shadow-2xl">
+            {/* Sequential Breadcrumb & Quick Return Bar */}
+            {(breadcrumbs.length > 1 || canStepBack || !isAtHome) && (
+              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800/90 bg-slate-900/75 px-2.5 py-1.5 text-xs">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={!canStepBack}
+                    onClick={onStepBack}
+                    className="mr-1 flex items-center gap-1 rounded-md border border-slate-700/80 bg-slate-950/70 px-2 py-0.5 text-[11px] font-medium text-slate-200 transition-colors hover:border-amber-500/60 hover:text-white disabled:opacity-40 whitespace-nowrap shrink-0"
+                    title={
+                      prevStepLabel
+                        ? `Retroceder en secuencia (${prevStepLabel})`
+                        : 'Retroceder un paso en secuencia'
+                    }
+                  >
+                    <ArrowLeft className="h-3 w-3 text-amber-400" />
+                    <span>Atrás</span>
+                  </button>
+
+                  <nav
+                    aria-label="Ruta de profundidad anatómica"
+                    className="flex flex-wrap items-center gap-1 min-w-0 text-[11px]"
+                  >
+                    {breadcrumbs.map((crumb, idx) => {
+                      const isLast = idx === breadcrumbs.length - 1;
+                      return (
+                        <React.Fragment key={crumb.id}>
+                          {idx > 0 && (
+                            <ChevronRight
+                              className="h-3 w-3 shrink-0 text-slate-600"
+                              aria-hidden="true"
+                            />
+                          )}
+                          {crumb.onClick && !isLast ? (
+                            <button
+                              type="button"
+                              onClick={crumb.onClick}
+                              className="truncate max-w-[160px] rounded px-1.5 py-0.5 font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-amber-300"
+                            >
+                              {crumb.label}
+                            </button>
+                          ) : (
+                            <span className="truncate max-w-[190px] px-1 font-semibold text-teal-300">
+                              {crumb.label}
+                            </span>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onGoHome}
+                  disabled={isAtHome}
+                  className="flex items-center gap-1 rounded-md border border-teal-500/40 bg-teal-950/60 px-2.5 py-0.5 text-[11px] font-medium text-teal-200 transition-colors hover:border-teal-400 hover:text-white disabled:opacity-40 whitespace-nowrap shrink-0"
+                  title="Volver a Inicio de una sola vez"
+                >
+                  <Home className="h-3 w-3" />
+                  <span>Inicio</span>
+                </button>
+              </div>
+            )}
+
             {/* Tab bar */}
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
               <div className="flex flex-wrap items-center gap-1">
@@ -277,14 +366,16 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={onShowAll}
-                  className="flex items-center gap-1 rounded-lg border border-slate-700/80 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white whitespace-nowrap"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  <span>{hiddenCount > 0 ? `Restaurar (${hiddenCount})` : 'Mostrar todo'}</span>
-                </button>
+                {hiddenCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={onShowAll}
+                    className="flex items-center gap-1 rounded-lg border border-slate-700/80 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white whitespace-nowrap"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>Restaurar ({hiddenCount})</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -570,6 +661,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 onUpdateFichaDraft={onUpdateFichaDraft}
                 onClearFichaDraft={onClearFichaDraft}
                 onVerifyAndNext={onVerifyAndNext}
+                fichaSubView={fichaSubView}
+                onFichaSubViewChange={onFichaSubViewChange}
               />
             )}
 

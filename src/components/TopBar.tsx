@@ -1,9 +1,11 @@
 import React from 'react';
 import {
+  ArrowLeft,
   Camera,
   Eye,
   EyeOff,
   HeartPulse,
+  Home,
   Moon,
   RotateCcw,
   Scissors,
@@ -35,6 +37,11 @@ interface TopBarProps {
   renderMode: RenderViewMode;
   sceneTheme: SceneTheme;
   onToggleTheme: () => void;
+  canStepBack: boolean;
+  prevStepLabel?: string;
+  onStepBack: () => void;
+  isAtHome: boolean;
+  onGoHome: () => void;
   onSnapshot: () => void;
   hudHidden: boolean;
   onToggleHud: () => void;
@@ -57,6 +64,11 @@ export const TopBar: React.FC<TopBarProps> = ({
   renderMode,
   sceneTheme,
   onToggleTheme,
+  canStepBack,
+  prevStepLabel,
+  onStepBack,
+  isAtHome,
+  onGoHome,
   onSnapshot,
   hudHidden,
   onToggleHud,
@@ -130,6 +142,40 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       {/* Right: Single-line quick clinical viewport controls */}
       <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
+        {/* Sequential Back & Direct Home */}
+        {(canStepBack || !isAtHome) && (
+          <div
+            className="flex items-center rounded-lg border border-slate-700/90 bg-[#0e141d]/95 p-0.5 shadow-sm"
+            role="group"
+            aria-label="Navegación de regreso"
+          >
+            <button
+              type="button"
+              disabled={!canStepBack}
+              onClick={onStepBack}
+              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-40 whitespace-nowrap shrink-0"
+              title={
+                prevStepLabel
+                  ? `Volver un paso atrás (${prevStepLabel})`
+                  : 'Volver un paso atrás en secuencia'
+              }
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Atrás</span>
+            </button>
+            <button
+              type="button"
+              onClick={onGoHome}
+              disabled={isAtHome}
+              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-teal-200 transition-colors hover:bg-teal-950/80 hover:text-white disabled:opacity-40 whitespace-nowrap shrink-0"
+              title="Volver a Inicio de una sola vez (restaura vista inicial, capas y cámara)"
+            >
+              <Home className="h-3.5 w-3.5 text-teal-400" />
+              <span className="hidden sm:inline">Inicio</span>
+            </button>
+          </div>
+        )}
+
         {/* Sex filter */}
         <div
           className="flex items-center rounded-lg border border-slate-800 bg-[#0e141d]/95 p-0.5 shadow-sm"

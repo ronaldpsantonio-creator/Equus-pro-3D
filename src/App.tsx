@@ -7,9 +7,12 @@ import { useOnlineStatus } from './hooks/usePWA';
 import { loadProClaVetCatalog } from './services/catalogLoader';
 import { EquineSceneManager, SceneVisualConfig } from './three/EquineSceneManager';
 import {
+  BreadcrumbStep,
+  CAMERA_PRESETS,
   CameraPreset,
   CutawayMode,
   FichaData,
+  FichaSubView,
   InventoryReport,
   LAYERS,
   LayerCode,
@@ -28,6 +31,21 @@ import {
   SYSTEMS,
   SystemCode,
 } from './types/proclavet';
+
+interface NavHistoryEntry {
+  label: string;
+  activeTab: DockTab;
+  fichaSubView: FichaSubView;
+  selectedId: string | null;
+  isolated: boolean;
+  hiddenIds: string[];
+  cutaway: CutawayMode;
+  explode: number;
+  renderMode: RenderViewMode;
+  blindMode: boolean;
+  dissectMode: boolean;
+  mpr: MprSliceState;
+}
 
 function loadJson<T>(key: string, fallback: T): T {
   try {
@@ -114,10 +132,13 @@ export default function App() {
     label: '',
   });
 
-  // HUD / Dock state
+  // HUD / Dock state & sequential navigation depth
   const [hudHidden, setHudHidden] = useState(false);
   const [dockCollapsed, setDockCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<DockTab>('sistemas');
+  const [fichaSubView, setFichaSubView] = useState<FichaSubView>('ficha');
+  const [navHistory, setNavHistory] = useState<NavHistoryEntry[]>([]);
+  const onSelect3DRef = useRef<(id: string | null) => void>(() => {});
 
   // Persisted study state (compatible with ProClaVet-core localStorage keys)
   const [favorites, setFavorites] = useState<Record<string, boolean>>(() =>
@@ -181,14 +202,7 @@ export default function App() {
     let active = true;
     const manager = new EquineSceneManager(mount, visualConfig, {
       onSelect: (id) => {
-        if (id && dissectModeRef.current) {
-          manager.setStructureVisible(id, false);
-          setSelectedId(null);
-          setHoveredInfo({ id: null, x: 0, y: 0 });
-          setModelBump((n) => n + 1);
-          return;
-        }
-        setSelectedId(id);
+        onSelect3DRef.current(id);
       },
       onHover: (id, x, y) => {
         setHoveredInfo({ id, x, y });
@@ -250,18 +264,127 @@ export default function App() {
     };
   }, []);
 
-  // Keyboard shortcut H to toggle HUD (Zen mode)
+  const pushHistory = useCallback(
+    (label: string) => {
+      const hiddenIds = sceneRef.current?.getHiddenStructureIds() ?? [];
+      const snap: NavHistoryEntry = {
+        label,
+        activeTab,
+        fichaSubView,
+        selectedId,
+        isolated,
+        hiddenIds,
+        cutaway,
+        explode,
+        renderMode,
+        blindMode,
+        dissectMode,
+        mpr: {
+          sagittal: { ...mpr.sagittal },
+          transverse: { ...mpr.transverse },
+          dorsal: { ...mpr.dorsal },
+        },
+      };
+      setNavHistory((prev) => [...prev.slice(-24), snap]);
+    },
+    [
+      activeTab,
+      fichaSubView,
+      selectedId,
+      isolated,
+      cutaway,
+      explode,
+      renderMode,
+      blindMode,
+      dissectMode,
+      mpr,
+    ],
+  );
+
+  useEffect(() => {
+    onSelect3DRef.current = (id: string | null) => {
+      if (id && dissectModeRef.current) {
+        pushHistory(`Ocultar ${byId[id]?.es || id}`);
+        sceneRef.current?.setStructureVisible(id, false);
+        setSelectedId(null);
+        setHoveredInfo({ id: null, x: 0, y: 0 });
+        setModelBump((n) => n + 1);
+        return;
+      }
+      if (id !== selectedId) {
+        pushHistory(selectedId ? byId[selectedId]?.es || 'Selección anterior' : 'Vista previa');
+        setSelectedId(id);
+        if (!id) setFichaSubView('ficha');
+      }
+    };
+  }, [byId, pushHistory, selectedId]);
+
+  const handleStepBack = useCallback(() => {
+    setNavHistory((prev) => {
+      if (prev.length === 0) return prev;
+      const entry = prev[prev.length - 1];
+      setActiveTab(entry.activeTab);
+      setFichaSubView(entry.fichaSubView);
+      setSelectedId(entry.selectedId);
+      setIsolated(entry.isolated);
+      setCutaway(entry.cutaway);
+      setExplode(entry.explode);
+      setRenderMode(entry.renderMode);
+      setBlindMode(entry.blindMode);
+      setDissectMode(entry.dissectMode);
+      setMpr(entry.mpr);
+      sceneRef.current?.setHiddenStructureIds(entry.hiddenIds);
+      setModelBump((n) => n + 1);
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const handleGoHome = useCallback(() => {
+    setNavHistory([]);
+    setSystems(createInitialSystems());
+    setLayers(createInitialLayers());
+    setCutaway('none');
+    setExplode(0);
+    setIsolated(false);
+    setSelectedId(null);
+    setBlindMode(false);
+    setDissectMode(false);
+    setVitalSigns(false);
+    setRenderMode('anatomico');
+    setMpr({
+      sagittal: { enabled: false, value: 0 },
+      transverse: { enabled: false, value: 0.2 },
+      dorsal: { enabled: false, value: 1.1 },
+    });
+    setReferencePlane((prev) => (prev.visible ? { ...prev, visible: false } : prev));
+    setActiveTab('sistemas');
+    setFichaSubView('ficha');
+    setDockCollapsed(false);
+    sceneRef.current?.showAllStructures();
+    const defaultCam = CAMERA_PRESETS.find((p) => p.id === 'tres-cuartos');
+    if (defaultCam) {
+      sceneRef.current?.setCameraView(defaultCam.position, defaultCam.target);
+    }
+    setModelBump((n) => n + 1);
+  }, []);
+
+  // Keyboard shortcuts: H (toggle HUD), Alt+ArrowLeft (step back), Escape (close deep edit/coverage view)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       if (e.key === 'h' || e.key === 'H') {
         setHudHidden((prev) => !prev);
+      } else if (e.altKey && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleStepBack();
+      } else if (e.key === 'Escape' && (fichaSubView === 'edit' || fichaSubView === 'coverage')) {
+        handleStepBack();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [fichaSubView, handleStepBack]);
 
   const persist = useCallback((key: string, val: unknown) => {
     try {
@@ -289,27 +412,81 @@ export default function App() {
     }));
   }, []);
 
-  const handleApplyStudyPreset = useCallback((preset: StudyPreset) => {
-    const nextSys = {} as Record<SystemCode, boolean>;
-    for (const s of SYSTEMS) {
-      nextSys[s.code] = preset.systems.includes(s.code);
-    }
-    setSystems(nextSys);
+  const handleTabChange = useCallback(
+    (nextTab: DockTab) => {
+      if (nextTab === activeTab) return;
+      const tabNames: Record<DockTab, string> = {
+        sistemas: 'Sistemas',
+        capas: 'Capas',
+        imagenologia: 'TC y Rx',
+        camaras: 'Cámaras',
+        ficha: 'Catálogo',
+        quiz: 'Quiz',
+      };
+      pushHistory(tabNames[activeTab]);
+      setActiveTab(nextTab);
+    },
+    [activeTab, pushHistory],
+  );
 
-    setLayers((prev) => {
-      const next = { ...prev };
-      for (const l of LAYERS) {
-        const override = preset.layers[l.code];
-        if (override) next[l.code] = { ...override };
+  const handleFichaSubViewChange = useCallback(
+    (nextView: FichaSubView) => {
+      if (nextView === fichaSubView) return;
+      const labels: Record<FichaSubView, string> = {
+        ficha: 'Ficha',
+        coverage: 'Cobertura',
+        edit: 'Editor de ficha',
+      };
+      pushHistory(labels[fichaSubView]);
+      setFichaSubView(nextView);
+    },
+    [fichaSubView, pushHistory],
+  );
+
+  const handleCutawayChange = useCallback(
+    (next: CutawayMode) => {
+      if (next === cutaway) return;
+      pushHistory(cutaway === 'none' ? 'Caballo completo' : `Corte ${cutaway}`);
+      setCutaway(next);
+    },
+    [cutaway, pushHistory],
+  );
+
+  const handleRenderModeChange = useCallback(
+    (next: RenderViewMode) => {
+      if (next === renderMode) return;
+      pushHistory(`Modo ${renderMode}`);
+      setRenderMode(next);
+    },
+    [pushHistory, renderMode],
+  );
+
+  const handleApplyStudyPreset = useCallback(
+    (preset: StudyPreset) => {
+      pushHistory('Modo de estudio anterior');
+      const nextSys = {} as Record<SystemCode, boolean>;
+      for (const s of SYSTEMS) {
+        nextSys[s.code] = preset.systems.includes(s.code);
       }
-      return next;
-    });
+      setSystems(nextSys);
 
-    if (preset.cutaway !== undefined) setCutaway(preset.cutaway);
-    if (preset.explode !== undefined) setExplode(preset.explode);
-    setIsolated(false);
-    sceneRef.current?.showAllStructures();
-  }, []);
+      setLayers((prev) => {
+        const next = { ...prev };
+        for (const l of LAYERS) {
+          const override = preset.layers[l.code];
+          if (override) next[l.code] = { ...override };
+        }
+        return next;
+      });
+
+      if (preset.cutaway !== undefined) setCutaway(preset.cutaway);
+      if (preset.explode !== undefined) setExplode(preset.explode);
+      setIsolated(false);
+      sceneRef.current?.showAllStructures();
+      setModelBump((n) => n + 1);
+    },
+    [pushHistory],
+  );
 
   const handleShowAll = useCallback(() => {
     const allSys = {} as Record<SystemCode, boolean>;
@@ -336,17 +513,20 @@ export default function App() {
   }, []);
 
   const handleRestoreHidden = useCallback(() => {
+    pushHistory('Antes de restaurar');
     setIsolated(false);
     sceneRef.current?.showAllStructures();
     setModelBump((n) => n + 1);
-  }, []);
+  }, [pushHistory]);
 
   const handleHideSelected = useCallback(() => {
     if (!selectedId) return;
+    pushHistory(`Ocultar ${byId[selectedId]?.es || selectedId}`);
     sceneRef.current?.setStructureVisible(selectedId, false);
     setSelectedId(null);
+    setFichaSubView('ficha');
     setModelBump((n) => n + 1);
-  }, [selectedId]);
+  }, [byId, pushHistory, selectedId]);
 
   const handleToggleTheme = useCallback(() => {
     setSceneTheme((prev) => {
@@ -366,11 +546,12 @@ export default function App() {
 
   const handleIsolateSelected = useCallback(() => {
     if (!selectedId) return;
+    pushHistory('Antes de aislar');
     setIsolated(true);
     sceneRef.current?.isolateStructure(selectedId);
     sceneRef.current?.focusOnStructure(selectedId);
     setModelBump((n) => n + 1);
-  }, [selectedId]);
+  }, [pushHistory, selectedId]);
 
   const handleSnapshot = useCallback(() => {
     if (!sceneRef.current) return;
@@ -577,6 +758,137 @@ export default function App() {
     ? byId[hoveredInfo.id] || byTraceabilityId[hoveredInfo.id] || null
     : null;
 
+  const isAtHome =
+    activeTab === 'sistemas' &&
+    !selectedId &&
+    !isolated &&
+    hiddenCount === 0 &&
+    cutaway === 'none' &&
+    explode === 0 &&
+    renderMode === 'anatomico' &&
+    !dissectMode &&
+    !blindMode &&
+    !mpr.sagittal.enabled &&
+    !mpr.transverse.enabled &&
+    !mpr.dorsal.enabled &&
+    !referencePlane.visible;
+
+  const breadcrumbs: BreadcrumbStep[] = useMemo(() => {
+    const steps: BreadcrumbStep[] = [
+      {
+        id: 'home',
+        label: 'Inicio',
+        onClick: isAtHome ? undefined : handleGoHome,
+      },
+    ];
+
+    const tabLabels: Record<DockTab, string> = {
+      sistemas: 'Sistemas y planos',
+      capas: 'Capas y disección',
+      imagenologia: 'TC y Rx',
+      camaras: 'Cámaras',
+      ficha: 'Catálogo y ficha',
+      quiz: 'Autoevaluación',
+    };
+
+    if (activeTab !== 'sistemas') {
+      steps.push({
+        id: `tab-${activeTab}`,
+        label: tabLabels[activeTab],
+        onClick:
+          activeTab === 'ficha' && (fichaSubView !== 'ficha' || !!selectedStructure)
+            ? () => {
+                pushHistory(fichaSubView === 'edit' ? 'Editor de ficha' : 'Ficha');
+                setFichaSubView('ficha');
+                setSelectedId(null);
+              }
+            : undefined,
+      });
+    }
+
+    if (renderMode !== 'anatomico') {
+      steps.push({
+        id: `mode-${renderMode}`,
+        label: renderMode === 'radiografia' ? 'Radiografía Rx' : 'Cortical TC',
+        onClick: () => handleRenderModeChange('anatomico'),
+      });
+    }
+
+    if (mpr.sagittal.enabled || mpr.transverse.enabled || mpr.dorsal.enabled) {
+      steps.push({
+        id: 'mpr-active',
+        label: 'Corte MPR',
+        onClick: handleResetMpr,
+      });
+    }
+
+    if (cutaway !== 'none') {
+      steps.push({
+        id: `cutaway-${cutaway}`,
+        label: cutaway === 'left' ? 'Corte izq.' : 'Corte der.',
+        onClick: () => handleCutawayChange('none'),
+      });
+    }
+
+    if (hiddenCount > 0 && !isolated) {
+      steps.push({
+        id: 'hidden-layers',
+        label: `Disección (${hiddenCount} ocultas)`,
+        onClick: handleRestoreHidden,
+      });
+    }
+
+    if (isolated) {
+      steps.push({
+        id: 'isolated',
+        label: 'Pieza aislada',
+        onClick: handleRestoreHidden,
+      });
+    }
+
+    if (selectedStructure) {
+      steps.push({
+        id: `sel-${selectedStructure.id}`,
+        label: blindMode ? selectedStructure.id : selectedStructure.es,
+        onClick:
+          activeTab === 'ficha' && fichaSubView !== 'ficha'
+            ? () => handleFichaSubViewChange('ficha')
+            : undefined,
+      });
+    }
+
+    if (activeTab === 'ficha' && fichaSubView === 'coverage') {
+      steps.push({ id: 'ficha-coverage', label: 'Cobertura' });
+    } else if (activeTab === 'ficha' && selectedStructure && fichaSubView === 'edit') {
+      steps.push({ id: 'ficha-edit', label: 'Editar ficha' });
+    }
+
+    return steps;
+  }, [
+    activeTab,
+    blindMode,
+    cutaway,
+    fichaSubView,
+    handleCutawayChange,
+    handleFichaSubViewChange,
+    handleGoHome,
+    handleRenderModeChange,
+    handleResetMpr,
+    handleRestoreHidden,
+    hiddenCount,
+    isAtHome,
+    isolated,
+    mpr.dorsal.enabled,
+    mpr.sagittal.enabled,
+    mpr.transverse.enabled,
+    pushHistory,
+    renderMode,
+    selectedStructure,
+  ]);
+
+  const prevStepLabel =
+    navHistory.length > 0 ? navHistory[navHistory.length - 1].label : undefined;
+
   return (
     <div
       className={`relative h-screen w-screen overflow-hidden text-slate-100 select-none transition-colors ${
@@ -628,7 +940,7 @@ export default function App() {
           }
         }}
         cutaway={cutaway}
-        onCutawayChange={setCutaway}
+        onCutawayChange={handleCutawayChange}
         vitalSigns={vitalSigns}
         onToggleVitalSigns={() => setVitalSigns((v) => !v)}
         dissectMode={dissectMode}
@@ -638,6 +950,11 @@ export default function App() {
         renderMode={renderMode}
         sceneTheme={sceneTheme}
         onToggleTheme={handleToggleTheme}
+        canStepBack={navHistory.length > 0}
+        prevStepLabel={prevStepLabel}
+        onStepBack={handleStepBack}
+        isAtHome={isAtHome}
+        onGoHome={handleGoHome}
         onSnapshot={handleSnapshot}
         hudHidden={hudHidden}
         onToggleHud={() => setHudHidden((h) => !h)}
@@ -671,7 +988,7 @@ export default function App() {
         collapsed={dockCollapsed}
         onToggleCollapse={() => setDockCollapsed((c) => !c)}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         hudHidden={hudHidden}
         selectedStructure={selectedStructure}
         selectedModelState={selectedStructure ? getModelStateFn(selectedStructure.id) : 'pendiente'}
@@ -689,7 +1006,13 @@ export default function App() {
         onShowAll={handleShowAll}
         onUploadGlb={handleUploadGlbClick}
         onUploadBatchGlb={() => batchGlbInputRef.current?.click()}
-        onClearSelection={() => setSelectedId(null)}
+        onClearSelection={() => {
+          if (selectedId) {
+            pushHistory(byId[selectedId]?.es || 'Selección');
+            setSelectedId(null);
+            setFichaSubView('ficha');
+          }
+        }}
         report={report}
         systems={systems}
         onToggleSystem={handleToggleSystem}
@@ -700,14 +1023,14 @@ export default function App() {
         explode={explode}
         onExplodeChange={setExplode}
         cutaway={cutaway}
-        onCutawayChange={setCutaway}
+        onCutawayChange={handleCutawayChange}
         showLabels={showLabels}
         onToggleLabels={() => setShowLabels((v) => !v)}
         blindMode={blindMode}
         onToggleBlindMode={() => setBlindMode((v) => !v)}
         onSelectCameraPreset={handleSelectCameraPreset}
         renderMode={renderMode}
-        onRenderModeChange={setRenderMode}
+        onRenderModeChange={handleRenderModeChange}
         mpr={mpr}
         onMprChange={setMpr}
         onResetMpr={handleResetMpr}
@@ -728,11 +1051,16 @@ export default function App() {
         isVisibleOverrideFn={isVisibleOverrideFn}
         onSelectStructure={(id) => {
           const resolved = byId[id] || byTraceabilityId[id];
-          setSelectedId(resolved ? resolved.id : id);
+          const nextId = resolved ? resolved.id : id;
+          if (nextId !== selectedId) {
+            pushHistory(selectedId ? byId[selectedId]?.es || 'Selección anterior' : 'Catálogo');
+            setSelectedId(nextId);
+          }
         }}
         onFocusStructure={(id) => sceneRef.current?.focusOnStructure(id)}
         onToggleFavorite={handleToggleFavorite}
         onToggleStructureVisible={(id) => {
+          pushHistory(`Visibilidad ${byId[id]?.es || id}`);
           const cur = isVisibleOverrideFn(id);
           sceneRef.current?.setStructureVisible(id, !cur);
           setModelBump((n) => n + 1);
@@ -741,6 +1069,14 @@ export default function App() {
         onUpdateFichaDraft={handleUpdateFichaDraft}
         onClearFichaDraft={handleClearFichaDraft}
         onVerifyAndNext={handleVerifyAndNext}
+        fichaSubView={fichaSubView}
+        onFichaSubViewChange={handleFichaSubViewChange}
+        breadcrumbs={breadcrumbs}
+        canStepBack={navHistory.length > 0}
+        prevStepLabel={prevStepLabel}
+        onStepBack={handleStepBack}
+        isAtHome={isAtHome}
+        onGoHome={handleGoHome}
         quizProgress={quizProgress}
         getVisible3DIdsFn={getVisible3DIdsFn}
         onQuizProgressChange={handleQuizProgressChange}

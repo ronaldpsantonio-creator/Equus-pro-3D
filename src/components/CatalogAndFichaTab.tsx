@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ArrowRight,
   BarChart3,
@@ -17,6 +17,7 @@ import {
   ANATOMY_PLATES,
   FICHA_FIELDS,
   FichaData,
+  FichaSubView,
   formatRevisionEstado,
   getCatalogSystem,
   LAYERS,
@@ -50,6 +51,8 @@ interface CatalogAndFichaTabProps {
   onUpdateFichaDraft: (id: string, nextFicha: FichaData) => void;
   onClearFichaDraft: (id: string) => void;
   onVerifyAndNext: (id: string) => void;
+  fichaSubView: FichaSubView;
+  onFichaSubViewChange: (view: FichaSubView) => void;
 }
 
 type CatalogFilter = 'all' | '3d' | 'ficha' | 'pend' | 'fav';
@@ -100,16 +103,14 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
   onUpdateFichaDraft,
   onClearFichaDraft,
   onVerifyAndNext,
+  fichaSubView,
+  onFichaSubViewChange,
 }) => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<CatalogFilter>('3d');
   const [systemFilter, setSystemFilter] = useState<'all' | SystemCode>('all');
-  const [showCoverage, setShowCoverage] = useState(false);
-  const [editingFicha, setEditingFicha] = useState(false);
-
-  useEffect(() => {
-    setEditingFicha(false);
-  }, [selectedId]);
+  const showCoverage = fichaSubView === 'coverage';
+  const editingFicha = fichaSubView === 'edit';
 
   const trimmedQuery = query.trim().toLowerCase();
 
@@ -311,8 +312,8 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
               <div
                 key={`pin-${s.id}`}
                 onClick={() => {
-                  setShowCoverage(false);
                   onSelect(s.id);
+                  onFichaSubViewChange('ficha');
                   if (hasMeshFn(s.id)) onFocus(s.id);
                 }}
                 className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs transition-colors ${
@@ -353,8 +354,8 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                 <div
                   key={s.id}
                   onClick={() => {
-                    setShowCoverage(false);
                     onSelect(s.id);
+                    onFichaSubViewChange('ficha');
                     if (is3D) onFocus(s.id);
                   }}
                   className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs transition-colors ${
@@ -467,7 +468,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
               {selected && (
                 <button
                   type="button"
-                  onClick={() => setShowCoverage(false)}
+                  onClick={() => onFichaSubViewChange('ficha')}
                   className="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-medium text-teal-300 hover:border-teal-500/60"
                 >
                   Volver a {blindMode ? selected.id : selected.es}
@@ -570,7 +571,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                   <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => setShowCoverage(true)}
+                      onClick={() => onFichaSubViewChange('coverage')}
                       className="flex items-center gap-1 rounded-lg border border-slate-700/80 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 hover:text-white"
                       title="Ver avance de fichas por sistema"
                     >
@@ -579,7 +580,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setEditingFicha((v) => !v)}
+                      onClick={() => onFichaSubViewChange(editingFicha ? 'ficha' : 'edit')}
                       className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors ${
                         editingFicha
                           ? 'border-amber-500 bg-amber-500 text-slate-950'

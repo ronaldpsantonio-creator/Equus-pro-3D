@@ -678,6 +678,23 @@ export class EquineSceneManager {
     return count;
   }
 
+  public getHiddenStructureIds(): string[] {
+    const out: string[] = [];
+    for (const it of Object.values(this.items)) {
+      if (it.hasMesh && !it.visibleOverride) out.push(it.record.id);
+    }
+    return out;
+  }
+
+  public setHiddenStructureIds(hiddenIds: string[]): void {
+    const hiddenSet = new Set(hiddenIds);
+    Object.values(this.items).forEach((it) => {
+      it.visibleOverride = !hiddenSet.has(it.record.id);
+    });
+    this.applyVisualConfig(this.config, true);
+    this.requestRender();
+  }
+
   public showAllStructures(): void {
     Object.values(this.items).forEach((it) => {
       it.visibleOverride = true;
