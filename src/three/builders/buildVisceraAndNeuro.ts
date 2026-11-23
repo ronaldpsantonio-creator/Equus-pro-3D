@@ -13,7 +13,12 @@ import {
 import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import { BuiltPart } from './buildSkeletalAndArticular';
-import { createOrganMesh, createTubeCurveMesh } from './geomHelpers';
+import {
+  createAnatomicalExtrudedPlate,
+  createMultiStationLoftTube,
+  createOrganMesh,
+  createTubeCurveMesh,
+} from './geomHelpers';
 
 export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[] {
   const parts: BuiltPart[] = [];
@@ -39,14 +44,12 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const lungMat = () => createTissueMaterial('lung', tex);
   const tracMat = () => createTissueMaterial('trachea', tex);
 
-  // Cartílago tiroides (laringe)
   push(
     'equ.res.lar.002',
     createOrganMesh(V3(0.95, 1.57, 0), [0.045, 0.04, 0.038], tracMat(), [0, 0, -0.45], 14),
     'center',
   );
 
-  // Tráquea porción cervical (equ.res.tra.001) y torácica (equ.res.tra.002) con anillos cartilaginosos
   const cervTracPts = [V3(0.92, 1.54, 0), V3(0.76, 1.38, 0), V3(0.56, 1.18, 0)];
   const cervTrac = new THREE.Group();
   cervTrac.add(createTubeCurveMesh(cervTracPts, 0.024, tracMat(), 16, 12));
@@ -64,7 +67,7 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const thorTracPts = [V3(0.56, 1.18, 0), V3(0.36, 1.12, 0), V3(0.20, 1.11, 0)];
   push('equ.res.tra.002', createTubeCurveMesh(thorTracPts, 0.023, tracMat(), 12, 12), 'center');
 
-  // Bronquios y Pulmones izquierdo (-Z) y derecho (+Z)
+  // Bronquios y Pulmones izquierdo (-Z) y derecho (+Z) con escotadura cardíaca y vértice apical
   for (const sd of [-1, 1] as const) {
     const tag = sd === -1 ? 'i' : 'd';
     const side = sd === -1 ? 'left' : 'right';
@@ -76,16 +79,23 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     );
 
     const lungGrp = new THREE.Group();
-    // Caudal main lobe + cranial cardiac lobe
+    const cardiacNotchInset = sd === -1 ? 0.024 : 0.01;
+    // Main diaphragmatic / caudal lung lobe lofted cranio-caudally
     lungGrp.add(
-      createOrganMesh(V3(0.11, 1.09, 0.115 * sd), [0.24, 0.15, 0.082], lungMat(), [0, 0, -0.15], 18),
-    );
-    lungGrp.add(
-      createOrganMesh(V3(0.35, 1.06, 0.095 * sd), [0.11, 0.10, 0.062], lungMat(), [0, 0, -0.2], 14),
+      createMultiStationLoftTube(
+        [
+          { pos: V3(0.45, 1.06, (0.065 + cardiacNotchInset * 0.3) * sd), rx: 0.042, ry: 0.065 },
+          { pos: V3(0.34, 1.09, (0.09 + cardiacNotchInset) * sd), rx: 0.056, ry: 0.095 },
+          { pos: V3(0.18, 1.11, 0.112 * sd), rx: 0.074, ry: 0.145 },
+          { pos: V3(0.02, 1.12, 0.118 * sd), rx: 0.076, ry: 0.145 },
+          { pos: V3(-0.11, 1.14, 0.10 * sd), rx: 0.058, ry: 0.11 },
+        ],
+        lungMat(),
+        18,
+      ),
     );
     push(`equ.res.pul.001-${tag}`, lungGrp, side);
 
-    // Cavidad nasal (equ.res.cav.001-i/d)
     push(
       `equ.res.cav.001-${tag}`,
       createTubeCurveMesh([V3(1.50, 1.41, 0.022 * sd), V3(1.24, 1.57, 0.028 * sd)], 0.022, createTissueMaterial('cavity', tex), 10, 8),
@@ -100,10 +110,24 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const artMat = () => createTissueMaterial('artery', tex);
   const veinMat = () => createTissueMaterial('vein', tex);
 
-  // Corazón equino (equ.car.cor.001 — tilted ventrocaudally & slightly left -Z, between ribs 3–6)
+  // Corazón equino (equ.car.cor.001 — conical equine heart between ribs 3–6, tilted left & caudoventrally)
   const heartGrp = new THREE.Group();
-  heartGrp.add(createOrganMesh(V3(0.34, 0.99, -0.025), [0.095, 0.135, 0.088], heartMat(), [0.1, 0, 0.28], 20));
-  heartGrp.add(createOrganMesh(V3(0.37, 1.09, -0.02), [0.065, 0.045, 0.06], heartMat(), undefined, 14));
+  heartGrp.add(
+    createMultiStationLoftTube(
+      [
+        { pos: V3(0.37, 1.10, -0.018), rx: 0.072, ry: 0.082 }, // Base & coronary groove
+        { pos: V3(0.35, 1.03, -0.024), rx: 0.082, ry: 0.086 }, // Left/right ventricles
+        { pos: V3(0.33, 0.94, -0.028), rx: 0.058, ry: 0.062 },
+        { pos: V3(0.31, 0.87, -0.03), rx: 0.028, ry: 0.03 },   // Cardiac apex near sternum
+      ],
+      heartMat(),
+      18,
+    ),
+  );
+  // Left & right auricles hugging the dorsal coronary base + pulmonary trunk root
+  heartGrp.add(createOrganMesh(V3(0.39, 1.11, -0.058), [0.036, 0.028, 0.024], heartMat(), [0.2, 0.2, 0], 12));
+  heartGrp.add(createOrganMesh(V3(0.36, 1.11, 0.032), [0.038, 0.03, 0.026], heartMat(), [-0.2, 0, 0], 12));
+  heartGrp.add(createTubeCurveMesh([V3(0.36, 1.08, -0.03), V3(0.32, 1.15, -0.015), V3(0.24, 1.14, 0)], 0.016, veinMat(), 10, 8));
   push('equ.car.cor.001', heartGrp, 'center', V3(0.34, 0.99, -0.025));
 
   // Aorta ascendente, torácica y abdominal
@@ -135,7 +159,6 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'center',
   );
 
-  // Bilateral carotids, jugulars, subclavians & iliacs
   for (const sd of [-1, 1] as const) {
     const tag = sd === -1 ? 'i' : 'd';
     const side = sd === -1 ? 'left' : 'right';
@@ -143,36 +166,45 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     const hl = hindlimbLandmarks(sd);
 
     push(
-      `equ.car.acc.002-${tag}`, // Arteria carótida común
+      `equ.car.acc.002-${tag}`,
       createTubeCurveMesh([V3(0.45, 1.16, 0.015 * sd), V3(0.75, 1.40, 0.032 * sd), V3(1.02, 1.63, 0.036 * sd)], 0.0075, artMat(), 16, 7),
       side,
     );
     push(
-      `equ.car.vcc.001-${tag}`, // Vena yugular externa (surco yugular superficial)
+      `equ.car.vcc.001-${tag}`,
       createTubeCurveMesh([V3(1.02, 1.60, 0.048 * sd), V3(0.74, 1.37, 0.048 * sd), V3(0.53, 1.15, 0.028 * sd)], 0.009, veinMat(), 16, 7),
       side,
     );
     push(
-      `equ.car.amt.001-${tag}`, // Arteria axilar / braquial
+      `equ.car.amt.001-${tag}`,
       createTubeCurveMesh([V3(0.42, 1.14, 0.03 * sd), fl.shoulder.clone().add(V3(-0.04, 0, -0.03 * sd)), fl.elbow.clone().add(V3(0, 0, -0.02 * sd))], 0.007, artMat(), 12, 7),
       side,
     );
     push(
-      `equ.car.amp.001-${tag}`, // Arteria ilíaca externa / femoral
+      `equ.car.amp.001-${tag}`,
       createTubeCurveMesh([V3(-0.76, 1.25, 0.02 * sd), hl.hip.clone().add(V3(0.03, -0.02, -0.02 * sd)), hl.stifle.clone().add(V3(-0.04, 0, -0.02 * sd))], 0.008, artMat(), 14, 7),
       side,
     );
   }
 
-  // Bazo (equ.car.lor.001 — left flank against stomach/ribs!)
+  // Bazo (equ.car.lor.001 — curved scythe-shaped spleen against left costal arch)
   push(
     'equ.car.lor.001',
-    createOrganMesh(V3(-0.32, 1.07, -0.19), [0.12, 0.19, 0.025], createTissueMaterial('liver', tex), [0.15, 0, 0.25], 16),
+    createMultiStationLoftTube(
+      [
+        { pos: V3(-0.42, 1.21, -0.17), rx: 0.018, ry: 0.068 },
+        { pos: V3(-0.34, 1.11, -0.195), rx: 0.016, ry: 0.056 },
+        { pos: V3(-0.24, 0.99, -0.185), rx: 0.012, ry: 0.038 },
+        { pos: V3(-0.18, 0.92, -0.16), rx: 0.008, ry: 0.02 },
+      ],
+      createTissueMaterial('liver', tex),
+      14,
+    ),
     'left',
   );
 
   // =========================================================================
-  // 3. APARATO DIGESTIVO (dig) — Anatomía característica de fermentador cólico equino
+  // 3. APARATO DIGESTIVO (dig)
   // =========================================================================
   const livMat = () => createTissueMaterial('liver', tex);
   const stoMat = () => createTissueMaterial('stomach', tex);
@@ -180,7 +212,6 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const cecMat = () => createTissueMaterial('cecum', tex);
   const colMat = () => createTissueMaterial('colon', tex);
 
-  // Esófago cervical y torácico (dorsal-left of trachea!)
   push(
     'equ.dig.eso.001',
     createTubeCurveMesh([V3(0.95, 1.58, -0.015), V3(0.75, 1.40, -0.028), V3(0.55, 1.20, -0.022)], 0.013, stoMat(), 16, 8),
@@ -188,59 +219,72 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   );
   push(
     'equ.dig.eso.002',
-    createTubeCurveMesh([V3(0.55, 1.20, -0.022), V3(0.20, 1.18, -0.015), V3(-0.10, 1.12, -0.03)], 0.013, stoMat(), 16, 8),
+    createTubeCurveMesh([V3(0.55, 1.20, -0.022), V3(0.20, 1.18, -0.015), V3(-0.14, 1.13, -0.05)], 0.013, stoMat(), 16, 8),
     'left',
   );
 
-  // Hígado (equ.dig.hig.001 — multi-lobed cranial abdomen, skewed slightly right +Z)
+  // Hígado (equ.dig.hig.001 — right, quadrate & left lobes hugging diaphragm)
   const liverGrp = new THREE.Group();
-  liverGrp.add(createOrganMesh(V3(-0.14, 1.03, 0.075), [0.11, 0.16, 0.09], livMat(), [0.1, 0, -0.25], 16));
-  liverGrp.add(createOrganMesh(V3(-0.15, 1.00, -0.055), [0.09, 0.13, 0.075], livMat(), [-0.1, 0, -0.2], 14));
+  liverGrp.add(createOrganMesh(V3(-0.16, 1.07, 0.088), [0.095, 0.145, 0.068], livMat(), [0.15, 0, -0.32], 16));
+  liverGrp.add(createOrganMesh(V3(-0.13, 0.96, 0.02), [0.075, 0.095, 0.065], livMat(), [0, 0, -0.25], 14));
+  liverGrp.add(createOrganMesh(V3(-0.14, 1.01, -0.055), [0.08, 0.125, 0.055], livMat(), [-0.15, 0, -0.25], 14));
   push('equ.dig.hig.001', liverGrp, 'center', V3(-0.14, 1.02, 0.02));
 
-  // Estómago (equ.dig.est.001 — small J-shaped equine stomach on left cranial abdomen -Z)
+  // Estómago (equ.dig.est.001 — true J-shaped equine stomach with saccus caecus & pylorus)
   push(
     'equ.dig.est.001',
-    createOrganMesh(V3(-0.22, 1.08, -0.10), [0.11, 0.09, 0.075], stoMat(), [0.2, 0.2, 0.3], 18),
+    createMultiStationLoftTube(
+      [
+        { pos: V3(-0.24, 1.16, -0.115), rx: 0.055, ry: 0.055 }, // Saccus caecus blind dorsal dome
+        { pos: V3(-0.23, 1.08, -0.105), rx: 0.078, ry: 0.068 }, // Body
+        { pos: V3(-0.18, 1.01, -0.055), rx: 0.056, ry: 0.052 }, // Pyloric curvature
+        { pos: V3(-0.17, 1.05, 0.025), rx: 0.028, ry: 0.028 },  // Pylorus toward duodenum right
+      ],
+      stoMat(),
+      16,
+    ),
     'left',
   );
 
-  // Ciego (equ.dig.cie.001 — huge comma-shaped vat on the RIGHT flank +Z!)
+  // Ciego (equ.dig.cie.001 — comma-shaped vat on RIGHT flank +Z with haustral sacculations!)
   push(
     'equ.dig.cie.001',
-    createTubeCurveMesh(
+    createMultiStationLoftTube(
       [
-        V3(-0.68, 1.20, 0.14),
-        V3(-0.52, 1.08, 0.16),
-        V3(-0.34, 0.94, 0.14),
-        V3(-0.16, 0.87, 0.08),
+        { pos: V3(-0.68, 1.22, 0.135), rx: 0.078, ry: 0.082 }, // Base of cecum (right paralumbar fossa)
+        { pos: V3(-0.56, 1.12, 0.155), rx: 0.074, ry: 0.078 },
+        { pos: V3(-0.42, 0.99, 0.150), rx: 0.068, ry: 0.070 }, // Cecal body
+        { pos: V3(-0.26, 0.89, 0.115), rx: 0.052, ry: 0.054 },
+        { pos: V3(-0.14, 0.85, 0.045), rx: 0.032, ry: 0.032 }, // Apex at sternal xiphoid
       ],
-      0.075,
       cecMat(),
-      20,
-      14,
+      16,
+      16,
+      0.085,
     ),
     'right',
   );
 
-  // Colon mayor ascendente (equ.dig.col.001 — double horseshoe loops on ventral abdomen!)
+  // Colon mayor ascendente (equ.dig.col.001 — double horseshoe with pelvic flexure & haustra!)
   push(
     'equ.dig.col.001',
-    createTubeCurveMesh(
+    createMultiStationLoftTube(
       [
-        V3(-0.46, 0.90, 0.09),
-        V3(-0.15, 0.86, 0.10),
-        V3(-0.08, 0.88, -0.08),
-        V3(-0.48, 0.93, -0.12),
-        V3(-0.62, 1.03, -0.10),
-        V3(-0.22, 1.01, -0.08),
-        V3(-0.16, 1.00, 0.07),
-        V3(-0.55, 1.06, 0.07),
+        { pos: V3(-0.44, 0.92, 0.085), rx: 0.056, ry: 0.056 },  // Right ventral colon
+        { pos: V3(-0.18, 0.85, 0.085), rx: 0.058, ry: 0.056 },
+        { pos: V3(-0.08, 0.87, 0.0), rx: 0.052, ry: 0.052 },    // Sternal flexure
+        { pos: V3(-0.18, 0.88, -0.095), rx: 0.056, ry: 0.054 }, // Left ventral colon
+        { pos: V3(-0.48, 0.92, -0.125), rx: 0.054, ry: 0.052 },
+        { pos: V3(-0.66, 1.00, -0.095), rx: 0.030, ry: 0.030 }, // Narrow Pelvic Flexure!
+        { pos: V3(-0.52, 1.04, -0.105), rx: 0.042, ry: 0.042 }, // Left dorsal colon
+        { pos: V3(-0.22, 1.02, -0.075), rx: 0.048, ry: 0.048 },
+        { pos: V3(-0.16, 1.00, 0.055), rx: 0.062, ry: 0.062 },  // Diaphragmatic flexure
+        { pos: V3(-0.48, 1.05, 0.065), rx: 0.076, ry: 0.072 },  // Large Right Dorsal Colon ampulla!
       ],
-      0.052,
       colMat(),
-      36,
-      12,
+      14,
+      26,
+      0.065,
     ),
     'center',
   );
@@ -265,7 +309,6 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'left',
   );
 
-  // Recto (equ.dig.rec.001)
   push(
     'equ.dig.rec.001',
     createTubeCurveMesh([V3(-0.72, 1.22, 0), V3(-0.98, 1.20, 0)], 0.028, colMat(), 10, 10),
@@ -278,11 +321,9 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const brainMat = () => createTissueMaterial('brain', tex);
   const nerveMat = () => createTissueMaterial('nerve', tex);
 
-  // Encéfalo (equ.ner.enc.001) + Cerebelo (equ.ner.met.008)
   push('equ.ner.enc.001', createOrganMesh(V3(1.13, 1.72, 0), [0.062, 0.044, 0.048], brainMat(), [0, 0, -0.3], 18), 'center');
   push('equ.ner.met.008', createOrganMesh(V3(1.06, 1.72, 0), [0.028, 0.026, 0.032], brainMat(), undefined, 14), 'center');
 
-  // Médula espinal (equ.ner.med.001 — inside vertebral canal from C1 to S5)
   const spinePts: THREE.Vector3[] = [V3(1.04, 1.72, 0)];
   for (let c = 1; c <= 7; c++) spinePts.push(V3(...cervicalPos(c)));
   for (let t = 1; t <= 18; t += 2) spinePts.push(V3(...thoracicPos(t)));
@@ -296,19 +337,16 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     const fl = forelimbLandmarks(sd);
     const hl = hindlimbLandmarks(sd);
 
-    // Plexo braquial + nervio radial/mediano (equ.ner.bra.001-i/d)
     push(
       `equ.ner.bra.001-${tag}`,
       createTubeCurveMesh([V3(0.56, 1.24, 0.02 * sd), fl.shoulder.clone().add(V3(-0.04, 0.04, -0.02 * sd)), fl.elbow, fl.carpus], 0.0055, nerveMat(), 20, 6),
       side,
     );
-    // Nervio ciático (equ.ner.lum.010-i/d)
     push(
       `equ.ner.lum.010-${tag}`,
       createTubeCurveMesh([V3(-0.76, 1.30, 0.02 * sd), hl.hip.clone().add(V3(-0.04, 0.02, -0.02 * sd)), hl.stifle.clone().add(V3(-0.08, -0.04, 0)), hl.hock], 0.0065, nerveMat(), 22, 6),
       side,
     );
-    // Nervio vago (equ.ner.cra.077-i/d)
     push(
       `equ.ner.cra.077-${tag}`,
       createTubeCurveMesh([V3(1.06, 1.69, 0.025 * sd), V3(0.75, 1.40, 0.025 * sd), V3(0.36, 1.16, 0.02 * sd), V3(-0.15, 1.12, 0.015 * sd)], 0.0045, nerveMat(), 20, 6),
@@ -322,26 +360,51 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const kidMat = () => createTissueMaterial('kidney', tex);
   const bladMat = () => createTissueMaterial('bladder', tex);
 
-  // Riñón izquierdo (equ.uri.rin.001-i, bean-shaped, caudal L1-L4)
-  push('equ.uri.rin.001-i', createOrganMesh(V3(-0.52, 1.25, -0.08), [0.075, 0.042, 0.052], kidMat(), [0, 0.15, 0], 16), 'left');
-  // Riñón derecho (equ.uri.rin.001-d, heart-shaped, slightly more cranial T16-L1)
-  push('equ.uri.rin.001-d', createOrganMesh(V3(-0.40, 1.26, 0.085), [0.072, 0.045, 0.06], kidMat(), [0, -0.25, 0], 16), 'right');
-  // Uréteres
+  // Riñón izquierdo (equ.uri.rin.001-i — true bean-shaped equine left kidney at L1-L4!)
+  push(
+    'equ.uri.rin.001-i',
+    createMultiStationLoftTube(
+      [
+        { pos: V3(-0.46, 1.25, -0.075), rx: 0.032, ry: 0.028 },
+        { pos: V3(-0.51, 1.255, -0.095), rx: 0.046, ry: 0.036 },
+        { pos: V3(-0.57, 1.25, -0.078), rx: 0.032, ry: 0.028 },
+      ],
+      kidMat(),
+      14,
+    ),
+    'left',
+  );
+
+  // Riñón derecho (equ.uri.rin.001-d — true heart / playing-card-shaped equine right kidney at T16-L1!)
+  const rightKidneyPlate = createAnatomicalExtrudedPlate(
+    [
+      [-0.055, -0.01], // caudal apex
+      [-0.04, 0.048],  // lateral convex border
+      [0.042, 0.054],  // cranial lobe
+      [0.06, 0.005],   // cranial notch
+      [0.042, -0.046], // medial hilus indentation
+      [-0.02, -0.038],
+    ],
+    0.045,
+    0.014,
+    kidMat(),
+  );
+  rightKidneyPlate.rotation.x = Math.PI / 2;
+  rightKidneyPlate.position.set(-0.40, 1.26, 0.085);
+  push('equ.uri.rin.001-d', rightKidneyPlate, 'right');
+
   push('equ.uri.ure.001-i', createTubeCurveMesh([V3(-0.54, 1.23, -0.06), V3(-0.84, 1.17, -0.03), V3(-0.92, 1.13, -0.015)], 0.0045, bladMat(), 12, 6), 'left');
   push('equ.uri.ure.001-d', createTubeCurveMesh([V3(-0.42, 1.24, 0.065), V3(-0.84, 1.17, 0.03), V3(-0.92, 1.13, 0.015)], 0.0045, bladMat(), 12, 6), 'right');
-  // Vejiga urinaria
   push('equ.uri.vej.001', createOrganMesh(V3(-0.90, 1.12, 0), [0.07, 0.055, 0.052], bladMat(), undefined, 16), 'center');
 
   // =========================================================================
   // 6. APARATO REPRODUCTOR (rep — con filtro automático m / f)
   // =========================================================================
   const repMat = () => createTissueMaterial('repro', tex);
-  // Male (sex = 'm')
   push('equ.rep.tes.001-i', createOrganMesh(V3(-0.78, 0.85, -0.035), [0.042, 0.03, 0.026], repMat(), undefined, 14), 'left');
   push('equ.rep.tes.001-d', createOrganMesh(V3(-0.78, 0.85, 0.035), [0.042, 0.03, 0.026], repMat(), undefined, 14), 'right');
   push('equ.rep.pen.001', createTubeCurveMesh([V3(-0.96, 1.07, 0), V3(-0.80, 0.90, 0), V3(-0.58, 0.86, 0)], 0.022, repMat(), 14, 10), 'center');
 
-  // Female (sex = 'f')
   push('equ.rep.ova.001-i', createOrganMesh(V3(-0.70, 1.17, -0.09), [0.032, 0.024, 0.022], repMat(), undefined, 12), 'left');
   push('equ.rep.ova.001-d', createOrganMesh(V3(-0.70, 1.17, 0.09), [0.032, 0.024, 0.022], repMat(), undefined, 12), 'right');
   const uteGrp = new THREE.Group();

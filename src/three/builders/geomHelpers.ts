@@ -13,6 +13,20 @@ export interface AnatomicalStation {
   dorsalTaper?: number;
 }
 
+export interface VariableTubeWaypoint {
+  pos: THREE.Vector3;
+  rx: number;
+  ry: number;
+}
+
+export interface SheetStation {
+  x: number;
+  yTop: number;
+  yBot: number;
+  zMid: number;
+  zBow: number; // outward lateral bow relative to chord
+}
+
 /**
  * Builds one anatomical half (left sd = -1 or right sd = +1) of a continuous
  * lofted living-horse envelope (body, neck, head, or limbs) split cleanly along Z = 0
@@ -100,6 +114,7 @@ export function createSculptedLimbPath(
   const tangent = new THREE.Vector3();
   const sideVec = new THREE.Vector3(0, 0, 1);
   const fwdVec = new THREE.Vector3();
+  const localSide = new THREE.Vector3();
 
   for (let r = 0; r < rows; r++) {
     const wp = waypoints[r];
@@ -111,14 +126,13 @@ export function createSculptedLimbPath(
       tangent.subVectors(waypoints[r + 1].pos, waypoints[r - 1].pos).normalize();
     }
 
-    // Build stable anatomical frame (fwdVec ~ cranial/caudal, sideVec ~ mediolateral)
     fwdVec.crossVectors(sideVec, tangent);
     if (fwdVec.lengthSq() < 0.001) {
       fwdVec.set(1, 0, 0);
     } else {
       fwdVec.normalize();
     }
-    const localSide = new THREE.Vector3().crossVectors(tangent, fwdVec).normalize();
+    localSide.crossVectors(tangent, fwdVec).normalize();
 
     const vCoord = r / Math.max(rows - 1, 1);
     for (let c = 0; c <= radialSegs; c++) {
@@ -153,6 +167,247 @@ export function createSculptedLimbPath(
   geo.computeVertexNormals();
 
   const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/**
+ * Builds a closed curved tube with independent per-station semi-axes (rx, ry)
+ * and optional haustral sacculation modulation (for equine cecum, colon, J-stomach, kidneys).
+ */
+export function createMultiStationLoftTube(
+  waypoints: VariableTubeWaypoint[],
+  mat: THREE.Material,
+  radialSegs = 16,
+  haustraFreq = 0,
+  haustraAmp = 0,
+): THREE.Mesh {
+  // Add tiny end caps for seamless closed mesh
+  const first = waypoints[0];
+  const last = waypoints[waypoints.length - 1];
+  const tStart = new THREE.Vector3().subVectors(waypoints[1].pos, first.pos).normalize();
+  const tEnd = new THREE.Vector3().subVectors(last.pos, waypoints[waypoints.length - 2].pos).normalize();
+
+  const pts: VariableTubeWaypoint[] = [
+    { pos: first.pos.clone().addScaledVector(tStart, -0.008), rx: 0.002, ry: 0.002 },
+    ...waypoints,
+    { pos: last.pos.clone().addScaledVector(tEnd, 0.008), rx: 0.002, ry: 0.002 },
+  ];
+
+  const rows = pts.length;
+  const cols = radialSegs + 1;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+
+  const tangent = new THREE.Vector3();
+  const upRef = new THREE.Vector3(0, 1, 0);
+  const sideRef = new THREE.Vector3(0, 0, 1);
+  const binormal = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+
+  for (let r = 0; r < rows; r++) {
+    const wp = pts[r];
+    if (r === 0) tangent.subVectors(pts[1].pos, wp.pos).normalize();
+    else if (r === rows - 1) tangent.subVectors(wp.pos, pts[r - 1].pos).normalize();
+    else tangent.subVectors(pts[r + 1].pos, pts[r - 1].pos).normalize();
+
+    const ref = Math.abs(tangent.dot(upRef)) > 0.92 ? sideRef : upRef;
+    binormal.crossVectors(tangent, ref).normalize();
+    normal.crossVectors(binormal, tangent).normalize();
+
+    const vCoord = r / Math.max(rows - 1, 1);
+    const haustraWave =
+      haustraFreq > 0 ? 1 + haustraAmp * Math.sin(vCoord * Math.PI * haustraFreq) : 1;
+
+    for (let c = 0; c <= radialSegs; c++) {
+      const uCoord = c / radialSegs;
+      const phi = uCoord * Math.PI * 2;
+      // Optional longitudinal taenia flattening groove on 2 bands for equine colon/cecum
+      const taeniaFactor = haustraFreq > 0 ? 1 - 0.08 * Math.pow(Math.cos(phi * 2), 4) : 1;
+      const rx = wp.rx * haustraWave * taeniaFactor;
+      const ry = wp.ry * haustraWave * taeniaFactor;
+
+      const cPhi = Math.cos(phi) * rx;
+      const sPhi = Math.sin(phi) * ry;
+      positions.push(
+        wp.pos.x + binormal.x * cPhi + normal.x * sPhi,
+        wp.pos.y + binormal.y * cPhi + normal.y * sPhi,
+        wp.pos.z + binormal.z * cPhi + normal.z * sPhi,
+      );
+      uvs.push(uCoord, vCoord * 3);
+    }
+  }
+
+  for (let r = 0; r < rows - 1; r++) {
+    for (let c = 0; c < radialSegs; c++) {
+      const a = r * cols + c;
+      const b = a + 1;
+      const d = (r + 1) * cols + c;
+      const e = d + 1;
+      indices.push(a, d, b, b, d, e);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/**
+ * Builds an anatomical extruded plate with beveled edges and optional perforations
+ * (used for Scapula blade, Coxal with obturator foramen, Atlas wings, Axis crest, Facial plates).
+ */
+export function createAnatomicalExtrudedPlate(
+  contourPts: Array<[number, number]>,
+  depth: number,
+  bevelSize: number,
+  mat: THREE.Material,
+  holesPts?: Array<Array<[number, number]>>,
+): THREE.Mesh {
+  const shape = new THREE.Shape();
+  contourPts.forEach(([x, y], idx) => {
+    if (idx === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  });
+  shape.closePath();
+
+  if (holesPts) {
+    for (const holeCoords of holesPts) {
+      const hole = new THREE.Path();
+      holeCoords.forEach(([x, y], idx) => {
+        if (idx === 0) hole.moveTo(x, y);
+        else hole.lineTo(x, y);
+      });
+      hole.closePath();
+      shape.holes.push(hole);
+    }
+  }
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    steps: 1,
+    depth,
+    bevelEnabled: bevelSize > 0,
+    bevelThickness: bevelSize,
+    bevelSize,
+    bevelSegments: 2,
+  });
+  geo.translate(0, 0, -depth * 0.5);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/**
+ * Builds a curved anatomical muscle or aponeurosis sheet wrapping smoothly
+ * over the equine thorax, flank, or pelvis wall (replacing flat spherical blobs).
+ */
+export function createCurvedMuscleSheetMesh(
+  stations: SheetStation[],
+  sd: -1 | 1,
+  mat: THREE.Material,
+  verticalSegs = 10,
+): THREE.Mesh {
+  const rows = stations.length;
+  const cols = verticalSegs + 1;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+
+  for (let r = 0; r < rows; r++) {
+    const st = stations[r];
+    const uCoord = r / Math.max(rows - 1, 1);
+    for (let c = 0; c <= verticalSegs; c++) {
+      const vCoord = c / verticalSegs;
+      const y = THREE.MathUtils.lerp(st.yTop, st.yBot, vCoord);
+      const bow = st.zBow * Math.sin(vCoord * Math.PI);
+      const z = (st.zMid + bow) * sd;
+      positions.push(st.x, y, z);
+      uvs.push(uCoord, vCoord);
+    }
+  }
+
+  for (let r = 0; r < rows - 1; r++) {
+    for (let c = 0; c < verticalSegs; c++) {
+      const a = r * cols + c;
+      const b = a + 1;
+      const d = (r + 1) * cols + c;
+      const e = d + 1;
+      if (sd === 1) {
+        indices.push(a, d, b, b, d, e);
+      } else {
+        indices.push(a, b, d, b, e, d);
+      }
+    }
+  }
+
+  // Clone material with DoubleSide so sheets are visible both externally and medially
+  const sheetMat = mat.clone();
+  sheetMat.side = THREE.DoubleSide;
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, sheetMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/**
+ * Builds a beveled faceted block for equine carpal and tarsal bones.
+ */
+export function createFacetedTarsalOrCarpalBlock(
+  center: THREE.Vector3,
+  size: [number, number, number],
+  mat: THREE.Material,
+  rot?: [number, number, number],
+): THREE.Mesh {
+  const [sx, sy, sz] = size;
+  const r = Math.min(sx, sy) * 0.28;
+  const hx = sx * 0.5;
+  const hy = sy * 0.5;
+  const s = new THREE.Shape();
+  s.moveTo(-hx + r, -hy);
+  s.lineTo(hx - r, -hy);
+  s.quadraticCurveTo(hx, -hy, hx, -hy + r);
+  s.lineTo(hx, hy - r);
+  s.quadraticCurveTo(hx, hy, hx - r, hy);
+  s.lineTo(-hx + r, hy);
+  s.quadraticCurveTo(-hx, hy, -hx, hy - r);
+  s.lineTo(-hx, -hy + r);
+  s.quadraticCurveTo(-hx, -hy, -hx + r, -hy);
+
+  const depth = Math.max(sz * 0.7, 0.006);
+  const bevel = Math.min(sz * 0.15, 0.004);
+  const geo = new THREE.ExtrudeGeometry(s, {
+    steps: 1,
+    depth,
+    bevelEnabled: true,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 2,
+  });
+  geo.translate(0, 0, -depth * 0.5);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(center);
+  if (rot) mesh.rotation.set(rot[0], rot[1], rot[2]);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
@@ -302,7 +557,7 @@ export function createHoofMesh(
     new THREE.Vector2(0.037, 0.074),
     new THREE.Vector2(0, 0.074),
   ];
-  const geo = new THREE.LatheGeometry(pts, 20);
+  const geo = new THREE.LatheGeometry(pts, 22);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
@@ -322,7 +577,8 @@ export function createHoofMesh(
 }
 
 /**
- * Builds the wedge-shaped equine distal phalanx (P3 / Tejuelo) inside the hoof capsule.
+ * Builds the wedge-shaped equine distal phalanx (P3 / Tejuelo) inside the hoof capsule,
+ * sculpted with extensor process crest and caudal palmar/plantar processes.
  */
 export function createCoffinBoneMesh(
   center: THREE.Vector3,
@@ -330,22 +586,24 @@ export function createCoffinBoneMesh(
 ): THREE.Mesh {
   const pts = [
     new THREE.Vector2(0, 0),
-    new THREE.Vector2(0.038, 0),
-    new THREE.Vector2(0.034, 0.015),
-    new THREE.Vector2(0.022, 0.036),
-    new THREE.Vector2(0.014, 0.044),
-    new THREE.Vector2(0, 0.044),
+    new THREE.Vector2(0.039, 0),
+    new THREE.Vector2(0.035, 0.014),
+    new THREE.Vector2(0.024, 0.034),
+    new THREE.Vector2(0.015, 0.046),
+    new THREE.Vector2(0, 0.046),
   ];
-  const geo = new THREE.LatheGeometry(pts, 16);
+  const geo = new THREE.LatheGeometry(pts, 18);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const z = pos.getZ(i);
-    const dorsalShift = (0.044 - y) * 0.34;
-    // Slight palmar concavity for semilunar surface & palmar processes
-    const xMod = x < 0 ? x * 1.1 : x * 1.05;
-    pos.setXYZ(i, xMod + dorsalShift, y, z * 0.92);
+    const dorsalShift = (0.046 - y) * 0.36;
+    // Slight extensor process peak dorsally + palmar processes widening caudolaterally
+    const extensorBump = x > 0.005 && y > 0.032 ? 0.004 : 0;
+    const palmarWings = x < -0.008 ? 1.14 : 1.0;
+    const xMod = x < 0 ? x * 1.12 : x * 1.06;
+    pos.setXYZ(i, xMod + dorsalShift, y + extensorBump, z * 0.92 * palmarWings);
   }
   geo.computeVertexNormals();
   const mesh = new THREE.Mesh(geo, mat);

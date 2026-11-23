@@ -5,6 +5,7 @@ import { ProceduralTextureSet } from '../textures';
 import { BuiltPart } from './buildSkeletalAndArticular';
 import {
   AnatomicalStation,
+  createCurvedMuscleSheetMesh,
   createHalfLoftedContourMesh,
   createHoofMesh,
   createMuscleBellyMesh,
@@ -49,7 +50,7 @@ function buildHalfEquineCoat(
     { x: 0.56, yCenter: 1.33, halfHeight: 0.215, halfWidth: 0.13, dorsalTaper: 1.65 },
     { x: 0.72, yCenter: 1.45, halfHeight: 0.19, halfWidth: 0.112, dorsalTaper: 1.75 },
     { x: 0.88, yCenter: 1.58, halfHeight: 0.16, halfWidth: 0.095, dorsalTaper: 1.65 },
-    { x: 1.02, yCenter: 1.68, halfHeight: 0.13, halfWidth: 0.085, dorsalTaper: 1.35 },
+    { x: 1.02, yCenter: 1.68, halfHeight: 0.128, halfWidth: 0.084, dorsalTaper: 1.35 },
     { x: 1.08, yCenter: 1.70, halfHeight: 0.03, halfWidth: 0.025 },
   ];
   g.add(mark(createHalfLoftedContourMesh(neckStations, sd, skinMat, 20)));
@@ -58,10 +59,10 @@ function buildHalfEquineCoat(
   const headStations: AnatomicalStation[] = [
     { x: 0.99, yCenter: 1.70, halfHeight: 0.03, halfWidth: 0.025 },
     { x: 1.07, yCenter: 1.65, halfHeight: 0.14, halfWidth: 0.09 },
-    { x: 1.16, yCenter: 1.64, halfHeight: 0.135, halfWidth: 0.095, flankBias: -0.06 },
-    { x: 1.28, yCenter: 1.56, halfHeight: 0.10, halfWidth: 0.072 },
-    { x: 1.42, yCenter: 1.46, halfHeight: 0.072, halfWidth: 0.056 },
-    { x: 1.53, yCenter: 1.38, halfHeight: 0.058, halfWidth: 0.052 },
+    { x: 1.16, yCenter: 1.64, halfHeight: 0.132, halfWidth: 0.095, flankBias: -0.06 },
+    { x: 1.28, yCenter: 1.56, halfHeight: 0.098, halfWidth: 0.070 },
+    { x: 1.42, yCenter: 1.46, halfHeight: 0.070, halfWidth: 0.054 },
+    { x: 1.53, yCenter: 1.38, halfHeight: 0.056, halfWidth: 0.050 },
     { x: 1.59, yCenter: 1.36, halfHeight: 0.015, halfWidth: 0.015 },
   ];
   g.add(mark(createHalfLoftedContourMesh(headStations, sd, skinMat, 20)));
@@ -137,8 +138,8 @@ function buildHalfEquineCoat(
       { pos: fl.carpus, radiusX: 0.042, radiusZ: 0.038 },
       { pos: fl.carpus.clone().lerp(fl.fetlock, 0.5), radiusX: 0.034, radiusZ: 0.028 },
       { pos: fl.fetlock, radiusX: 0.039, radiusZ: 0.033 },
-      { pos: fl.pasternMid, radiusX: 0.032, radiusZ: 0.028 },
-      { pos: fl.hoofCenter.clone().add(V3(-0.004, 0.042, 0)), radiusX: 0.038, radiusZ: 0.034 },
+      { pos: fl.pasternMid, radiusX: 0.031, radiusZ: 0.027 },
+      { pos: fl.hoofCenter.clone().add(V3(-0.004, 0.036, 0)), radiusX: 0.037, radiusZ: 0.033 },
     ],
     darkPointMat,
     16,
@@ -152,8 +153,8 @@ function buildHalfEquineCoat(
       { pos: hl.tuberCoxae.clone().add(V3(-0.04, -0.06, -0.02 * sd)), radiusX: 0.14, radiusZ: 0.105 },
       { pos: hl.hip.clone().add(V3(-0.02, 0.02, 0.01 * sd)), radiusX: 0.15, radiusZ: 0.11 },
       { pos: hl.stifle.clone().add(V3(-0.04, 0.03, 0)), radiusX: 0.115, radiusZ: 0.088 },
-      { pos: hl.stifle.clone().lerp(hl.hock, 0.52), radiusX: 0.075, radiusZ: 0.056 },
-      { pos: hl.hock.clone().add(V3(-0.01, 0.06, 0)), radiusX: 0.048, radiusZ: 0.04 },
+      { pos: hl.stifle.clone().lerp(hl.hock, 0.52), radiusX: 0.076, radiusZ: 0.056 },
+      { pos: hl.hock.clone().add(V3(-0.015, 0.06, 0)), radiusX: 0.05, radiusZ: 0.04 },
     ],
     skinMat,
     18,
@@ -162,12 +163,12 @@ function buildHalfEquineCoat(
 
   const hLower = createSculptedLimbPath(
     [
-      { pos: hl.hock.clone().add(V3(-0.01, 0.065, 0)), radiusX: 0.049, radiusZ: 0.04 },
-      { pos: hl.hock.clone().add(V3(-0.015, 0, 0)), radiusX: 0.046, radiusZ: 0.038 },
+      { pos: hl.hock.clone().add(V3(-0.015, 0.065, 0)), radiusX: 0.051, radiusZ: 0.04 },
+      { pos: hl.hock.clone().add(V3(-0.018, 0, 0)), radiusX: 0.047, radiusZ: 0.038 },
       { pos: hl.hock.clone().lerp(hl.fetlock, 0.5), radiusX: 0.035, radiusZ: 0.029 },
       { pos: hl.fetlock, radiusX: 0.039, radiusZ: 0.033 },
-      { pos: hl.pasternMid, radiusX: 0.032, radiusZ: 0.028 },
-      { pos: hl.hoofCenter.clone().add(V3(-0.004, 0.042, 0)), radiusX: 0.038, radiusZ: 0.034 },
+      { pos: hl.pasternMid, radiusX: 0.031, radiusZ: 0.027 },
+      { pos: hl.hoofCenter.clone().add(V3(-0.004, 0.036, 0)), radiusX: 0.037, radiusZ: 0.033 },
     ],
     darkPointMat,
     16,
@@ -204,7 +205,6 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   };
 
   // --- 1. INTEGUMENTARY SYSTEM (pel) ---
-  // Piel (equ.teg.pie.001) split internally into left/right sculpted halves for sagittal cutaway
   const coatGroup = new THREE.Group();
   coatGroup.add(buildHalfEquineCoat(-1, skinMat(), darkPointMat(), maneMat()));
   coatGroup.add(buildHalfEquineCoat(1, skinMat(), darkPointMat(), maneMat()));
@@ -228,7 +228,6 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     lock.userData.side = 'left';
     maneGroup.add(lock);
   }
-  // Forelock (tupé) falling gently between eyes
   const forelock = createMuscleBellyMesh(
     V3(1.10, 1.79, 0),
     V3(1.24, 1.65, -0.018),
@@ -240,7 +239,7 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   maneGroup.add(forelock);
   push('equ.teg.pel.011', maneGroup, 'left', V3(0.75, 1.64, -0.04));
 
-  // Cola / Crin de la cola (equ.teg.pel.012) — lush multi-strand dock + flowing tail
+  // Cola / Crin de la cola (equ.teg.pel.012)
   const tailGroup = new THREE.Group();
   const strandOffsets = [
     [0, 0, 0.032],
@@ -267,7 +266,7 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   }
   push('equ.teg.pel.012', tailGroup, 'center', V3(-1.24, 0.94, 0));
 
-  // 4 Keratin Hooves grounded flush at Y = 0 (fore ~50° dorsal wall, hind slightly steeper ~54°)
+  // 4 Keratin Hooves grounded flush at Y = 0
   for (const sd of [-1, 1] as const) {
     const tag = sd === -1 ? 'i' : 'd';
     const side = sd === -1 ? 'left' : 'right';
@@ -278,15 +277,19 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   }
 
   // --- 2. MUSCULAR SYSTEM: SUPERFICIAL (msu), DEEP (mpr) & FASCIA (fas) ---
-  // Masetero (bilateral: equ.mus.cab.018)
+  // Masetero (bilateral: equ.mus.cab.018) — sculpted curved fan hugging mandibular ramus & facial crest
   const masseterGroup = new THREE.Group();
   for (const sd of [-1, 1] as const) {
-    const m = createOrganMesh(
-      V3(1.13, 1.56, 0.072 * sd),
-      [0.072, 0.058, 0.026],
+    const m = createCurvedMuscleSheetMesh(
+      [
+        { x: 1.06, yTop: 1.62, yBot: 1.50, zMid: 0.068, zBow: 0.018 },
+        { x: 1.13, yTop: 1.63, yBot: 1.47, zMid: 0.072, zBow: 0.025 },
+        { x: 1.21, yTop: 1.59, yBot: 1.47, zMid: 0.065, zBow: 0.02 },
+        { x: 1.27, yTop: 1.55, yBot: 1.49, zMid: 0.056, zBow: 0.01 },
+      ],
+      sd,
       msuMat(),
-      [0, 0, -0.35],
-      16,
+      8,
     );
     m.userData.side = sd === -1 ? 'left' : 'right';
     masseterGroup.add(m);
@@ -317,10 +320,10 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       createMuscleBellyMesh(V3(0.96, 1.74, 0.045 * sd), V3(0.45, 1.44, 0.055 * sd), 0.068, 0.4, msuMat(), 0.45),
       side,
     );
-    // Trapecio cervical (equ.mus.ext.001-i/d) & torácico (equ.mus.ext.002-i/d)
+    // Trapecio cervical (001) & torácico (002)
     push(
       `equ.mus.ext.001-${tag}`,
-      createMuscleBellyMesh(V3(0.84, 1.66, 0.04 * sd), V3(0.38, 1.38, 0.11 * sd), 0.068, 0.3, msuMat(), 0.55),
+      createMuscleBellyMesh(V3(0.84, 1.66, 0.04 * sd), V3(0.36, 1.38, 0.11 * sd), 0.068, 0.3, msuMat(), 0.55),
       side,
     );
     push(
@@ -328,12 +331,25 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       createMuscleBellyMesh(V3(0.32, 1.46, 0.04 * sd), V3(0.18, 1.26, 0.14 * sd), 0.062, 0.3, msuMat(), 0.45),
       side,
     );
-    // Dorsal ancho / Latissimus dorsi (equ.mus.ext.005-i/d)
+
+    // Dorsal ancho / Latissimus dorsi (equ.mus.ext.005-i/d) — sculpted curved sheet over ribcage to humerus!
     push(
       `equ.mus.ext.005-${tag}`,
-      createOrganMesh(V3(-0.02, 1.24, 0.22 * sd), [0.34, 0.14, 0.028], msuMat(), [0, 0, -0.18], 16),
+      createCurvedMuscleSheetMesh(
+        [
+          { x: -0.34, yTop: 1.37, yBot: 1.24, zMid: 0.15, zBow: 0.05 },
+          { x: -0.14, yTop: 1.35, yBot: 1.15, zMid: 0.19, zBow: 0.065 },
+          { x: 0.08, yTop: 1.33, yBot: 1.07, zMid: 0.21, zBow: 0.06 },
+          { x: 0.28, yTop: 1.26, yBot: 0.99, zMid: 0.18, zBow: 0.035 },
+          { x: 0.42, yTop: 1.12, yBot: 0.98, zMid: 0.155, zBow: 0.015 },
+        ],
+        sd,
+        msuMat(),
+        10,
+      ),
       side,
     );
+
     // Pectoral descendente & transverso (equ.mus.ext.009/010-i/d)
     push(
       `equ.mus.ext.009-${tag}`,
@@ -345,10 +361,10 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       createMuscleBellyMesh(V3(0.34, 0.85, 0.02 * sd), fl.elbow.clone().add(V3(0, 0.02, -0.02 * sd)), 0.048, 0.55, msuMat()),
       side,
     );
-    // Deltoides (equ.mus.hom.003-i/d) & Supraespinoso (equ.mus.hom.001-i/d)
+    // Deltoides (003) & Supraespinoso (001)
     push(
       `equ.mus.hom.003-${tag}`,
-      createMuscleBellyMesh(V3(0.36, 1.34, 0.165 * sd), fl.shoulder.clone().add(V3(-0.04, -0.08, 0.025 * sd)), 0.052, 0.45, msuMat()),
+      createMuscleBellyMesh(V3(0.35, 1.34, 0.165 * sd), fl.shoulder.clone().add(V3(-0.04, -0.08, 0.025 * sd)), 0.052, 0.45, msuMat()),
       side,
     );
     push(
@@ -359,7 +375,7 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     // Tríceps braquial cabeza larga (007) y lateral (008)
     push(
       `equ.mus.bra.007-${tag}`,
-      createMuscleBellyMesh(V3(0.30, 1.24, 0.16 * sd), fl.elbow.clone().add(V3(-0.02, 0.05, 0.01 * sd)), 0.08, 0.55, msuMat(), 0.42),
+      createMuscleBellyMesh(V3(0.29, 1.24, 0.16 * sd), fl.elbow.clone().add(V3(-0.02, 0.05, 0.01 * sd)), 0.08, 0.55, msuMat(), 0.42),
       side,
     );
     push(
@@ -367,20 +383,95 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       createMuscleBellyMesh(fl.shoulder.clone().add(V3(-0.03, -0.03, 0.02 * sd)), fl.elbow.clone().add(V3(-0.01, 0.04, 0.02 * sd)), 0.048, 0.55, msuMat()),
       side,
     );
-    // Extensor radial del carpo + tendón flexor digital profundo
-    const extGrp = new THREE.Group();
-    extGrp.add(createMuscleBellyMesh(fl.elbow.clone().add(V3(0.02, 0.02, 0.01 * sd)), fl.carpus.clone().add(V3(0.01, 0.08, 0)), 0.038, 0.65, msuMat(), 0.3));
-    extGrp.add(createTubeCurveMesh([fl.carpus.clone().add(V3(-0.016, 0.08, 0)), fl.fetlock.clone().add(V3(-0.016, 0, 0)), fl.hoofCenter.clone().add(V3(-0.022, 0.02, 0))], 0.0085, tenMat(), 16, 7));
-    push(`equ.mus.ant.001-${tag}`, extGrp, side);
 
-    // Oblicuo externo del abdomen (equ.mus.abd.001-i/d)
-    push(
-      `equ.mus.abd.001-${tag}`,
-      createOrganMesh(V3(-0.34, 1.03, 0.23 * sd), [0.36, 0.19, 0.024], msuMat(), [0, 0, 0.08], 18),
-      side,
+    // Forelimb extensors & flexors with authentic dorsal/palmar tendon insertions:
+    // Extensor radial del carpo (001) -> dorsomedial metacarpal tuberosity
+    const ercGrp = new THREE.Group();
+    ercGrp.add(createMuscleBellyMesh(fl.elbow.clone().add(V3(0.025, 0.02, 0.008 * sd)), fl.carpus.clone().add(V3(0.018, 0.09, 0)), 0.036, 0.65, msuMat(), 0.3));
+    ercGrp.add(createTubeCurveMesh([fl.carpus.clone().add(V3(0.018, 0.09, 0)), fl.carpus.clone().add(V3(0.018, -0.03, -0.004 * sd))], 0.007, tenMat(), 8, 6));
+    push(`equ.mus.ant.001-${tag}`, ercGrp, side);
+
+    // Extensor digital común (equ.mus.ant.002-i/d) -> dorsal cannon -> P3 extensor process!
+    const edcGrp = new THREE.Group();
+    edcGrp.add(createMuscleBellyMesh(fl.elbow.clone().add(V3(0.015, 0.0, 0.022 * sd)), fl.carpus.clone().add(V3(0.016, 0.08, 0.01 * sd)), 0.026, 0.65, msuMat(), 0.35));
+    edcGrp.add(
+      createTubeCurveMesh(
+        [
+          fl.carpus.clone().add(V3(0.016, 0.08, 0.008 * sd)),
+          fl.carpus.clone().add(V3(0.018, 0, 0)),
+          fl.fetlock.clone().add(V3(0.022, 0, 0)),
+          fl.pasternMid.clone().add(V3(0.018, 0, 0)),
+          fl.hoofCenter.clone().add(V3(0.02, 0.042, 0)),
+        ],
+        0.0065,
+        tenMat(),
+        18,
+        7,
+      ),
     );
+    push(`equ.mus.ant.002-${tag}`, edcGrp, side);
 
-    // Glúteo superficial (001) y Glúteo medio (002)
+    // Flexor digital superficial (equ.mus.ant.008-i/d) -> palmar tendon -> splits onto P1/P2!
+    const sdfGrp = new THREE.Group();
+    sdfGrp.add(createMuscleBellyMesh(fl.elbow.clone().add(V3(-0.02, -0.01, -0.005 * sd)), fl.carpus.clone().add(V3(-0.024, 0.10, 0)), 0.032, 0.65, msuMat(), 0.35));
+    const sdfFet = fl.fetlock.clone().add(V3(-0.026, 0, 0));
+    sdfGrp.add(createTubeCurveMesh([fl.carpus.clone().add(V3(-0.024, 0.10, 0)), fl.carpus.clone().add(V3(-0.028, 0, 0)), sdfFet], 0.007, tenMat(), 12, 7));
+    sdfGrp.add(createTubeCurveMesh([sdfFet, fl.pasternMid.clone().add(V3(-0.016, -0.008, -0.013 * sd))], 0.005, tenMat(), 8, 6));
+    sdfGrp.add(createTubeCurveMesh([sdfFet, fl.pasternMid.clone().add(V3(-0.016, -0.008, 0.013 * sd))], 0.005, tenMat(), 8, 6));
+    push(`equ.mus.ant.008-${tag}`, sdfGrp, side);
+
+    // Flexor digital profundo, cabeza humeral (equ.mus.ant.010-i/d) -> deep palmar tendon over navicular to solar P3!
+    const ddfGrp = new THREE.Group();
+    ddfGrp.add(createMuscleBellyMesh(fl.elbow.clone().add(V3(-0.012, -0.02, 0.005 * sd)), fl.carpus.clone().add(V3(-0.018, 0.11, 0)), 0.03, 0.65, mprMat(), 0.35));
+    ddfGrp.add(
+      createTubeCurveMesh(
+        [
+          fl.carpus.clone().add(V3(-0.018, 0.11, 0)),
+          fl.carpus.clone().add(V3(-0.02, 0, 0)),
+          fl.fetlock.clone().add(V3(-0.02, 0, 0)),
+          fl.coronet.clone().add(V3(-0.024, -0.01, 0)),
+          fl.hoofCenter.clone().add(V3(-0.008, 0.01, 0)),
+        ],
+        0.0075,
+        tenMat(),
+        18,
+        7,
+      ),
+    );
+    push(`equ.mus.ant.010-${tag}`, ddfGrp, side);
+
+    // Oblicuo externo del abdomen (equ.mus.abd.001-i/d) — sculpted curved abdominal wall + aponeurosis
+    const abdGrp = new THREE.Group();
+    abdGrp.add(
+      createCurvedMuscleSheetMesh(
+        [
+          { x: -0.68, yTop: 1.24, yBot: 0.96, zMid: 0.15, zBow: 0.05 },
+          { x: -0.48, yTop: 1.23, yBot: 0.87, zMid: 0.16, zBow: 0.08 },
+          { x: -0.25, yTop: 1.21, yBot: 0.82, zMid: 0.17, zBow: 0.095 },
+          { x: -0.02, yTop: 1.18, yBot: 0.81, zMid: 0.17, zBow: 0.09 },
+          { x: 0.16, yTop: 1.13, yBot: 0.84, zMid: 0.15, zBow: 0.055 },
+        ],
+        sd,
+        msuMat(),
+        10,
+      ),
+    );
+    // Ventral abdominal tunic aponeurosis seam
+    abdGrp.add(
+      createCurvedMuscleSheetMesh(
+        [
+          { x: -0.62, yTop: 0.97, yBot: 0.89, zMid: 0.04, zBow: 0.09 },
+          { x: -0.32, yTop: 0.87, yBot: 0.77, zMid: 0.03, zBow: 0.14 },
+          { x: 0.02, yTop: 0.84, yBot: 0.76, zMid: 0.03, zBow: 0.12 },
+        ],
+        sd,
+        fasMat(),
+        6,
+      ),
+    );
+    push(`equ.mus.abd.001-${tag}`, abdGrp, side);
+
+    // Glúteo superficial (001) & Glúteo medio (002 curved over ilial croup dome)
     push(
       `equ.mus.cad.001-${tag}`,
       createMuscleBellyMesh(V3(-0.74, 1.32, 0.16 * sd), hl.hip.clone().add(V3(-0.04, -0.04, 0.04 * sd)), 0.058, 0.42, msuMat()),
@@ -388,7 +479,17 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     );
     push(
       `equ.mus.cad.002-${tag}`,
-      createOrganMesh(V3(-0.74, 1.27, 0.14 * sd), [0.22, 0.12, 0.075], msuMat(), [0, 0, -0.22], 16),
+      createCurvedMuscleSheetMesh(
+        [
+          { x: -0.96, yTop: 1.34, yBot: 1.18, zMid: 0.09, zBow: 0.06 },
+          { x: -0.82, yTop: 1.39, yBot: 1.15, zMid: 0.11, zBow: 0.09 },
+          { x: -0.66, yTop: 1.38, yBot: 1.16, zMid: 0.11, zBow: 0.085 },
+          { x: -0.54, yTop: 1.35, yBot: 1.21, zMid: 0.09, zBow: 0.05 },
+        ],
+        sd,
+        msuMat(),
+        8,
+      ),
       side,
     );
 
@@ -406,9 +507,45 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
 
     // Gastrocnemio + Tendón calcáneo común (equ.mus.pie.001-i/d)
     const gastGrp = new THREE.Group();
-    gastGrp.add(createMuscleBellyMesh(hl.stifle.clone().add(V3(-0.04, -0.02, 0)), hl.hock.clone().add(V3(-0.05, 0.15, 0)), 0.05, 0.72, msuMat(), 0.32));
-    gastGrp.add(createTubeCurveMesh([hl.hock.clone().add(V3(-0.05, 0.16, 0)), hl.hock.clone().add(V3(-0.06, 0.06, 0))], 0.01, tenMat(), 10, 7));
+    gastGrp.add(createMuscleBellyMesh(hl.stifle.clone().add(V3(-0.04, -0.02, 0)), hl.calcaneusTip.clone().add(V3(0.01, 0.12, 0)), 0.05, 0.72, msuMat(), 0.32));
+    gastGrp.add(createTubeCurveMesh([hl.calcaneusTip.clone().add(V3(0.01, 0.13, 0)), hl.calcaneusTip], 0.01, tenMat(), 10, 7));
     push(`equ.mus.pie.001-${tag}`, gastGrp, side);
+
+    // Flexor digital superficial pélvico (equ.mus.pie.004-i/d) — tendon capping tuber calcanei -> plantar cannon -> P1/P2
+    const sdfHGrp = new THREE.Group();
+    sdfHGrp.add(
+      createTubeCurveMesh(
+        [
+          hl.stifle.clone().add(V3(-0.025, -0.03, 0)),
+          hl.calcaneusTip.clone().add(V3(-0.012, 0.01, 0)),
+          hl.hock.clone().add(V3(-0.03, -0.02, 0)),
+          hl.fetlock.clone().add(V3(-0.026, 0, 0)),
+          hl.pasternMid.clone().add(V3(-0.016, -0.008, 0)),
+        ],
+        0.007,
+        tenMat(),
+        22,
+        7,
+      ),
+    );
+    push(`equ.mus.pie.004-${tag}`, sdfHGrp, side);
+
+    // Fibular tercero / Peroneus tertius (equ.mus.pie.009-i/d) — key stay-apparatus reciprocal cord!
+    push(
+      `equ.mus.pie.009-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.stifle.clone().add(V3(0.015, 0.01, 0.012 * sd)),
+          hl.stifle.clone().lerp(hl.hock, 0.5).add(V3(0.024, 0, 0.008 * sd)),
+          hl.hock.clone().add(V3(0.022, -0.02, 0)),
+        ],
+        0.008,
+        tenMat(),
+        14,
+        7,
+      ),
+      side,
+    );
 
     // Deep muscle: Psoas mayor (equ.mus.sub.001-i/d)
     push(
@@ -417,15 +554,25 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       side,
     );
 
-    // Fascia toracolumbar / pélvica (equ.mus.fas.011-i/d)
+    // Fascia toracolumbar / pélvica (equ.mus.fas.011-i/d) — sculpted curved aponeurosis over lumbar loin
     push(
       `equ.mus.fas.011-${tag}`,
-      createOrganMesh(V3(-0.46, 1.32, 0.13 * sd), [0.28, 0.09, 0.015], fasMat(), [0, 0, -0.05], 14),
+      createCurvedMuscleSheetMesh(
+        [
+          { x: -0.78, yTop: 1.40, yBot: 1.25, zMid: 0.05, zBow: 0.07 },
+          { x: -0.55, yTop: 1.44, yBot: 1.25, zMid: 0.06, zBow: 0.085 },
+          { x: -0.32, yTop: 1.42, yBot: 1.24, zMid: 0.06, zBow: 0.09 },
+          { x: -0.14, yTop: 1.39, yBot: 1.24, zMid: 0.05, zBow: 0.07 },
+        ],
+        sd,
+        fasMat(),
+        8,
+      ),
       side,
     );
   }
 
-  // Diafragma (equ.mus.tor.009 — deep dome separating thorax & abdomen)
+  // Diafragma (equ.mus.tor.009 — deep curved dome separating thorax & abdomen)
   const diaph = createOrganMesh(V3(-0.08, 1.05, 0), [0.09, 0.24, 0.22], mprMat(), [0, 0, -0.45], 18);
   push('equ.mus.tor.009', diaph, 'center');
 
