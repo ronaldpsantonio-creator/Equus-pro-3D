@@ -1,6 +1,12 @@
 import React from 'react';
 import { Crosshair, FileText, Focus, Maximize2, Upload, X } from 'lucide-react';
-import { getCatalogSystem, LAYERS, StructureRecord, SYSTEMS } from '../types/proclavet';
+import {
+  formatRevisionEstado,
+  getCatalogSystem,
+  LAYERS,
+  StructureRecord,
+  SYSTEMS,
+} from '../types/proclavet';
 
 interface SelectionBarProps {
   structure: StructureRecord | null;
@@ -35,6 +41,8 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
     SYSTEMS.find((s) => s.code === getCatalogSystem(structure))?.label || structure.sys;
   const layerLabel = LAYERS.find((l) => l.code === structure.layer)?.label || structure.layer;
   const hasFicha = !!(structure.ficha && Object.keys(structure.ficha).length > 0);
+  const revEstado = structure.revision?.estado;
+  const traceCount = structure.trazabilidad_ids?.length || 0;
 
   return (
     <div className="mb-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700/80 bg-[#0e141d]/95 px-4 py-2.5 shadow-xl">
@@ -67,6 +75,28 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
             <>
               <span aria-hidden="true">·</span>
               <span className="text-amber-300">Ficha disponible</span>
+            </>
+          )}
+          {revEstado && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span
+                className={
+                  revEstado === 'aprobada_y_verificada' ||
+                  revEstado === 'verificada' ||
+                  revEstado === 'aprobada'
+                    ? 'text-emerald-300/90'
+                    : 'text-amber-300/90'
+                }
+              >
+                {formatRevisionEstado(revEstado)}
+              </span>
+            </>
+          )}
+          {traceCount > 0 && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{traceCount} ID{traceCount === 1 ? '' : 's'} de trazabilidad</span>
             </>
           )}
         </div>

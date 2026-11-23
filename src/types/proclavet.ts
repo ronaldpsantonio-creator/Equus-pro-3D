@@ -70,8 +70,28 @@ export interface StructureRecord {
     fecha?: string;
     alcance?: string;
   };
-  relacion_conceptual?: Record<string, unknown>;
+  relacion_conceptual?: {
+    tipo?: string;
+    vinculada_a?: string;
+    tratamiento?: string;
+    [key: string]: unknown;
+  };
   _catalog?: SystemCode;
+}
+
+export function formatRevisionEstado(estado?: string): string {
+  switch (estado) {
+    case 'aprobada_y_verificada':
+      return 'Aprobada y verificada';
+    case 'verificada':
+      return 'Verificada';
+    case 'aprobada':
+      return 'Aprobada';
+    case 'redactada_pendiente_de_verificacion':
+      return 'Redactada · pendiente de verificación';
+    default:
+      return estado ? estado.replace(/_/g, ' ') : 'Pendiente de auditoría';
+  }
 }
 
 export interface LayerState {

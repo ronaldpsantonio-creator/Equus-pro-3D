@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { CheckCircle2, Eye, EyeOff, Search, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Eye, EyeOff, GitBranch, Search, ShieldCheck, Star } from 'lucide-react';
 import {
   ANATOMY_PLATES,
   FICHA_FIELDS,
+  formatRevisionEstado,
   getCatalogSystem,
   LAYERS,
   SexFilter,
@@ -13,6 +14,7 @@ import {
 interface CatalogAndFichaTabProps {
   structures: StructureRecord[];
   byId: Record<string, StructureRecord>;
+  byTraceabilityId: Record<string, StructureRecord>;
   selectedId: string | null;
   sex: SexFilter;
   blindMode: boolean;
@@ -35,6 +37,7 @@ type CatalogFilter = 'all' | '3d' | 'ficha' | 'fav';
 export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
   structures,
   byId,
+  byTraceabilityId,
   selectedId,
   sex,
   blindMode,
@@ -54,22 +57,24 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<CatalogFilter>('3d');
 
+  const trimmedQuery = query.trim().toLowerCase();
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     const out: StructureRecord[] = [];
     for (const s of structures) {
       if (s.sex && sex !== 'all' && s.sex !== sex) continue;
       if (filter === '3d' && !hasMeshFn(s.id)) continue;
       if (filter === 'ficha' && (!s.ficha || Object.keys(s.ficha).length === 0)) continue;
       if (filter === 'fav' && !favorites[s.id]) continue;
-      if (q) {
-        const hay = `${s.es} ${s.la} ${s.id}`.toLowerCase();
-        if (!hay.includes(q)) continue;
+      if (trimmedQuery) {
+        const traceHay = s.trazabilidad_ids ? s.trazabilidad_ids.join(' ') : '';
+        const hay = `${s.es} ${s.la} ${s.id} ${traceHay}`.toLowerCase();
+        if (!hay.includes(trimmedQuery)) continue;
       }
       out.push(s);
     }
     return out;
-  }, [structures, sex, filter, query, favorites, hasMeshFn]);
+  }, [structures, sex, filter, trimmedQuery, favorites, hasMeshFn]);
 
   const pinnedRibs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -97,7 +102,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar estructura (español, latín NAV o ID)…"
+            placeholder="Buscar (español, latín NAV, ID o ID histórico)…"
             className="w-full rounded-lg border border-slate-700/80 bg-slate-900/90 py-1.5 pr-3 pl-8 text-xs text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
           />
         </div>
@@ -169,6 +174,13 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
               const sysColor =
                 SYSTEMS.find((sy) => sy.code === getCatalogSystem(s))?.color || '#94a3b8';
 
+              const matchedTraceId =
+                trimmedQuery && s.trazabilidad_ids
+                  ? s.trazabilidad_ids.find(
+                      (tid) => tid !== s.id && tid.toLowerCase().includes(trimmedQuery),
+                    )
+                  : undefined;
+
               return (
                 <div
                   key={s.id}
@@ -194,7 +206,9 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                       >
                         {blindMode ? s.id : s.es}
                       </span>
-                      {verified[s.id] && (
+                      {(verified[s.id] ||
+                        s.revision?.estado === 'aprobada_y_verificada' ||
+                        s.revision?.estado === 'verificada') && (
                         <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-400" />
                       )}
                     </div>
@@ -206,6 +220,14 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                       <span className="font-mono text-[10px]">
                         {is3D ? getModelStateFn(s.id) : 'sin malla'}
                       </span>
+                      {matchedTraceId && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="font-mono text-[10px] text-amber-300">
+                            hist. {matchedTraceId}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -324,6 +346,101 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                   </div>
                 );
               })}
+            </div>
+
+            {/* Traceability, Audit & Conceptual Links (ProClaVet Standard) */}
+            <div className="rounded-lg border border-slate-800/90 bg-slate-900/50 p-3 text-xs space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-semibold text-slate-200">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Auditoría y trazabilidad ProClaVet</span>
+                </span>
+                <span
+                  className={`text-[11px] ${
+                    selected.revision?.estado === 'aprobada_y_verificada' ||
+                    selected.revision?.estado === 'verificada' ||
+                    selected.revision?.estado === 'aprobada'
+                      ? 'text-emerald-300'
+                      : 'text-amber-300/90'
+                  }`}
+                >
+                  {formatRevisionEstado(selected.revision?.estado)}
+                  {selected.revision?.fecha ? ` · ${selected.revision.fecha}` : ''}
+                </span>
+              </div>
+
+              {selected.revision?.alcance && (
+                <p className="text-[11px] leading-relaxed text-slate-400">
+                  {selected.revision.alcance}
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-[11px]">
+                {selected.lateralidad && (
+                  <div className="text-slate-300">
+                    <span className="text-slate-500">Lateralidad: </span>
+                    <span className="capitalize">{selected.lateralidad}</span>
+                  </div>
+                )}
+
+                {selected.trazabilidad_ids && selected.trazabilidad_ids.length > 0 && (
+                  <div className="text-slate-300 sm:col-span-2">
+                    <span className="inline-flex items-center gap-1 text-slate-500">
+                      <GitBranch className="h-3 w-3" />
+                      IDs de trazabilidad:{' '}
+                    </span>
+                    <span className="font-mono text-amber-300/90">
+                      {selected.trazabilidad_ids.join(', ')}
+                    </span>
+                  </div>
+                )}
+
+                {selected.historial_origen && (
+                  <div className="text-slate-400 sm:col-span-2">
+                    <span className="text-slate-500">Origen histórico: </span>
+                    {selected.historial_origen}
+                  </div>
+                )}
+
+                {selected.relacion_conceptual && (
+                  <div className="rounded border border-amber-500/30 bg-amber-950/20 p-2 sm:col-span-2 space-y-1">
+                    <div className="text-amber-200 font-medium">
+                      Relación conceptual:{' '}
+                      {String(selected.relacion_conceptual.tipo || '').replace(/_/g, ' ')}
+                    </div>
+                    {selected.relacion_conceptual.tratamiento && (
+                      <div className="text-slate-300">
+                        {selected.relacion_conceptual.tratamiento}
+                      </div>
+                    )}
+                    {selected.relacion_conceptual.vinculada_a && (() => {
+                      const linkedId = selected.relacion_conceptual.vinculada_a!;
+                      const linked = byId[linkedId] || byTraceabilityId[linkedId];
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const targetId = linked ? linked.id : linkedId;
+                            onSelect(targetId);
+                            if (hasMeshFn(targetId)) onFocus(targetId);
+                          }}
+                          className="inline-flex items-center gap-1 font-mono text-teal-300 hover:text-teal-200 underline-offset-2 hover:underline"
+                        >
+                          <span>
+                            Ir a{' '}
+                            {linked
+                              ? blindMode
+                                ? linked.id
+                                : `${linked.es} (${linked.id})`
+                              : linkedId}
+                          </span>
+                          <ArrowRight className="h-3 w-3" />
+                        </button>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 border-t border-slate-800 pt-3 sm:flex-row sm:items-start">

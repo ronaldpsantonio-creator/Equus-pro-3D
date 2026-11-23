@@ -56,6 +56,7 @@ export default function App() {
 
   const [structures, setStructures] = useState<StructureRecord[]>([]);
   const [byId, setById] = useState<Record<string, StructureRecord>>({});
+  const [byTraceabilityId, setByTraceabilityId] = useState<Record<string, StructureRecord>>({});
   const [report, setReport] = useState<InventoryReport | null>(null);
   const [mounted3DCount, setMounted3DCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -151,6 +152,7 @@ export default function App() {
         if (!active) return;
         setStructures(res.structures);
         setById(res.byId);
+        setByTraceabilityId(res.byTraceabilityId);
         setReport(res.report);
         const { mounted3DCount: count } = manager.populateCatalog(res.structures);
         setMounted3DCount(count);
@@ -368,8 +370,12 @@ export default function App() {
     [],
   );
 
-  const selectedStructure = selectedId ? byId[selectedId] || null : null;
-  const hoveredStructure = hoveredInfo.id ? byId[hoveredInfo.id] || null : null;
+  const selectedStructure = selectedId
+    ? byId[selectedId] || byTraceabilityId[selectedId] || null
+    : null;
+  const hoveredStructure = hoveredInfo.id
+    ? byId[hoveredInfo.id] || byTraceabilityId[hoveredInfo.id] || null
+    : null;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#0c1118] text-slate-100 select-none">
@@ -468,6 +474,7 @@ export default function App() {
         onSelectCameraPreset={handleSelectCameraPreset}
         structures={structures}
         byId={byId}
+        byTraceabilityId={byTraceabilityId}
         sex={sex}
         favorites={favorites}
         notes={notes}
@@ -475,7 +482,10 @@ export default function App() {
         hasMeshFn={hasMeshFn}
         getModelStateFn={getModelStateFn}
         isVisibleOverrideFn={isVisibleOverrideFn}
-        onSelectStructure={(id) => setSelectedId(id)}
+        onSelectStructure={(id) => {
+          const resolved = byId[id] || byTraceabilityId[id];
+          setSelectedId(resolved ? resolved.id : id);
+        }}
         onFocusStructure={(id) => sceneRef.current?.focusOnStructure(id)}
         onToggleFavorite={handleToggleFavorite}
         onToggleStructureVisible={(id) => {

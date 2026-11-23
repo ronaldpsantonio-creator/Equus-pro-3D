@@ -73,6 +73,7 @@ interface BottomDockProps {
   // Catalog & Ficha
   structures: StructureRecord[];
   byId: Record<string, StructureRecord>;
+  byTraceabilityId: Record<string, StructureRecord>;
   sex: SexFilter;
   favorites: Record<string, boolean>;
   notes: Record<string, string>;
@@ -128,6 +129,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     onSelectCameraPreset,
     structures,
     byId,
+    byTraceabilityId,
     sex,
     favorites,
     notes,
@@ -443,6 +445,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
               <CatalogAndFichaTab
                 structures={structures}
                 byId={byId}
+                byTraceabilityId={byTraceabilityId}
                 selectedId={selectedStructure?.id || null}
                 sex={sex}
                 blindMode={blindMode}

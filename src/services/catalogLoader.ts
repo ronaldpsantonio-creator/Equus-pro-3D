@@ -10,6 +10,7 @@ import {
 export interface CatalogLoadResult {
   structures: StructureRecord[];
   byId: Record<string, StructureRecord>;
+  byTraceabilityId: Record<string, StructureRecord>;
   report: InventoryReport;
 }
 
@@ -43,6 +44,7 @@ export async function loadProClaVetCatalog(): Promise<CatalogLoadResult> {
 
   const structures = parts.flat();
   const byId: Record<string, StructureRecord> = {};
+  const byTraceabilityId: Record<string, StructureRecord> = {};
   const selfTraceabilityIds: string[] = [];
   const uniquePrimary = new Set<string>();
 
@@ -56,6 +58,15 @@ export async function loadProClaVetCatalog(): Promise<CatalogLoadResult> {
     }
     uniquePrimary.add(s.id);
     byId[s.id] = s;
+    byTraceabilityId[s.id] = s;
+
+    if (s.trazabilidad_ids) {
+      for (const oldId of s.trazabilidad_ids) {
+        if (oldId && !byTraceabilityId[oldId]) {
+          byTraceabilityId[oldId] = s;
+        }
+      }
+    }
 
     const cat = s._catalog === 'art' ? 'art' : s.sys;
     if (cat in perSystemCount) perSystemCount[cat]++;
@@ -78,6 +89,7 @@ export async function loadProClaVetCatalog(): Promise<CatalogLoadResult> {
   return {
     structures,
     byId,
+    byTraceabilityId,
     report: {
       totalRecords: structures.length,
       uniquePrimaryIds: uniquePrimary.size,
