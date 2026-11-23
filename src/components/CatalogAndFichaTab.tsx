@@ -108,7 +108,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
               ['3d', 'Con malla 3D'],
               ['ficha', 'Con ficha'],
               ['fav', 'Favoritas'],
-              ['all', 'Todas (3.856)'],
+              ['all', `Todas (${structures.length.toLocaleString('es-ES')})`],
             ] as const
           ).map(([val, label]) => (
             <button

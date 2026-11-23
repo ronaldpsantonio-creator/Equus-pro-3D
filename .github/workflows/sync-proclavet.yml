@@ -1,0 +1,44 @@
+name: Sincronizar desde ProClaVet-core
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Ejecuta una comprobación diaria (06:00 UTC) para traer cambios de ProClaVet-core
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Equus-pro-3D
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sincronizar y validar catálogos desde ProClaVet-core
+        run: npm run sync:proclavet
+
+      - name: Verificar si hay cambios nuevos
+        id: diff
+        run: |
+          git status --porcelain
+          if [ -n "$(git status --porcelain public/ schemas/)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Guardar cambios sincronizados en main
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/sistemas public/assets/laminas schemas/estructura.schema.json
+          git commit -m "chore(data): sincronizar catálogos desde ProClaVet-core"
+          git push

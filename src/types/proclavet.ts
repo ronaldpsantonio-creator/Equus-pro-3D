@@ -64,11 +64,13 @@ export interface StructureRecord {
   ph?: PlaceholderSpec;
   ficha?: FichaData;
   trazabilidad_ids?: string[];
+  historial_origen?: string;
   revision?: {
     estado?: string;
     fecha?: string;
     alcance?: string;
   };
+  relacion_conceptual?: Record<string, unknown>;
   _catalog?: SystemCode;
 }
 

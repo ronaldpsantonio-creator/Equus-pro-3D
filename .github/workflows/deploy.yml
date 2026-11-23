@@ -26,6 +26,8 @@ jobs:
           node-version: 22
       - name: Instalar dependencias
         run: npm install --legacy-peer-deps
+      - name: Validar catálogos ProClaVet
+        run: npm run validate:catalog
       - name: Compilar aplicación Vite
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/

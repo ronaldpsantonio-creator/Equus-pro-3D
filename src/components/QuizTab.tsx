@@ -271,7 +271,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({
             <p className="text-xs leading-relaxed text-slate-300">
               {mode === 'visor'
                 ? 'Se resalta una estructura anatómica en el modelo 3D sin su nombre para que la identifiques entre cuatro opciones.'
-                : 'Practica la correspondencia entre nomenclatura en español y latín oficial (NAV) sobre las 3.856 estructuras del catálogo.'}
+                : `Practica la correspondencia entre nomenclatura en español y latín oficial (NAV) sobre las ${structures.length.toLocaleString('es-ES')} estructuras del catálogo.`}
             </p>
             <button
               type="button"
