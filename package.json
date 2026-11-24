@@ -11,6 +11,7 @@
     "lint": "tsc --noEmit",
     "validate:catalog": "node scripts/sync-proclavet.mjs --validate-only",
     "sync:proclavet": "node scripts/sync-proclavet.mjs",
+    "export:core": "node scripts/sync-proclavet.mjs --export-core",
     "models:index": "node scripts/index-models.mjs"
   },
   "dependencies": {
