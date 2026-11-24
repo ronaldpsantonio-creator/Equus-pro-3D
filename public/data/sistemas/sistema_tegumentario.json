@@ -23,7 +23,26 @@
       "es": "Piel",
       "la": "Cutis",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Revestimiento continuo de toda la superficie externa del cuerpo del caballo, uniéndose a las mucosas en los orificios naturales (ollares, boca, párpados, ano, vulva y prepucio) y continuándose distalmente con las estructuras córneas digitales (cascos, espejuelos y espolones).",
+        "descripcion": "El órgano más extenso y pesado del organismo equino (representa aprox. el 5–7 % del peso corporal), constituido por **epidermis** (epitelio plano estratificado queratinizado), **dermis o corion** (tejido conjuntivo denso rico en fibras elásticas, vasos, nervios y anexos: folículos pilosos, glándulas sebáceas y abundantes **glándulas sudoríparas apocrinas/epitrichiales**) e **hipodermis** (tejido subcutáneo adiposo-fascial donde se sitúa el músculo cutáneo del tronco).",
+        "relaciones": "Se desliza sobre la fascia superficial y el músculo cutáneo del tronco en cuello y flancos; está firmemente adherida sobre el puente nasal, cresta facial, regiones articulares distales y el limbo coronario del casco.",
+        "accidentes": "Presenta pliegues cutáneos cervicales y del flanco (pliegue de la babilla), remolinos pilosos (espiras), líneas de tensión cutánea, los **espejuelos (castañas)** en la cara medial de antebrazos y tarsos y los **espolones** en la cara palmar/plantar del menudillo.",
+        "articulaciones": "No forma articulación sinovial directa; recubre de manera elástica todas las articulaciones permitiendo su rango completo de flexión y extensión.",
+        "inserciones": "En la dermis e hipodermis del tronco, cuello y región omobraquial se insertan las finas láminas del **músculo cutáneo del tronco** y el músculo cutáneo del cuello/cara (responsables de sacudir la piel frente a insectos).",
+        "irrigacion": "Extenso plexo vascular cutáneo (plexos dérmico profundo, medio y subepidérmico) alimentado por ramas perforantes de las arterias segmentarias torácicas, abdominales, cervicales y digitales.",
+        "inervacion": "Ramas cutáneas sensitivas de todos los nervios espinales y del nervio trigémino (NC V), más inervación simpática vasomotora, pilomotora y sudomotora (característicamente mediada por receptores beta-2 adrenérgicos en los équidos).",
+        "funcion": "Protege mecánicamente, químicamente y frente a patógenos y radiación UV; constituye el **órgano termorregulador evaporativo primordial del caballo atleta** mediante sudoración profusa rica en proteína latherina, además de órgano sensorial táctil/térmico y síntesis de vitamina D.",
+        "especie": "Rasgo fisiológico sobresaliente en *Equus caballus*: la piel equina posee la mayor densidad y capacidad secretora de **glándulas sudoríparas epitrichiales** entre todos los mamíferos domésticos, produciendo sudor rico en electrolitos y proteína espumante (**latherina**) que facilita su dispersión evaporativa por el pelaje.",
+        "clinica": "En la clínica equina refleja alteraciones sistémicas (deshidratación por pérdida del pliegue cutáneo, urticaria alérgica, **hipersensibilidad a picadura de *Culicoides*** / dermatitis estival recidivante, **melanomas en caballos tordos**, **sarcoide equino** viral/papilomavirus, dermatofilosis o «lluvia escaldada», anhidrosis en climas cálidos-húmedos y parches de sudoración segmentaria neuropática).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.pie.002",
@@ -602,14 +621,52 @@
       "es": "Crin",
       "la": "Juba",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Borde dorsal de la línea media del cuello, extendiéndose continuamente desde la nuca (entre las orejas, donde forma el copete craneal) hasta el borde craneal de la cruz.",
+        "descripcion": "Conjunto denso de **pelos largos, gruesos y resistentes (cerdas o crines)** desprovistos de glándulas sudoríparas asociadas en su inserción superficial pero implantados profundamente en grandes folículos pilosos dérmicos (hasta la hipodermis de la cresta nucal), acompañados de voluminosas glándulas sebáceas.",
+        "relaciones": "Emergen sobre la gruesa almohadilla fibroadiposa de la cresta del cuello (borde dorsal del ligamento nucal), continuándose rostralmente con el **copete** (*cirrus capitis*) sobre la frente y caudalmente con el pelaje corto dorsal de la cruz.",
+        "accidentes": "Forma una banda longitudinal mediana de pelos largos que caen normalmente hacia un lado del cuello (generalmente derecho o izquierdo, o erguidos en équidos salvajes/Przewalski).",
+        "articulaciones": "No forma articulación sinovial directa; recubre dorsalmente la columna cervical y el ligamento nucal.",
+        "inserciones": "Los folículos pilosos se anclan profundamente en la dermis e hipodermis dorsal del cuello, carentes de ciclo estacional de muda sincronizado (crecimiento casi continuo).",
+        "irrigacion": "Ramas cutáneas dorsales de la arteria cervical profunda y arteria occipital en la nuca.",
+        "inervacion": "Ramas cutáneas dorsales de los nervios cervicales C1–C8 (sensibilidad táctil folicular en la base y fibras simpáticas pilomotoras).",
+        "funcion": "Protege la región cervical dorsal, la nuca y la frente (copete) frente a insectos voladores, lluvia intensa, radiación solar y agresiones por mordeduras entre congéneres.",
+        "especie": "En *Equus caballus* las cerdas de la crin son pelos permanentes de crecimiento continuo (junto con los de la cola y cernejas), muy gruesos y elásticos, con variaciones raciales extremas (muy finos y largos en Pura Raza Española/Frisón o cortos y ralos en algunas razas de tiro o Appaloosa).",
+        "clinica": "Punto blanco clásico de **dermatitis estival recidivante (alergia a *Culicoides*)** con intenso prurito y rotura/alopecia de crines («cuello de rata»), seborrea nucal, tiña, pediculosis (*Werneckiella equi*) y alopecia por **intoxicación por selenio** (deformación de cascos y caída de crin y cola).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.pel.012",
       "es": "Crin de la cola",
       "la": "Pili caudae",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Superficie dorsal, lateral y extremo distal del maslo de la cola (sobre las vértebras caudales Cd1–Cd18/21), cubriendo toda la región coccígea excepto la cara ventral glabra del maslo proximal.",
+        "descripcion": "Conjunto abundante de **pelos largos, muy gruesos y rígidos (cerdas caudales)** de crecimiento continuo implantados en folículos pilosos profundos y densos de la piel del maslo de la cola.",
+        "relaciones": "Se continúa cranealmente con el pelaje corto de la grupa en la raíz de la cola y deja libre la cara ventral de la base caudal (piel fina y casi lampiña en contacto con el ano y periné/vulva).",
+        "accidentes": "Presenta el penacho grueso de cerdas caudales cuyo largo suele alcanzar desde el corvejón hasta cerca de los menudillos en caballos no recortados.",
+        "articulaciones": "No forma articulación sinovial directa; recubre las articulaciones intervertebrales caudales y su musculatura.",
+        "inserciones": "Folículos pilosos profundos anclados en la dermis fibrosa firmemente adherida a la fascia coccígea del maslo de la cola.",
+        "irrigacion": "Ramas cutáneas segmentarias de las arterias caudales dorsolaterales y arteria caudal mediana.",
+        "inervacion": "Ramos cutáneos de los nervios caudales Cd1–Cd5 (plexos dorsal y ventral de la cola).",
+        "funcion": "Actúa como un **espantamoscas mecánico de gran alcance** mediante el balanceo muscular de la cola para ahuyentar dípteros hematófagos de la grupa, flancos y región perineal, protegiendo además el periné y ubre/prepucio.",
+        "especie": "Al igual que la crin, las cerdas de la cola en *Equus caballus* no mudan estacionalmente y constituyen un rasgo zootécnico distintivo; las yeguas en celo o caballos con dolor cólico/cauda equina modifican activamente el porte o movimiento de la cola.",
+        "clinica": "Sede frecuente de **prurito caudal intenso con alopecia en «cola de rata»** por infección por ***Oxyuris equi*** (oxiuros equinos cuyos huevos irritan el margen anal) o alergia a *Culicoides*; también afectada por **toxicosis crónica por selenio** (pérdida de cerdas caudales), **polineuritis equi** (parálisis flácida de la cola manchada de heces) y **melanomas** perianales/subcaudales en caballos tordos.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.pel.013-i",
@@ -980,14 +1037,52 @@
       "es": "Casco (izquierdo)",
       "la": "Ungula",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Extremo distal del miembro torácico izquierdo, encapsulando completamente la falange distal (tejuelo), el hueso sesamoideo distal (navicular), los cartílagos ungulares y la articulación interfalángica distal.",
+        "descripcion": "Cápsula córnea especializada y altamente queratinizada (estuche córneo epidérmico) unida íntimamente a la dermis (corion) ungular subyacente y al cojinete digital en el lado izquierdo, integrada por tres regiones anatómicas continuas: muralla (pinza, hombros, cuartas partes y talones con barras reflejas), suela cóncava y ranilla cuneiforme con el surco paracuneal y central.",
+        "relaciones": "Se continúa proximalmente con la piel del rodete coronario y cuartilla mediante el limbo (perioplo); internamente engrana mediante ~550–600 láminas epidérmicas primarias (con sus láminas secundarias) con las láminas dérmicas del corion parietal adheridas al periostio de la falange distal, independiente del casco contralateral derecho.",
+        "accidentes": "Muestra el borde coronario, la pared o muralla dorsal y abaxial, las barras, los ángulos de los talones, la línea blanca (zona alba, unión entre muralla y suela), el cuerpo y vértice de la ranilla y los bulbos de los talones.",
+        "articulaciones": "Envuelve y protege funcionalmente la articulación interfalángica distal (articulación del casco) y la bolsa podotroclear (navicular).",
+        "inserciones": "Actúa como aparato suspensorio del hueso tejuelo mediante el engranaje laminar dermoepidérmico que transmite el peso del caballo desde la falange distal hacia la muralla córnea.",
+        "irrigacion": "Arterias digitales palmares/plantares propias lateral y medial (arco terminal y plexos coronario, laminar, solar y de la ranilla).",
+        "inervacion": "Nervios digitales palmares/plantares propio lateral y medial y sus ramas dorsales (proporcionando sensibilidad propioceptiva y nociceptiva intensa al corion y cápsula).",
+        "funcion": "Soporta la totalidad del peso corporal en estación y locomoción, absorbe y disipa las fuerzas de impacto mediante la expansión elástica de los talones y cojinete digital (mecanismo de bomba hemodinámica del pie), proporciona tracción y protege las estructuras óseas y tendinosas distales.",
+        "especie": "En *Equus caballus* el casco del **miembro torácico** (mano) tiene contorno plantar más **redondeado y simétrico**, suela menos cóncava y ángulo dorsal de la muralla en pinza más inclinado (~45°–50°), soportando aproximadamente el 60 % del peso corporal en estación.",
+        "clinica": "El casco equino concentra la mayor proporción de claudicaciones clínicas: **laminitis (infosura)** con pérdida de soporte laminar y rotación/hundimiento de la falange distal, abscesos subsolares, síndrome podotroclear (enfermedad navicular), cuartos/razas en la muralla, hormiguillo y pododermatitis séptica de la ranilla (gabarro/afta).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.cmt.001-d",
       "es": "Casco (derecho)",
       "la": "Ungula",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Extremo distal del miembro torácico derecho, encapsulando completamente la falange distal (tejuelo), el hueso sesamoideo distal (navicular), los cartílagos ungulares y la articulación interfalángica distal.",
+        "descripcion": "Cápsula córnea especializada y altamente queratinizada (estuche córneo epidérmico) unida íntimamente a la dermis (corion) ungular subyacente y al cojinete digital en el lado derecho, integrada por tres regiones anatómicas continuas: muralla (pinza, hombros, cuartas partes y talones con barras reflejas), suela cóncava y ranilla cuneiforme con el surco paracuneal y central.",
+        "relaciones": "Se continúa proximalmente con la piel del rodete coronario y cuartilla mediante el limbo (perioplo); internamente engrana mediante ~550–600 láminas epidérmicas primarias (con sus láminas secundarias) con las láminas dérmicas del corion parietal adheridas al periostio de la falange distal, independiente del casco contralateral izquierdo.",
+        "accidentes": "Muestra el borde coronario, la pared o muralla dorsal y abaxial, las barras, los ángulos de los talones, la línea blanca (zona alba, unión entre muralla y suela), el cuerpo y vértice de la ranilla y los bulbos de los talones.",
+        "articulaciones": "Envuelve y protege funcionalmente la articulación interfalángica distal (articulación del casco) y la bolsa podotroclear (navicular).",
+        "inserciones": "Actúa como aparato suspensorio del hueso tejuelo mediante el engranaje laminar dermoepidérmico que transmite el peso del caballo desde la falange distal hacia la muralla córnea.",
+        "irrigacion": "Arterias digitales palmares/plantares propias lateral y medial (arco terminal y plexos coronario, laminar, solar y de la ranilla).",
+        "inervacion": "Nervios digitales palmares/plantares propio lateral y medial y sus ramas dorsales (proporcionando sensibilidad propioceptiva y nociceptiva intensa al corion y cápsula).",
+        "funcion": "Soporta la totalidad del peso corporal en estación y locomoción, absorbe y disipa las fuerzas de impacto mediante la expansión elástica de los talones y cojinete digital (mecanismo de bomba hemodinámica del pie), proporciona tracción y protege las estructuras óseas y tendinosas distales.",
+        "especie": "En *Equus caballus* el casco del **miembro torácico** (mano) tiene contorno plantar más **redondeado y simétrico**, suela menos cóncava y ángulo dorsal de la muralla en pinza más inclinado (~45°–50°), soportando aproximadamente el 60 % del peso corporal en estación.",
+        "clinica": "El casco equino concentra la mayor proporción de claudicaciones clínicas: **laminitis (infosura)** con pérdida de soporte laminar y rotación/hundimiento de la falange distal, abscesos subsolares, síndrome podotroclear (enfermedad navicular), cuartos/razas en la muralla, hormiguillo y pododermatitis séptica de la ranilla (gabarro/afta).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.cmt.002-i",
@@ -2762,14 +2857,52 @@
       "es": "Casco (izquierdo)",
       "la": "Ungula",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Extremo distal del miembro pélvico izquierdo, encapsulando completamente la falange distal (tejuelo), el hueso sesamoideo distal (navicular), los cartílagos ungulares y la articulación interfalángica distal.",
+        "descripcion": "Cápsula córnea especializada y altamente queratinizada (estuche córneo epidérmico) unida íntimamente a la dermis (corion) ungular subyacente y al cojinete digital en el lado izquierdo, integrada por tres regiones anatómicas continuas: muralla (pinza, hombros, cuartas partes y talones con barras reflejas), suela cóncava y ranilla cuneiforme con el surco paracuneal y central.",
+        "relaciones": "Se continúa proximalmente con la piel del rodete coronario y cuartilla mediante el limbo (perioplo); internamente engrana mediante ~550–600 láminas epidérmicas primarias (con sus láminas secundarias) con las láminas dérmicas del corion parietal adheridas al periostio de la falange distal, independiente del casco contralateral derecho.",
+        "accidentes": "Muestra el borde coronario, la pared o muralla dorsal y abaxial, las barras, los ángulos de los talones, la línea blanca (zona alba, unión entre muralla y suela), el cuerpo y vértice de la ranilla y los bulbos de los talones.",
+        "articulaciones": "Envuelve y protege funcionalmente la articulación interfalángica distal (articulación del casco) y la bolsa podotroclear (navicular).",
+        "inserciones": "Actúa como aparato suspensorio del hueso tejuelo mediante el engranaje laminar dermoepidérmico que transmite el peso del caballo desde la falange distal hacia la muralla córnea.",
+        "irrigacion": "Arterias digitales palmares/plantares propias lateral y medial (arco terminal y plexos coronario, laminar, solar y de la ranilla).",
+        "inervacion": "Nervios digitales palmares/plantares propio lateral y medial y sus ramas dorsales (proporcionando sensibilidad propioceptiva y nociceptiva intensa al corion y cápsula).",
+        "funcion": "Soporta la totalidad del peso corporal en estación y locomoción, absorbe y disipa las fuerzas de impacto mediante la expansión elástica de los talones y cojinete digital (mecanismo de bomba hemodinámica del pie), proporciona tracción y protege las estructuras óseas y tendinosas distales.",
+        "especie": "En *Equus caballus* el casco del **miembro pélvico** (pie) es más **estrecho, alargado y puntiagudo en la pinza**, presenta una suela más cóncava y un ángulo dorsal en pinza ligeramente más vertical (~50°–55°), especializado en la impulsión propulsiva.",
+        "clinica": "El casco equino concentra la mayor proporción de claudicaciones clínicas: **laminitis (infosura)** con pérdida de soporte laminar y rotación/hundimiento de la falange distal, abscesos subsolares, síndrome podotroclear (enfermedad navicular), cuartos/razas en la muralla, hormiguillo y pododermatitis séptica de la ranilla (gabarro/afta).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.cmp.001-d",
       "es": "Casco (derecho)",
       "la": "Ungula",
       "sys": "teg",
-      "layer": "pel"
+      "layer": "pel",
+      "ficha": {
+        "ubicacion": "Extremo distal del miembro pélvico derecho, encapsulando completamente la falange distal (tejuelo), el hueso sesamoideo distal (navicular), los cartílagos ungulares y la articulación interfalángica distal.",
+        "descripcion": "Cápsula córnea especializada y altamente queratinizada (estuche córneo epidérmico) unida íntimamente a la dermis (corion) ungular subyacente y al cojinete digital en el lado derecho, integrada por tres regiones anatómicas continuas: muralla (pinza, hombros, cuartas partes y talones con barras reflejas), suela cóncava y ranilla cuneiforme con el surco paracuneal y central.",
+        "relaciones": "Se continúa proximalmente con la piel del rodete coronario y cuartilla mediante el limbo (perioplo); internamente engrana mediante ~550–600 láminas epidérmicas primarias (con sus láminas secundarias) con las láminas dérmicas del corion parietal adheridas al periostio de la falange distal, independiente del casco contralateral izquierdo.",
+        "accidentes": "Muestra el borde coronario, la pared o muralla dorsal y abaxial, las barras, los ángulos de los talones, la línea blanca (zona alba, unión entre muralla y suela), el cuerpo y vértice de la ranilla y los bulbos de los talones.",
+        "articulaciones": "Envuelve y protege funcionalmente la articulación interfalángica distal (articulación del casco) y la bolsa podotroclear (navicular).",
+        "inserciones": "Actúa como aparato suspensorio del hueso tejuelo mediante el engranaje laminar dermoepidérmico que transmite el peso del caballo desde la falange distal hacia la muralla córnea.",
+        "irrigacion": "Arterias digitales palmares/plantares propias lateral y medial (arco terminal y plexos coronario, laminar, solar y de la ranilla).",
+        "inervacion": "Nervios digitales palmares/plantares propio lateral y medial y sus ramas dorsales (proporcionando sensibilidad propioceptiva y nociceptiva intensa al corion y cápsula).",
+        "funcion": "Soporta la totalidad del peso corporal en estación y locomoción, absorbe y disipa las fuerzas de impacto mediante la expansión elástica de los talones y cojinete digital (mecanismo de bomba hemodinámica del pie), proporciona tracción y protege las estructuras óseas y tendinosas distales.",
+        "especie": "En *Equus caballus* el casco del **miembro pélvico** (pie) es más **estrecho, alargado y puntiagudo en la pinza**, presenta una suela más cóncava y un ángulo dorsal en pinza ligeramente más vertical (~50°–55°), especializado en la impulsión propulsiva.",
+        "clinica": "El casco equino concentra la mayor proporción de claudicaciones clínicas: **laminitis (infosura)** con pérdida de soporte laminar y rotación/hundimiento de la falange distal, abscesos subsolares, síndrome podotroclear (enfermedad navicular), cuartos/razas en la muralla, hormiguillo y pododermatitis séptica de la ranilla (gabarro/afta).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.teg.cmp.002-i",

@@ -262,7 +262,26 @@
       "es": "Glándula tiroides",
       "la": "Glandula thyroidea",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Región cervical craneal ventral, aplicada a las caras dorsolaterales de los primeros 2 a 4 (o hasta el 6.º) anillos traqueales, inmediatamente caudal a la laringe y medial a las arterias carótidas comunes.",
+        "descripcion": "Glándula endocrina bilobulada impar de color pardo-rojizo firme formada por dos lóbulos laterales ovoides (de ~4–5 cm de largo × 2,5 cm de ancho) unidos ventralmente a través del primer o segundo anillo traqueal por un **istmo fibroso delgado** (frecuentemente atrófico o carente de tejido glandular en el caballo adulto).",
+        "relaciones": "Cubierta lateralmente por los músculos esternohioideos, esternotiroideos y omohioideos y la glándula parótida caudalmente; en íntima vecindad medial con la tráquea y el esófago (a la izquierda), dorsolateralmente con la arteria carótida común y el tronco vagosimpático, y asociada íntimamente en sus polos con las glándulas paratiroides craneales (externas) y caudales (internas).",
+        "accidentes": "Presenta un polo craneal redondeado junto al cartílago cricoides, un polo caudal en contacto con el 4.º–6.º anillo traqueal, cápsula fibrosa propia con tabiques lobulillares foliculares y un istmo fibroso ventral muy fino o ausente en caballos viejos.",
+        "articulaciones": "No forma articulación sinovial directa; se mantiene fija por la fascia pretraqueal y pedículos vasculares contra la pared craneal de la tráquea.",
+        "inserciones": "Carece de inserciones musculares esqueléticas directas; sus lóbulos quedan suspendidos por ligamentos suspensorios fasciales hacia la laringe y tráquea.",
+        "irrigacion": "Abundante irrigación por la **arteria tiroidea craneal** (rama mayor constante de la arteria carótida común) y pequeña arteria tiroidea caudal inconstante; drenaje venoso por la vena tiroidea craneal hacia la vena yugular externa/lingüofacial.",
+        "inervacion": "Fibras simpáticas posganglionares vasomotoras del **ganglio cervical craneal** (vía plexo periarterial) y fibras parasimpáticas de ramas del **nervio vago** (nervios laríngeos craneal y recurrente).",
+        "funcion": "Sintetiza, almacena en el coloide folicular y secreta las hormonas tiroideas **tiroxina (T4)** y **triyodotironina (T3)** (reguladoras de la tasa metabólica basal, crecimiento y termogénesis), además de **calcitonina** en sus células parafoliculares C.",
+        "especie": "Particularidad clínica en *Equus caballus*: en el caballo adulto sano ambos lóbulos tiroideos son fácilmente palpables a los lados de los primeros anillos traqueales; con la edad (especialmente en caballos mayores de 15 años) son sumamente frecuentes los **adenomas tiroideos benignos** nodulares no funcionales.",
+        "clinica": "Palpable bilateralmente en el examen físico rutinario bajo la garganta: una hipertrofia unilateral o bilateral en caballos adultos suele corresponder a **adenoma folicular benigno** (eutiroideo); el hipotiroidismo primario verdadero es rarísimo en caballos adultos, mientras que en potros recién nacidos la deficiencia o exceso de yodo materno causa **bocio congénito** y síndrome de dismadurez musculoesquelética.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.tir.002",
@@ -503,14 +522,52 @@
       "es": "Glándula suprarrenal (izquierda)",
       "la": "Glandula suprarenalis",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Espacio retroperitoneal craneal dorsal izquierdo, situada medialmente al polo craneal del **riñón izquierdo** (al que está firmemente adosada) a nivel de la 17.ª–18.ª vértebra torácica hasta la 1.ª lumbar, lateralmente a la aorta abdominal.",
+        "descripcion": "Glándula endocrina par elongada y aplanada dorsoventralmente (más larga, delgada y plana que la derecha en el caballo, ~7–9 cm de longitud), constituida por una corteza periférica amarillenta-anaranjada de origen mesodérmico (zonas glomerulosa, fasciculada y reticular) y una médula central pardo-rojiza neuroectodérmica.",
+        "relaciones": "Medial a la superficie medial/craneal del riñón izquierdo (separada apenas por fascia y grasa perirrenal), lateral a la aorta abdominal y al pilar izquierdo del diafragma, dorsal al páncreas izquierdo y estómago/bazo, y ventralmente en contacto directo con el **ganglio celíaco izquierdo** y el plexo solar.",
+        "accidentes": "Presenta borde medial cóncavo o recto hacia la aorta, borde lateral en contacto renal, hilio ventral para la emergencia de la vena adrenal izquierda y un surco vascular superficial.",
+        "articulaciones": "No forma articulación sinovial directa; integrada en el compartimento retroperitoneal sublumbar izquierdo.",
+        "inserciones": "Carece de inserciones musculares esqueléticas; sostenida por la fascia renal retroperitoneal y pedículos vasculonerviosos.",
+        "irrigacion": "Múltiples pequeñas arterias adrenales craneales, medias y caudales procedentes de la arteria frénica caudal, aorta abdominal y arteria renal izquierda; drenaje venoso por la vena adrenal izquierda hacia la vena renal izquierda o directamente a la vena cava caudal.",
+        "inervacion": "Inervación preganglionar simpática directa y masiva desde los **nervios esplácnicos mayor y menor izquierdos** (atravesando el ganglio celíaco sin sinapsis hacia las células cromafines medulares) más fibras posganglionares vasomotoras.",
+        "funcion": "La corteza secreta mineralocorticoides (aldosterona), glucocorticoides (cortisol) y andrógenos suprarrenales esenciales para el equilibrio hidroelectrolítico y respuesta al estrés; la médula actúa como ganglio simpático modificado liberando **adrenalina y noradrenalina** directamente al torrente sanguíneo.",
+        "especie": "En *Equus caballus* la glándula suprarrenal izquierda es característica por su forma alargada en cinta o lengua estrecha y su posición ligeramente más caudal que la derecha (a nivel de T18–L1), siguiendo la asimetría renal equina.",
+        "clinica": "Sufre hiperplasia cortical difusa en caballos con **disfunción de la pars intermedia pituitaria (PPID/Cushing equino)** por exceso de ACTH crónica, o hemorragia/necrosis cortical aguda en potros neonatos con **sepsis endotoxémica** e insuficiencia adrenal relativa del enfermo crítico (CIRCI).",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.sup.001-d",
       "es": "Glándula suprarrenal (derecha)",
       "la": "Glandula suprarenalis",
       "sys": "end",
-      "layer": "org"
+      "layer": "org",
+      "ficha": {
+        "ubicacion": "Espacio retroperitoneal craneal dorsal derecho, ubicada más cranealmente que la izquierda (nivel de las costillas 16.ª–17.ª) entre el polo craneal medial del **riñón derecho** y la cara lateral de la **vena cava caudal**.",
+        "descripcion": "Glándula endocrina par más corta, gruesa y ligeramente piramidal/semilunar en comparación con la izquierda (~6–8 cm de longitud), integrada por una corteza externa esteroidogénica amarillenta y una médula interna pardo-oscura productora de catecolaminas.",
+        "relaciones": "Firmemente adherida medialmente a la pared de la **vena cava caudal**, craneodorsalmente en relación con el lóbulo derecho e impresión renal del hígado y el pilar derecho del diafragma, lateralmente con el borde medial del riñón derecho, y medialmente con el ganglio celíaco-mesentérico derecho.",
+        "accidentes": "Forma triangular o en coma aplanada con cara dorsal aplicada al pilar diafragmático, borde medial moldeado sobre la vena cava caudal y una vena adrenal derecha muy corta que desemboca directamente en la cava.",
+        "articulaciones": "No forma articulación sinovial directa; alojada en el espacio retroperitoneal sublumbar derecho.",
+        "inserciones": "Sin inserciones musculares esqueléticas directas; mantenida por el tejido conectivo retroperitoneal perirrenal y su adherencia vascular a la vena cava caudal.",
+        "irrigacion": "Arterias adrenales craneales, medias y caudales derivadas de la aorta abdominal, arteria frénica caudal derecha y arteria renal derecha; drenaje venoso directo y muy corto hacia la **vena cava caudal**.",
+        "inervacion": "Fibras simpáticas preganglionares colinérgicas procedentes de los **nervios esplácnicos mayor y menor derechos** directamente sobre las células cromafines de la médula suprarrenal.",
+        "funcion": "Regula la homeostasis hidromineral (aldosterona), el metabolismo energético y la respuesta inmuno-metabólica al estrés (cortisol), además de liberar catecolaminas (adrenalina/noradrenalina) ante ejercicio máximo, dolor agudo o hipovolemia.",
+        "especie": "En el caballo la glándula suprarrenal derecha se ubica a la altura de T16–T17 (más craneal que la izquierda) y su cápsula está estrechamente adherida a la túnica externa de la vena cava caudal.",
+        "clinica": "Evaluada en necropsia de potros sépticos (hemorragia/necrosis adrenal por síndrome de Waterhouse-Friderichsen equino) y en caballos con PPID avanzado (hiperplasia cortical bilateral) o feocromocitomas medulares raros en caballos geriátricos con cólico o taquicardia refractaria.",
+        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
+      },
+      "revision": {
+        "estado": "redactada_pendiente_de_verificacion",
+        "fecha": "2026-11-24",
+        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
+      }
     },
     {
       "id": "equ.end.sup.002-i",
