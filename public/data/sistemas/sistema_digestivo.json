@@ -171,52 +171,14 @@
       "es": "Esófago, porción cervical",
       "la": "Oesophagus, pars cervicalis",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Región cervical, extendiéndose desde el vestíbulo esofágico dorsal a la laringe (C1–C2) hasta la apertura torácica craneal.",
-        "descripcion": "Conducto musculomembranoso colapsable en reposo (~70 cm en cuello), compuesto en el caballo por músculo estriado en su túnica muscular cervical y revestido de epitelio escamoso estratificado queratinizado o paraqueratinizado.",
-        "relaciones": "En el tercio craneal del cuello se ubica dorsal a la tráquea; en el tercio medio e inferior se desvía progresivamente hacia la izquierda de la tráquea, quedando entre esta, la vaina carotídea izquierda y el músculo largo del cuello.",
-        "accidentes": "Constitución tubular con túnica mucosa en pliegues longitudinales y submucosa laxa; sin esfínter anatómico distal en esta porción.",
-        "articulaciones": "Discurre ventralmente a los cuerpos vertebrales cervicales (C2–C7/T1).",
-        "inserciones": "Origen craneal en el músculo cricofaríngeo y cartílagos aritenoides/cricoides vía tendón cricoesofágico.",
-        "irrigacion": "Ramas esofágicas de las arterias carótidas comunes y tronco broncoesofágico distalmente.",
-        "inervacion": "Ramos esofágicos del nervio vago (X) y nervios laríngeos recurrentes; fibras autónomas del plexo mientérico.",
-        "funcion": "Conduce el bolo alimenticio masticado y la saliva/agua desde la faringe hasta el esófago torácico mediante ondas peristálticas.",
-        "especie": "Su desviación hacia el lado izquierdo en los tercios medio y caudal del cuello es un punto de referencia clásico tanto para observar el paso de la sonda nasogástrica como para los abordajes quirúrgicos de esofagotomía.",
-        "clinica": "La obstrucción esofágica («atragantamiento» por pulpa de remolacha seca o pellets sin masticar) ocurre con frecuencia en el cuello o en la entrada torácica, manifestándose con ptialismo nasal bilateral con restos alimenticios y riesgo de neumonía por aspiración.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.eso.002",
       "es": "Esófago, porción torácica",
       "la": "Oesophagus, pars thoracica",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Mediastino craneal, medio y caudal de la cavidad torácica, desde la entrada del tórax hasta el hiato esofágico del diafragma (nivel de T14–T15 aprox.), continuándose brevemente hasta el cardias gástrico.",
-        "descripcion": "Segmento intratorácico del esófago (~55–65 cm), donde la musculatura estriada transiciona progresivamente a músculo liso en el tercio distal (aproximadamente en los últimos 20–30 cm antes del cardias).",
-        "relaciones": "En mediastino craneal cruza dorsalmente de izquierda a línea media dorsal sobre la tráquea; pasa a la derecha del arco aórtico en la base del corazón; en mediastino caudal discurre entre los pulmones acompañado por los troncos vagales dorsal y ventral.",
-        "accidentes": "Estrechamiento fisiológico en la apertura torácica craneal, cruce aórtico/base cardíaca y paso por el hiato esofágico.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Rodeado por tejido conectivo mediastínico y fijado laxamente en el hiato esofágico del pilar derecho del diafragma.",
-        "irrigacion": "Rama esofágica de la arteria broncoesofágica (de la aorta torácica) y rama ascendente de la arteria gástrica izquierda.",
-        "inervacion": "Troncos vagales dorsal y ventral (parasimpático) y fibras simpáticas mediastínicas.",
-        "funcion": "Transporta el alimento hasta el cardias gástrico evitando el reflujo mediante el tono del esfínter esofágico inferior.",
-        "especie": "En el equino la transición a musculatura lisa se produce hacia el cuarto caudal torácico y el engrosamiento muscular del cardias junto con la entrada oblicua impiden fisiológicamente el vómito.",
-        "clinica": "Sitio frecuente de obstrucción en el paso por la base cardíaca o hiato esofágico; el megaesófago o la estenosis por cuerpo extraño/úlcera distal requieren endoscopia de larga longitud (gastroscopio de 2,5–3 m).",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.eso.003",
@@ -230,26 +192,7 @@
       "es": "Estómago",
       "la": "Gaster",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Porción dorsal izquierda de la cavidad abdominal craneal, caudal al hígado y al diafragma y craneal al bazo y al riñón izquierdo, sin contactar en condiciones normales con la pared abdominal ventral ni izquierda.",
-        "descripcion": "Estómago simple relativamente pequeño (capacidad de 8–15 litros en un caballo adulto de 500 kg), fuertemente incurvado en forma de «J», con una transición mucocutánea marcada entre mucosa aglandular (esofágica) y glandular.",
-        "relaciones": "Cara parietal con el hígado y el diafragma; cara visceral con el páncreas, asas de yeyuno y colon dorsal izquierdo; curvatura mayor unida al bazo (ligamento gastroesplénico) y omento mayor; curvatura menor con el ligamento hepatogástrico.",
-        "accidentes": "Cardias (entrada oblicua con fuerte asa muscular), saco ciego (saccus caecus ventriculi) aglandular dorsal, borde plegado (margo plicatus) que separa la región aglandular blanca de la mucosa glandular rojo-parda, cuerpo, antro pilórico y píloro a la derecha del plano mediano.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Omento menor (hepatogástrico), ligamento gastrofrénico, ligamento gastroesplénico y omento mayor.",
-        "irrigacion": "Ramas del tronco celíaco: arterias gástrica izquierda, hepática (gástrica derecha y gastroepiploica derecha) y esplénica (gástrica corta y gastroepiploica izquierda). Drenaje portal.",
-        "inervacion": "Troncos vagales dorsal y ventral (parasimpático secretomotor/motilidad) y plexo celíaco simpático.",
-        "funcion": "Almacenamiento breve, inicio de fermentación láctica en la porción aglandular, secreción continua de ácido clorhídrico y pepsinógeno en la región glandular y vaciamiento rápido hacia el duodeno.",
-        "especie": "Su capacidad reducida está adaptada al pastoreo continuo; el ángulo agudo cardial, el asa de fibras oblicuas y la presión del saco ciego hacen imposible el vómito en el caballo, de modo que la sobrecarga o el reflujo enterogástrico pueden provocar rotura gástrica fatal.",
-        "clinica": "El síndrome de úlcera gástrica equina (EGUS) afecta de manera característica al margo plicatus y la mucosa escamosa (ESGD) por exposición ácida, así como a la mucosa glandular pilórica (EGGD). El sondaje nasogástrico de descompresión es maniobra vital en el cólico agudo.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.est.002",
@@ -298,26 +241,7 @@
       "es": "Yeyuno",
       "la": "Jejunum",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Cuadrante abdominal dorsal e izquierdo en gran parte de sus asas móviles, suspendido desde la raíz del mesenterio craneal bajo L1–L2.",
-        "descripcion": "Porción intermedia y más larga del intestino delgado equino (~18–25 m de longitud total del intestino delgado, correspondiendo unos 17–22 m al yeyuno), de pared lisa y dispuesto en numerosas asas flexibles.",
-        "relaciones": "Sus asas se entremezclan con el colon menor en el flanco izquierdo y región dorsal del abdomen, desplazándose con facilidad sobre las flexuras del colon mayor.",
-        "accidentes": "Numerosas arcadas vasculares en el mesoyeyuno largo y pliegues mucosos circulares ricos en vellosidades intestinales.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Suspendido por un mesenterio largo (mesoyeyuno) desde la raíz del mesenterio en torno a la arteria mesentérica craneal.",
-        "irrigacion": "Arterias yeyunales (15–20 ramas paralelas) procedentes de la arteria mesentérica craneal, formando arcos anastomóticos dobles o triples y vasos rectos; drenaje a la vena porta.",
-        "inervacion": "Plexos mesentérico craneal (simpático inhibidor) y vagal (parasimpático estimulador), junto al sistema nervioso entérico intrínseco.",
-        "funcion": "Digestión enzimática de carbohidratos no estructurales, proteínas y lípidos, y absorción intensiva de nutrientes, agua y electrólitos.",
-        "especie": "La extraordinaria longitud de su mesenterio otorga gran movilidad a las asas yeyunales equinas, favoreciendo su herniación por orificios anatómicos naturales o adquiridos.",
-        "clinica": "Frecuentemente implicado en estrangulaciones del intestino delgado con cólico severo y reflujo gástrico: encarcelamiento en el foramen epiploico (de Winslow), estrangulación por lipomas pediculados mesentéricos en caballos gerontes, vólvulo e intususcepción.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.int.003",
@@ -331,26 +255,7 @@
       "es": "Ciego",
       "la": "Caecum",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Lado derecho de la cavidad abdominal, extendiéndose oblicuamente en forma de coma desde la fosa paralumbar derecha y región sublumbar (base) hasta la región xifoidea ventral (vértice).",
-        "descripcion": "Cámara de fermentación saculada de gran volumen (~1–1,2 m de longitud, ~25–35 litros de capacidad), con forma de coma y cuatro tenias longitudinales (bandas musculares) que delimitan cuatro hileras de haustros (sáculos).",
-        "relaciones": "Base aplicada contra la pared abdominal dorsal derecha, riñón derecho y páncreas; cuerpo descendiendo a lo largo de la pared derecha; vértice apoyado cerca del esternón/xifoides entre el colon ventral derecho e izquierdo; orificio ileocecal y cecocólico situados en la base.",
-        "accidentes": "Base (cúpula), cuerpo, vértice, cuatro tenias (dorsal, ventral, lateral y medial; la lateral sirve de referencia para el pliegue ileocecal o cecocólico en sus caras respectivas) y los orificios ileocecal y cecocólico.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Base fijada dorsalmente al techo abdominal derecho y riñón derecho; unido al íleon por el pliegue ileocecal (tenia dorsal) y al colon ventral derecho por el pliegue cecocólico (tenia lateral).",
-        "irrigacion": "Arteria ileocólica (rama de la mesentérica craneal), dando las arterias cecales lateral y medial a lo largo de sus tenias; drenaje por venas cecales hacia la porta.",
-        "inervacion": "Plexo mesentérico craneal y sistema entérico con marcapasos cecales propios.",
-        "funcion": "Cámara primaria de fermentación microbiana de celulosa y fibra vegetal, síntesis de ácidos grasos volátiles (acetato, propionato, butirato) y absorción de gran volumen de agua.",
-        "especie": "El ciego equino está excepcionalmente desarrollado (~30 L) y su orificio de salida (cecocólico) se sitúa en posición dorsal en la base, cercano al de entrada (ileocecal), por lo que la ingesta debe propulsarse en sentido antigravitatorio hacia el colon.",
-        "clinica": "La base cecal se ausculta en la fosa paralumbar derecha (borborigmos de vaciamiento cada 1–3 min) y su tenia ventral/medial se palpa por vía rectal. Es sede de impactación cecal (riesgo de rotura cecal súbita), timpanismo (trocarización de urgencia) e invaginación cecocólica/cecocecal (asociada a Anoplocephala perfoliata).",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.cie.002",
@@ -378,26 +283,7 @@
       "es": "Colon mayor (ascendente)",
       "la": "Colon ascendens",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Ocupa la mayor parte de la cavidad abdominal ventral y media desde la fosa paralumbar derecha hasta la entrada pélvica, formando una doble herradura en U superpuesta.",
-        "descripcion": "Segmento masivo del intestino grueso (3–3,7 m de longitud y hasta 80–130 litros de capacidad), dividido en cuatro porciones continuas: colon ventral derecho, flexura esternal, colon ventral izquierdo, flexura pélvica, colon dorsal izquierdo, flexura diafragmática y colon dorsal derecho (ampolla cólica).",
-        "relaciones": "Ventralmente contacta con el suelo abdominal (sobre el yeyuno en partes), cranealmente con el diafragma e hígado/estómago en las flexuras esternal y diafragmática, caudalmente la flexura pélvica entra cerca de la pelvis izquierda y la porción dorsal derecha contacta con el ciego, duodeno y páncreas.",
-        "accidentes": "Colon ventral (4 tenias y haustros marcados), flexura pélvica (estrechamiento brusco a 1 tenia y sin haustros), colon dorsal izquierdo (1 tenia), colon dorsal derecho muy dilatado (ampolla cólica, 3 tenias).",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Las hojas dorsal y ventral están unidas entre sí por el mesocolon ascendente corto; la porción dorsal derecha se adhiere ampliamente al techo abdominal, base cecal y páncreas, mientras que la flexura pélvica y porciones izquierdas quedan libres y móviles.",
-        "irrigacion": "Ramas cólica derecha (para porciones dorsales) y rama cólica de la arteria ileocólica (para porciones ventrales), ambas de la arteria mesentérica craneal, anastomosándose en la flexura pélvica.",
-        "inervacion": "Plexos mesentérico craneal (simpático), vago/pélvico y plexos entéricos con marcapaso en la flexura pélvica.",
-        "funcion": "Fermentación microbiana principal de la fibra, digestión hidroelectrolítica y reabsorción masiva de agua (hasta ~100 L/día de recambio hídrico intestinal).",
-        "especie": "La libertad anatómica de las porciones izquierdas (unidas solo al segmento derecho en su base) explica su propensión a desplazamientos y torsiones, mientras que la reducción abrupta de calibre en la flexura pélvica actúa como cuello de botella fisiológico.",
-        "clinica": "Sede de la mayoría de cólicos de importancia quirúrgica y médica en el caballo: impactación en la flexura pélvica y colon dorsal derecho, desplazamiento dorsal izquierdo (atrapamiento nefroesplénico), desplazamiento dorsal derecho y vólvulo de colon mayor (urgencia quirúrgica hiperaguda con endotoxemia).",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.col.002",
@@ -467,26 +353,7 @@
       "es": "Recto",
       "la": "Rectum",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Cavidad pélvica en el plano mediano, extendiéndose desde la entrada de la pelvis (promontorio sacro) hasta el canal anal bajo la raíz de la cola.",
-        "descripcion": "Tramo terminal del intestino grueso (~25–30 cm de longitud), con porción craneal peritoneal y porción caudal retroperitoneal dilatada en la ampolla rectal.",
-        "relaciones": "Dorsalmente con el sacro y músculos sacrococcígeos ventrales; ventralmente en el macho con la vejiga urinaria, glándulas vesiculares, próstata y uretra pélvica, y en la yegua con el útero, cuello uterino y vagina.",
-        "accidentes": "Mesorrecto craneal, ampolla rectal dilatada, musculatura longitudinal externa continua (sin tenias definidas) y esfínteres anales interno (liso) y externo (estriado).",
-        "articulaciones": "Relación dorsal con el sacro y primeras vértebras caudales.",
-        "inserciones": "Fijado dorsalmente por el mesorrecto y caudalmente rodeado por la fascia pélvica, el músculo elevador del ano y el ligamento/músculo rectococcígeo.",
-        "irrigacion": "Arteria rectal craneal (continuación de la mesentérica caudal), arteria rectal media y caudal (de la pudenda interna).",
-        "inervacion": "Plexo hipogástrico (simpático) y nervios pélvicos (parasimpático); músculo esfínter anal externo por el nervio rectal caudal (del nervio pudendo).",
-        "funcion": "Almacena temporalmente las heces formadas en boñigas (escíbalos) e interviene en el reflejo de defecación.",
-        "especie": "En el caballo presenta una túnica muscular relativamente gruesa pero con menor elasticidad frente a presiones puntuales intensas y escaso mesorrecto dorsal en la transición recto-colon menor.",
-        "clinica": "Vía diagnóstica indispensable (palpación transrectal) en cólico y reproducción; el desgarro rectal iatrogénico (grados I a IV) es una complicación grave potencialmente mortal debido a la contaminación peritoneal rápida.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.rec.002",
@@ -507,26 +374,7 @@
       "es": "Hígado",
       "la": "Hepar",
       "sys": "dig",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Región abdominal craneal intratorácica, inmediatamente caudal al diafragma, orientado oblicuamente de dorsal derecha hacia ventral izquierda (aprox. 60 % a la derecha del plano mediano).",
-        "descripcion": "La mayor glándula del organismo (~1–1,5 % del peso corporal, 4–7 kg), de color pardo rojizo y dividida en lóbulos izquierdo (lateral y medial), cuadrado, derecho y caudado (proceso caudado). Carece de vesícula biliar.",
-        "relaciones": "Cara diafragmática convexa aplicada al diafragma (espacios intercostales 7.º–16.º derechos); cara visceral relacionada con el estómago (impresión gástrica), duodeno, colon dorsal derecho, páncreas y riñón derecho (impresión renal en el proceso caudado).",
-        "accidentes": "Lóbulo hepático izquierdo lateral e izquierdo medial, lóbulo cuadrado, lóbulo derecho indiviso, proceso caudado (sin proceso papilar desarrollado), porta hepática, conducto hepático común y surco de la vena cava caudal.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Fijado al diafragma y pared por los ligamentos coronario, falciforme, redondo y triangulares derecho e izquierdo; unido al estómago y duodeno por el omento menor.",
-        "irrigacion": "Doble aporte aferente: vena porta hepática (~75–80 % del flujo, sangre funcional del tubo digestivo/bazo) y arteria hepática (rama del tronco celíaco, ~20–25 %, sangre oxigenada). Drenaje por las venas hepáticas directamente a la vena cava caudal.",
-        "inervacion": "Plexo hepático (fibras simpáticas del plexo celíaco y vagales parasimpáticas).",
-        "funcion": "Metabolismo de carbohidratos, lípidos y proteínas, síntesis de albúmina y factores de coagulación, detoxificación de xenobióticos/amonio, almacenamiento de glucógeno y vitaminas, y secreción continua de bilis directamente al duodeno.",
-        "especie": "El caballo carece por completo de vesícula biliar, por lo que la bilis fluye de manera continua por el conducto hepático común hasta la papila duodenal mayor (junto con el conducto pancreático). En adultos viejos es fisiológica cierta atrofia progresiva del lóbulo derecho.",
-        "clinica": "Por su localización casi enteramente intratorácica, no es palpable; su evaluación depende de ecografía intercostal (espacios 10.º–15.º derechos y ventral izquierdo) y biopsia ecoguiada en el lado derecho. Sedes de lipidosis hepática en ponis, hepatitis sérica (enfermedad de Theiler) y colangiohepatitis/colelitiasis.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.dig.hig.002",

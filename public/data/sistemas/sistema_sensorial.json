@@ -30,52 +30,14 @@
       "es": "Globo ocular (izquierdo)",
       "la": "Bulbus oculi",
       "sys": "sen",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Órbita ósea izquierda (fosa orbitaria delimitada por un anillo orbitario óseo completo), desplazado ligeramente lateral y rostral para proporcionar amplio campo visual panorámico.",
-        "descripcion": "Órgano de la visión izquierdo esferoide algo comprimido anteroposteriormente (~45–50 mm de diámetro anteroposterior y >50 mm transversal, uno de los mayores entre los mamíferos terrestres), constituido por tres túnicas concéntricas (fibrosa: esclera/córnea; vascular: coroides/cuerpo ciliar/iris; nerviosa: retina) y medios refringentes (humor acuoso, cristalino, cuerpo vítreo).",
-        "relaciones": "Rodeado por la periórbita, músculos extrínsecos del globo ocular (4 rectos, 2 oblicuos, retractor del bulbo), cuerpo adiposo periorbitario y glándula lagrimal dorsal; protegido rostralmente por los párpados y el tercer párpado (membrana nictitante).",
-        "accidentes": "Córnea ovalada horizontalmente, esclera, pupila ovalada horizontalmente con gránulos irídicos (corpora nigra) en el borde dorsal (y pequeños ventrales), tapetum lucidum fibroso verde-azulado en el fondo ocular dorsal y disco óptico ovalado ventral con vasos paurangióticos.",
-        "articulaciones": "Alojado dentro de la órbita ósea cerrada formada por frontal, lagrimal, cigomático y temporal.",
-        "inserciones": "Los siete músculos extraoculares se insertan sobre la esclerótica.",
-        "irrigacion": "Arterias ciliares posteriores largas y cortas y ciliares anteriores (de la arteria oftálmica externa); drenaje por venas vorticosas hacia el plexo oftálmico.",
-        "inervacion": "Nervio óptico (II, sensorial visual); sensibilidad corneal/ocular vía rama oftálmica del trigémino (V1); motricidad intrínseca por ganglio ciliar (III parasimpático) y fibras simpáticas (ganglio cervical craneal).",
-        "funcion": "Recepción óptica, refracción y transducción luminosa proporcionando un campo visual monocular panorámico de casi 350° con visión binocular frontal reducida (~65°).",
-        "especie": "El ojo equino presenta córnea y pupila elípticas horizontalmente, conspicuos gránulos del iris (corpora nigra, que actúan como visera antideslumbrante), tapetum lucidum fibroso (dorsal azul-verdoso) y vascularización retiniana paurangiótica restringida a la vecindad inmediata del disco óptico.",
-        "clinica": "Muy expuesto lateralmente; es sede frecuente de queratitis traumáticas/ulcerativas, queratitis inmunomediada, uveítis recurrente equina (oftalmía periódica/ceguera de la luna, primera causa de ceguera en caballos) y cataratas.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.sen.ocu.001-d",
       "es": "Globo ocular (derecho)",
       "la": "Bulbus oculi",
       "sys": "sen",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Órbita ósea derecha (fosa orbitaria delimitada por un anillo orbitario óseo completo), desplazado ligeramente lateral y rostral para proporcionar amplio campo visual panorámico.",
-        "descripcion": "Órgano de la visión derecho esferoide algo comprimido anteroposteriormente (~45–50 mm de diámetro anteroposterior y >50 mm transversal, uno de los mayores entre los mamíferos terrestres), constituido por tres túnicas concéntricas (fibrosa: esclera/córnea; vascular: coroides/cuerpo ciliar/iris; nerviosa: retina) y medios refringentes (humor acuoso, cristalino, cuerpo vítreo).",
-        "relaciones": "Rodeado por la periórbita, músculos extrínsecos del globo ocular (4 rectos, 2 oblicuos, retractor del bulbo), cuerpo adiposo periorbitario y glándula lagrimal dorsal; protegido rostralmente por los párpados y el tercer párpado (membrana nictitante).",
-        "accidentes": "Córnea ovalada horizontalmente, esclera, pupila ovalada horizontalmente con gránulos irídicos (corpora nigra) en el borde dorsal (y pequeños ventrales), tapetum lucidum fibroso verde-azulado en el fondo ocular dorsal y disco óptico ovalado ventral con vasos paurangióticos.",
-        "articulaciones": "Alojado dentro de la órbita ósea cerrada formada por frontal, lagrimal, cigomático y temporal.",
-        "inserciones": "Los siete músculos extraoculares se insertan sobre la esclerótica.",
-        "irrigacion": "Arterias ciliares posteriores largas y cortas y ciliares anteriores (de la arteria oftálmica externa); drenaje por venas vorticosas hacia el plexo oftálmico.",
-        "inervacion": "Nervio óptico (II, sensorial visual); sensibilidad corneal/ocular vía rama oftálmica del trigémino (V1); motricidad intrínseca por ganglio ciliar (III parasimpático) y fibras simpáticas (ganglio cervical craneal).",
-        "funcion": "Recepción óptica, refracción y transducción luminosa proporcionando un campo visual monocular panorámico de casi 350° con visión binocular frontal reducida (~65°).",
-        "especie": "El ojo equino presenta córnea y pupila elípticas horizontalmente, conspicuos gránulos del iris (corpora nigra, que actúan como visera antideslumbrante), tapetum lucidum fibroso (dorsal azul-verdoso) y vascularización retiniana paurangiótica restringida a la vecindad inmediata del disco óptico.",
-        "clinica": "Muy expuesto lateralmente; es sede frecuente de queratitis traumáticas/ulcerativas, queratitis inmunomediada, uveítis recurrente equina (oftalmía periódica/ceguera de la luna, primera causa de ceguera en caballos) y cataratas.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.sen.ocu.002-i",

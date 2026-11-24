@@ -95,52 +95,14 @@
       "es": "Cavidad nasal (izquierda)",
       "la": "Cavum nasi",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Porción facial rostral de la cabeza, lado izquierdo del tabique nasal mediano, desde el ollar correspondiente hasta las coanas craneales a la nasofaringe.",
-        "descripcion": "Cámara respiratoria y olfatoria par izquierda, dividida por los cornetes (conchas) nasales dorsal, medio y ventral en los meatos nasales dorsal, medio, ventral y común.",
-        "relaciones": "Medialmente limitada por el tabique nasal cartilaginoso y el vómer; dorsalmente por el hueso nasal y frontal; lateralmente por el maxilar, incisivo y lagrimal; ventralmente por los procesos palatinos del incisivo, maxilar y palatino (paladar duro). Comunica con los senos paranasales maxilar y frontoconchal.",
-        "accidentes": "Vestíbulo nasal (con divertículo nasal en el ángulo dorsal del ollar y orificio nasolagrimal en el suelo cutáneo-mucoso), conchas nasales dorsal y ventral enrolladas en doble espiral, etmoturbinados caudales y meatos nasales.",
-        "articulaciones": "Delimitada por suturas craneofaciales entre huesos nasales, maxilares, incisivos y palatinos.",
-        "inserciones": "Tapizada por mucoperiostio respiratorio ricamente vascularizado y mucosa olfatoria caudal.",
-        "irrigacion": "Arterias esfenopalatina, etmoidal externa e infraorbitaria/labial superior; plexos venosos cavernosos densos en la submucosa nasal (especialmente sobre el tabique y cornete ventral).",
-        "inervacion": "Nervio olfatorio (I) en la región etmoidal caudal y ramos sensitivos del nervio trigémino (V1 oftálmico y V2 maxilar/nasal caudal).",
-        "funcion": "Calienta, humidifica y filtra el aire inspirado (función obligatoria en el caballo al ser respirador nasal obligado), percibe olores y contribuye a la resonancia.",
-        "especie": "El caballo es un respirador nasal estricto debido al paladar blando muy largo encajado bajo la epiglotis. Destaca además el divertículo nasal («falsa nariz») ciego en el ángulo alar dorsal y el meato nasal ventral como ruta exclusiva para pasar la sonda nasogástrica y el endoscopio.",
-        "clinica": "Al introducir una sonda nasogástrica debe dirigirse siempre ventromedialmente por el meato nasal ventral para evitar entrar en el divertículo nasal (ciego) o lesionar los etmoturbinados muy vascularizados (epistaxis severa). Sede de micosis, pólipos, hematomas etmoidales progresivos y rinitis.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.cav.001-d",
       "es": "Cavidad nasal (derecha)",
       "la": "Cavum nasi",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Porción facial rostral de la cabeza, lado derecho del tabique nasal mediano, desde el ollar correspondiente hasta las coanas craneales a la nasofaringe.",
-        "descripcion": "Cámara respiratoria y olfatoria par derecha, dividida por los cornetes (conchas) nasales dorsal, medio y ventral en los meatos nasales dorsal, medio, ventral y común.",
-        "relaciones": "Medialmente limitada por el tabique nasal cartilaginoso y el vómer; dorsalmente por el hueso nasal y frontal; lateralmente por el maxilar, incisivo y lagrimal; ventralmente por los procesos palatinos del incisivo, maxilar y palatino (paladar duro). Comunica con los senos paranasales maxilar y frontoconchal.",
-        "accidentes": "Vestíbulo nasal (con divertículo nasal en el ángulo dorsal del ollar y orificio nasolagrimal en el suelo cutáneo-mucoso), conchas nasales dorsal y ventral enrolladas en doble espiral, etmoturbinados caudales y meatos nasales.",
-        "articulaciones": "Delimitada por suturas craneofaciales entre huesos nasales, maxilares, incisivos y palatinos.",
-        "inserciones": "Tapizada por mucoperiostio respiratorio ricamente vascularizado y mucosa olfatoria caudal.",
-        "irrigacion": "Arterias esfenopalatina, etmoidal externa e infraorbitaria/labial superior; plexos venosos cavernosos densos en la submucosa nasal (especialmente sobre el tabique y cornete ventral).",
-        "inervacion": "Nervio olfatorio (I) en la región etmoidal caudal y ramos sensitivos del nervio trigémino (V1 oftálmico y V2 maxilar/nasal caudal).",
-        "funcion": "Calienta, humidifica y filtra el aire inspirado (función obligatoria en el caballo al ser respirador nasal obligado), percibe olores y contribuye a la resonancia.",
-        "especie": "El caballo es un respirador nasal estricto debido al paladar blando muy largo encajado bajo la epiglotis. Destaca además el divertículo nasal («falsa nariz») ciego en el ángulo alar dorsal y el meato nasal ventral como ruta exclusiva para pasar la sonda nasogástrica y el endoscopio.",
-        "clinica": "Al introducir una sonda nasogástrica debe dirigirse siempre ventromedialmente por el meato nasal ventral para evitar entrar en el divertículo nasal (ciego) o lesionar los etmoturbinados muy vascularizados (epistaxis severa). Sede de micosis, pólipos, hematomas etmoidales progresivos y rinitis.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.cav.002",
@@ -469,26 +431,7 @@
       "es": "Cartílago tiroides",
       "la": "Cartilago thyroidea",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Región faríngea ventral / garganta, entre las ramas de la mandíbula (a nivel del aparato hioideo y C1–C2), formando el cuerpo ventral y paredes laterales de la laringe.",
-        "descripcion": "El cartílago más grande de la laringe equina, impar y constituido por cartílago hialino en forma de escudo abierto dorsalmente, integrado por dos láminas laterales reunidas ventralmente en un cuerpo corto.",
-        "relaciones": "Rostralmente unido al hueso basihioides y tirohioides por la membrana tirohioidea; dorsalmente articula con el cartílago cricoides y cubre lateralmente los cartílagos aritenoides; ventralmente presenta la amplia escotadura tiroidea caudal cerrada por el ligamento cricotiroideo.",
-        "accidentes": "Láminas derecha e izquierda, línea oblicua lateral, astas rostrales (con fisura tiroidea para el nervio laríngeo craneal) y astas caudales, prominencia laríngea ventral y escotadura tiroidea caudal profunda.",
-        "articulaciones": "Articulación cricotiroidea sinovial par entre sus astas caudales y las carillas laterales del cartílago cricoides; unión al hioides mediante la articulación tirohioidea.",
-        "inserciones": "Presta inserción externa a los músculos esternotiroideo, tirohioideo, tirofaríngeo y cricotiroideo, e internamente al músculo vocal/tiroaritenoideo.",
-        "irrigacion": "Arteria laríngea craneal (rama de la carótida externa/tiroidea craneal).",
-        "inervacion": "Sensibilidad de la mucosa adyacente vía ramo interno del nervio laríngeo craneal; músculos relacionados por el laríngeo craneal externo (cricotiroideo) y recurrente.",
-        "funcion": "Forma el armazón protector rígido lateral y ventral de la caja laríngea y sirve de palanca de inserción para tensar o relajar los pliegues vocales.",
-        "especie": "En el caballo destaca la escotadura tiroidea caudal muy profunda y triangular en el borde ventral entre las dos láminas, cerrada únicamente por el ligamento cricotiroideo elástico (accesible quirúrgicamente sin cortar cartílago).",
-        "clinica": "El ligamento cricotiroideo en la escotadura tiroidea caudal es el sitio estándar de abordaje en la laringotomía ventral (ventriculocordectomía / cirugía del rodete o tie-forward para desplazamiento dorsal del paladar blando). Palpable directamente entre las ramas mandibulares.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.lar.003",
@@ -628,52 +571,14 @@
       "es": "Tráquea, porción cervical",
       "la": "Trachea, pars cervicalis",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Región ventral del cuello en el plano mediano, extendiéndose desde el borde caudal del cartílago cricoides de la laringe (C1–C2) hasta la apertura torácica craneal.",
-        "descripcion": "Tubo respiratorio flexible y semirrígido sustentado por ~48–60 anillos incompletos de cartílago hialino en forma de C (abiertos dorsalmente y cerrados por el músculo traqueal liso) unidos por ligamentos anulares.",
-        "relaciones": "Ventralmente cubierta por los músculos esternohioideos y esternotiroideos; dorsalmente en relación con el músculo largo del cuello y el esófago (el cual se desvía a la izquierda a partir del tercio medio cervical); lateralmente con las vainas carotídeas y glándula tiroides cranealmente.",
-        "accidentes": "Anillos traqueales aplanados dorsoventralmente (sección transversa ovalada en el equino con extremos dorsales superpuestos en adultos), ligamentos anulares y músculo traqueal dorsal interno a los extremos cartilaginosos.",
-        "articulaciones": "Unida cranealmente al cartílago cricoides por el ligamento cricotraqueal.",
-        "inserciones": "Envuelta por fascia pretraqueal cervical.",
-        "irrigacion": "Ramas traqueales de las arterias carótidas comunes y broncoesofágica.",
-        "inervacion": "Ramos traqueales del nervio vago y nervio laríngeo recurrente.",
-        "funcion": "Mantiene una vía aérea permeable y distensible durante los movimientos de flexión y extensión del cuello equino.",
-        "especie": "La sección transversal de la tráquea cervical equina es característica por su aplanamiento dorsoventral y por el solapamiento dorsal de los extremos libres de los anillos cartilaginosos, situándose el músculo traqueal por dentro de las placas cartilaginosas.",
-        "clinica": "Fácilmente accesible por palpación en el tercio medio cervical para realización de traqueostomía temporal de urgencia (incisión transversa entre ligamentos anulares), lavado transtraqueal percutáneo (entre anillos del tercio medio) y evaluación endoscópica de moco o hemorragia (EIPH). En razas miniatura y ponis puede presentarse colapso traqueal dorsoventral.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.tra.002",
       "es": "Tráquea, porción torácica",
       "la": "Trachea, pars thoracica",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Mediastino craneal y medio de la cavidad torácica, desde la entrada del tórax hasta la carina traqueal dorsal a la base cardíaca (aprox. 5.º–6.º espacio intercostal).",
-        "descripcion": "Continuación intratorácica de la tráquea con igual arquitectura de anillos cartilaginosos hialinos incompletos y músculo traqueal dorsal, finalizando en la carina donde diverge en los dos bronquios principales.",
-        "relaciones": "Dorsalmente con el esófago (desplazado hacia la línea media sobre ella) y el músculo largo del cuello en el tramo craneal; lateralmente a la izquierda con el arco aórtico y tronco braquiocefálico, y a la derecha con la vena ácigos; ventralmente con el tronco braquiocefálico, vena cava craneal y base cardíaca; rodeada en la bifurcación por los linfonodos traqueobronquiales.",
-        "accidentes": "Anillos traqueales torácicos, carina traqueal (espolón sagital interno de bifurcación).",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Sostenida por la pleura y tejido conectivo del mediastino craneal/medio.",
-        "irrigacion": "Ramas broncoesofágicas de la aorta torácica y ramas de las arterias cervical profunda/torácica interna.",
-        "inervacion": "Nervio vago, laríngeos recurrentes y fibras simpáticas del ganglio cervicotorácico.",
-        "funcion": "Conduce el aire inspirado y espirado entre la porción cervical y ambos bronquios principales soportando las variaciones de presión intratorácica.",
-        "especie": "A diferencia de rumiantes y suidos, la tráquea torácica equina no origina un bronquio traqueal accesorio derecho antes de la carina; los linfonodos traqueobronquiales se disponen alrededor de su bifurcación.",
-        "clinica": "La carina traqueal es referencia anatómica cardinal en endoscopia respiratoria (para valorar simetría, grosor de espolón, acúmulo de secreciones o estenosis extrínseca por masas mediastínicas como linfoma o linfadenitis por Streptococcus equi).",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.tra.003",
@@ -708,52 +613,14 @@
       "es": "Bronquio principal (izquierdo)",
       "la": "Bronchus principalis",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Mediastino medio (nivel del 5.º–6.º espacio intercostal), originándose en la bifurcación traqueal dorsal a la base cardíaca e ingresando por el hilio del pulmón izquierdo.",
-        "descripcion": "Conducto cartilaginoso principal izquierdo que ventila el pulmón izquierdo, sustentado por placas/anillos cartilaginosos hialinos completos o semicompletos y revestido de mucosa respiratoria ciliada.",
-        "relaciones": "Pasa ventralmente al arco aórtico y esófago y dorsalmente al atrio izquierdo y venas pulmonares izquierdas antes de ramificarse en bronquios lobares craneal y caudal.",
-        "accidentes": "Orificio de entrada desde la carina traqueal, anillos cartilaginosos lobulados y bifurcación temprana en bronquios lobares (craneal y caudal).",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Continuación directa de la membrana fibroelástica y músculo traqueal a nivel de la carina.",
-        "irrigacion": "Ramas bronquiales de la arteria broncoesofágica.",
-        "inervacion": "Plexo pulmonar (fibras vagales broncoconstrictoras y simpáticas broncodilatadoras).",
-        "funcion": "Conduce el flujo de aire de alto volumen entre la tráquea y el árbol bronquial intrapulmonar correspondiente.",
-        "especie": "A diferencia de rumiantes y cerdos, el caballo carece de bronquio traqueal accesorio derecho; ambos pulmones reciben su ventilación exclusivamente a través de la bifurcación de los dos bronquios principales en la carina.",
-        "clinica": "La evaluación endoscópica de la carina y de los bronquios principales permite tomar muestras de lavado broncoalveolar (BAL), detectar exudados mucopurulentos (asma equino/RAO o hemorragia pulmonar inducida por el ejercicio) y observar colapso o compresión bronquial por linfoadenomegalia.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.tra.007-d",
       "es": "Bronquio principal (derecho)",
       "la": "Bronchus principalis",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Mediastino medio (nivel del 5.º–6.º espacio intercostal), originándose en la bifurcación traqueal dorsal a la base cardíaca e ingresando por el hilio del pulmón derecho.",
-        "descripcion": "Conducto cartilaginoso principal derecho que ventila el pulmón derecho, sustentado por placas/anillos cartilaginosos hialinos completos o semicompletos y revestido de mucosa respiratoria ciliada.",
-        "relaciones": "Pasa caudal a la vena ácigos derecha y dorsal al tronco pulmonar/atrio derecho para ramificarse en el pulmón derecho (sin bronquio traqueal en equinos).",
-        "accidentes": "Orificio de entrada desde la carina traqueal, anillos cartilaginosos lobulados y bifurcación temprana en bronquios lobares (craneal, caudal y accesorio).",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Continuación directa de la membrana fibroelástica y músculo traqueal a nivel de la carina.",
-        "irrigacion": "Ramas bronquiales de la arteria broncoesofágica.",
-        "inervacion": "Plexo pulmonar (fibras vagales broncoconstrictoras y simpáticas broncodilatadoras).",
-        "funcion": "Conduce el flujo de aire de alto volumen entre la tráquea y el árbol bronquial intrapulmonar correspondiente.",
-        "especie": "A diferencia de rumiantes y cerdos, el caballo carece de bronquio traqueal accesorio derecho; ambos pulmones reciben su ventilación exclusivamente a través de la bifurcación de los dos bronquios principales en la carina.",
-        "clinica": "La evaluación endoscópica de la carina y de los bronquios principales permite tomar muestras de lavado broncoalveolar (BAL), detectar exudados mucopurulentos (asma equino/RAO o hemorragia pulmonar inducida por el ejercicio) y observar colapso o compresión bronquial por linfoadenomegalia.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.tra.008",
@@ -795,52 +662,14 @@
       "es": "Pulmón (izquierdo)",
       "la": "Pulmo",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Saco pleural izquierdo de la cavidad torácica, ocupando el hemitórax izquierdo desde la entrada torácica (cúpula craneal al 1.er arco costal) hasta el borde basal oblicuo frente al diafragma (hasta el 16.º–17.º espacio intercostal dorsalmente).",
-        "descripcion": "Órgano respiratorio par esponjoso, elástico y rosado, casi sin fisuras interlobares profundas en el caballo, constituido únicamente por dos lóbulos poco escotados: lóbulo craneal y lóbulo caudal.",
-        "relaciones": "Cara costal contra la pleura costal; cara diafragmática cóncava sobre el diafragma izquierdo; cara mediastínica con amplia escotadura cardíaca (3.º–6.º espacio intercostal izquierdo) y raíz pulmonar.",
-        "accidentes": "Lóbulo craneal, lóbulo caudal, borde dorsal romo, borde ventral cortante con marcada escotadura cardíaca (espacios 3.º–6.º), borde basal e hilio pulmonar.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Fijado al mediastino por su raíz pulmonar (bronquio y vasos) y el ligamento pulmonar caudal.",
-        "irrigacion": "Circulación funcional por ramas izquierda de la arteria pulmonar y venas pulmonares; circulación nutricia por ramas de la arteria broncoesofágica.",
-        "inervacion": "Plexo pulmonar (autónomo simpático y parasimpático vagal).",
-        "funcion": "Intercambio gaseoso hematoalveolar (captación de O2 y eliminación de CO2), además de reserva metabólica/vascular.",
-        "especie": "Los pulmones equinos se distinguen por la ausencia casi total de fisuras interlobares externas (aspecto continuo) y la ausencia de un lóbulo medio derecho separado; además muestran una lobulación pleural débil con muy desarrollada ventilación colateral por poros alveolares.",
-        "clinica": "La amplia escotadura cardíaca izquierda permite auscultar directamente el corazón sin interposición pulmonar en los espacios 3.º–5.º. El pulmón equino es sede frecuente de asma equino (antes RAO), pleuroneumonía bacteriana con derrame pleural ventral (evaluación ecográfica entre costillas 3–17), neumonía por Rhodococcus equi en potros y hemorragia pulmonar inducida por el ejercicio (EIPH) en el aspecto caudodorsal.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.pul.001-d",
       "es": "Pulmón (derecho)",
       "la": "Pulmo",
       "sys": "res",
-      "layer": "org",
-      "ficha": {
-        "ubicacion": "Saco pleural derecho de la cavidad torácica, ocupando el hemitórax derecho desde la entrada torácica (cúpula craneal al 1.er arco costal) hasta el borde basal oblicuo frente al diafragma (hasta el 16.º–17.º espacio intercostal dorsalmente).",
-        "descripcion": "Órgano respiratorio par esponjoso, algo más voluminoso que el izquierdo, formado por lóbulo craneal, lóbulo caudal y lóbulo accesorio (que ocupa el receso mediastínico junto a la vena cava caudal), sin lóbulo medio individualizado.",
-        "relaciones": "Cara costal contra las costillas derechas; cara diafragmática sobre el diafragma derecho; cara mediastínica con escotadura cardíaca menor (3.º–4.º espacio intercostal derecho), impresión de la vena cava caudal y raíz pulmonar.",
-        "accidentes": "Lóbulo craneal, lóbulo caudal, lóbulo accesorio ventral al surco de la vena cava caudal, escotadura cardíaca discreta (espacios 3.º–4.º) e hilio pulmonar.",
-        "articulaciones": "Sin relaciones articulares.",
-        "inserciones": "Fijado al mediastino por su raíz pulmonar (bronquio y vasos) y el ligamento pulmonar caudal.",
-        "irrigacion": "Circulación funcional por ramas derecha de la arteria pulmonar y venas pulmonares; circulación nutricia por ramas de la arteria broncoesofágica.",
-        "inervacion": "Plexo pulmonar (autónomo simpático y parasimpático vagal).",
-        "funcion": "Intercambio gaseoso hematoalveolar (captación de O2 y eliminación de CO2), además de reserva metabólica/vascular.",
-        "especie": "Los pulmones equinos se distinguen por la ausencia casi total de fisuras interlobares externas (aspecto continuo) y la ausencia de un lóbulo medio derecho separado; además muestran una lobulación pleural débil con muy desarrollada ventilación colateral por poros alveolares.",
-        "clinica": "La amplia escotadura cardíaca izquierda permite auscultar directamente el corazón sin interposición pulmonar en los espacios 3.º–5.º. El pulmón equino es sede frecuente de asma equino (antes RAO), pleuroneumonía bacteriana con derrame pleural ventral (evaluación ecográfica entre costillas 3–17), neumonía por Rhodococcus equi en potros y hemorragia pulmonar inducida por el ejercicio (EIPH) en el aspecto caudodorsal.",
-        "referencias": "Nomina Anatomica Veterinaria (NAV, 6.ª ed.).\nBudras KD, Sack WO, Röck S. Anatomy of the Horse. 6.ª ed. Schlütersche; 2011.\nDyce KM, Sack WO, Wensing CJG. Textbook of Veterinary Anatomy. 5.ª ed. Elsevier; 2018.\nKönig HE, Liebich HG. Veterinary Anatomy of Domestic Mammals. 7.ª ed. Thieme; 2020.\nSisson S, Grossman JD. Anatomía de los animales domésticos. 5.ª ed. Salvat/Elsevier."
-      },
-      "revision": {
-        "estado": "redactada_pendiente_de_verificacion",
-        "fecha": "2026-11-23",
-        "alcance": "Ficha anatómica completa de 12 campos redactada con base en anatomía veterinaria equina comparada (NAV, Budras/Sack, Dyce, König/Liebich, Sisson/Grossman) para cobertura 3D integral. Pendiente de auditoría editorial final."
-      }
+      "layer": "org"
     },
     {
       "id": "equ.res.pul.002",
