@@ -63,6 +63,7 @@ interface BottomDockProps {
   selectedModelState: 'esquemático' | 'cargado' | 'pendiente';
   selectedModelMeta?: LoadedModelMeta;
   selectedHasMesh: boolean;
+  selectedProxyTarget?: StructureRecord | null;
   isolated: boolean;
   onFocusSelected: () => void;
   onIsolateSelected: () => void;
@@ -131,6 +132,8 @@ interface BottomDockProps {
   fichaDrafts: Record<string, FichaData>;
   loadedModelMeta: Record<string, LoadedModelMeta>;
   hasMeshFn: (id: string) => boolean;
+  has3DAnchorFn?: (id: string) => boolean;
+  get3DAnchorTargetFn?: (id: string) => StructureRecord | null;
   getModelStateFn: (id: string) => 'esquemático' | 'cargado' | 'pendiente';
   isVisibleOverrideFn: (id: string) => boolean;
   onSelectStructure: (id: string) => void;
@@ -170,6 +173,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     selectedModelState,
     selectedModelMeta,
     selectedHasMesh,
+    selectedProxyTarget,
     isolated,
     onFocusSelected,
     onIsolateSelected,
@@ -228,6 +232,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     fichaDrafts,
     loadedModelMeta,
     hasMeshFn,
+    has3DAnchorFn,
+    get3DAnchorTargetFn,
     getModelStateFn,
     isVisibleOverrideFn,
     onSelectStructure,
@@ -276,6 +282,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
           modelState={selectedModelState}
           modelMeta={selectedModelMeta}
           hasMesh={selectedHasMesh}
+          proxyTarget={selectedProxyTarget}
           blindMode={blindMode}
           isolated={isolated}
           onOpenFicha={() => {
@@ -700,6 +707,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 fichaDrafts={fichaDrafts}
                 loadedModelMeta={loadedModelMeta}
                 hasMeshFn={hasMeshFn}
+                has3DAnchorFn={has3DAnchorFn}
+                get3DAnchorTargetFn={get3DAnchorTargetFn}
                 getModelStateFn={getModelStateFn}
                 isVisibleOverrideFn={isVisibleOverrideFn}
                 onSelect={onSelectStructure}

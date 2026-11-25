@@ -879,6 +879,18 @@ export default function App() {
     [mounted3DCount, modelBump],
   );
 
+  const has3DAnchorFn = useCallback(
+    (id: string) => sceneRef.current?.has3DAnchor(id) ?? false,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mounted3DCount, modelBump],
+  );
+
+  const get3DAnchorTargetFn = useCallback(
+    (id: string) => sceneRef.current?.get3DAnchorTargetRecord(id) ?? null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mounted3DCount, modelBump],
+  );
+
   const getModelStateFn = useCallback(
     (id: string) => sceneRef.current?.getItemState(id) ?? 'pendiente',
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -905,6 +917,10 @@ export default function App() {
   const selectedStructure = selectedId
     ? byId[selectedId] || byTraceabilityId[selectedId] || null
     : null;
+  const selectedProxyTarget =
+    selectedStructure && !hasMeshFn(selectedStructure.id)
+      ? get3DAnchorTargetFn(selectedStructure.id)
+      : null;
   const hoveredStructure = hoveredInfo.id
     ? byId[hoveredInfo.id] || byTraceabilityId[hoveredInfo.id] || null
     : null;
@@ -1195,6 +1211,7 @@ export default function App() {
         selectedModelState={selectedStructure ? getModelStateFn(selectedStructure.id) : 'pendiente'}
         selectedModelMeta={selectedStructure ? loadedModelMeta[selectedStructure.id] : undefined}
         selectedHasMesh={selectedStructure ? hasMeshFn(selectedStructure.id) : false}
+        selectedProxyTarget={selectedProxyTarget}
         isolated={isolated}
         onFocusSelected={() => selectedStructure && sceneRef.current?.focusOnStructure(selectedStructure.id)}
         onIsolateSelected={handleIsolateSelected}
@@ -1259,6 +1276,8 @@ export default function App() {
         fichaDrafts={fichaDrafts}
         loadedModelMeta={loadedModelMeta}
         hasMeshFn={hasMeshFn}
+        has3DAnchorFn={has3DAnchorFn}
+        get3DAnchorTargetFn={get3DAnchorTargetFn}
         getModelStateFn={getModelStateFn}
         isVisibleOverrideFn={isVisibleOverrideFn}
         onSelectStructure={(id) => {
@@ -1295,7 +1314,7 @@ export default function App() {
         onQuizHighlight={(id, forceBlind) => {
           setBlindMode(forceBlind);
           setSelectedId(id);
-          if (id && hasMeshFn(id)) {
+          if (id && (hasMeshFn(id) || has3DAnchorFn(id))) {
             sceneRef.current?.focusOnStructure(id);
           }
         }}

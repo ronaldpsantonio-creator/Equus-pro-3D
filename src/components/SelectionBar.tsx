@@ -14,6 +14,7 @@ interface SelectionBarProps {
   modelState: 'esquemático' | 'cargado' | 'pendiente';
   modelMeta?: LoadedModelMeta;
   hasMesh: boolean;
+  proxyTarget?: StructureRecord | null;
   blindMode: boolean;
   isolated: boolean;
   onOpenFicha: () => void;
@@ -30,6 +31,7 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
   modelState,
   modelMeta,
   hasMesh,
+  proxyTarget,
   blindMode,
   isolated,
   onOpenFicha,
@@ -48,6 +50,24 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
   const hasFicha = !!(structure.ficha && Object.keys(structure.ficha).length > 0);
   const revEstado = structure.revision?.estado;
   const traceCount = structure.trazabilidad_ids?.length || 0;
+  const canFocusOrIsolate = hasMesh || !!proxyTarget;
+
+  const modelStatusText =
+    modelState === 'cargado'
+      ? [
+          'GLB verificado',
+          modelMeta?.modalidad_respaldo,
+          modelMeta?.resolucion_corte,
+          modelMeta?.proyeccion_referencia,
+          modelMeta?.licencia ? `(${modelMeta.licencia})` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : modelState === 'esquemático'
+        ? 'Malla 3D anatómica'
+        : proxyTarget
+          ? `Referencia 3D: ${blindMode ? proxyTarget.id : proxyTarget.es}`
+          : 'Sin malla 3D';
 
   return (
     <div className="mb-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700/80 bg-[#0e141d]/95 px-4 py-2.5 shadow-xl">
@@ -69,12 +89,11 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
           <span aria-hidden="true">·</span>
           <span className="font-mono">{structure.id}</span>
           <span aria-hidden="true">·</span>
-          <span>
-            {modelState === 'cargado'
-              ? `GLB verificado${modelMeta?.modalidad_respaldo ? ` · ${modelMeta.modalidad_respaldo}` : ''}${modelMeta?.licencia ? ` (${modelMeta.licencia})` : ''}`
-              : modelState === 'esquemático'
-                ? 'Malla 3D anatómica'
-                : 'Sin malla 3D'}
+          <span
+            className={proxyTarget && modelState === 'pendiente' ? 'text-cyan-300/90' : undefined}
+            title={modelMeta?.calibracion_anatomica}
+          >
+            {modelStatusText}
           </span>
           {hasFicha && (
             <>
@@ -118,18 +137,22 @@ export const SelectionBar: React.FC<SelectionBarProps> = ({
             <span>Ver ficha</span>
           </button>
         )}
-        {hasMesh && (
+        {canFocusOrIsolate && (
           <button
             type="button"
             onClick={onFocus}
             className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-slate-500 hover:text-white whitespace-nowrap"
-            title="Acercar cámara a la estructura"
+            title={
+              proxyTarget
+                ? `Acercar cámara a la región 3D de referencia (${blindMode ? proxyTarget.id : proxyTarget.es})`
+                : 'Acercar cámara a la estructura'
+            }
           >
             <Crosshair className="h-3.5 w-3.5" />
             <span>Enfocar</span>
           </button>
         )}
-        {hasMesh && (
+        {canFocusOrIsolate && (
           <button
             type="button"
             onClick={isolated ? onShowAll : onIsolate}

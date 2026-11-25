@@ -41,6 +41,8 @@ interface CatalogAndFichaTabProps {
   fichaDrafts: Record<string, FichaData>;
   loadedModelMeta: Record<string, LoadedModelMeta>;
   hasMeshFn: (id: string) => boolean;
+  has3DAnchorFn?: (id: string) => boolean;
+  get3DAnchorTargetFn?: (id: string) => StructureRecord | null;
   getModelStateFn: (id: string) => 'esquemático' | 'cargado' | 'pendiente';
   isVisibleOverrideFn: (id: string) => boolean;
   onSelect: (id: string) => void;
@@ -93,6 +95,8 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
   fichaDrafts,
   loadedModelMeta,
   hasMeshFn,
+  has3DAnchorFn,
+  get3DAnchorTargetFn,
   getModelStateFn,
   isVisibleOverrideFn,
   onSelect,
@@ -198,6 +202,8 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
 
   const visibleList = filtered.slice(0, 90);
   const selected = selectedId ? byId[selectedId] : null;
+  const selectedProxyTarget =
+    selected && !hasMeshFn(selected.id) ? (get3DAnchorTargetFn?.(selected.id) ?? null) : null;
   const effectiveSelectedFicha = selected ? getEffectiveFicha(selected, fichaDrafts) : undefined;
   const selectedHasDraft = selected ? !!fichaDrafts[selected.id] : false;
   const plate = selected && !blindMode ? ANATOMY_PLATES[selected.id] : undefined;
@@ -314,7 +320,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                 onClick={() => {
                   onSelect(s.id);
                   onFichaSubViewChange('ficha');
-                  if (hasMeshFn(s.id)) onFocus(s.id);
+                  if (hasMeshFn(s.id) || has3DAnchorFn?.(s.id)) onFocus(s.id);
                 }}
                 className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs transition-colors ${
                   isSel ? 'bg-teal-950/60 text-teal-200' : 'hover:bg-slate-900/70 text-slate-200'
@@ -338,6 +344,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
             visibleList.map((s) => {
               const isSel = selectedId === s.id;
               const is3D = hasMeshFn(s.id);
+              const hasAnchor = is3D || (has3DAnchorFn?.(s.id) ?? false);
               const vis = isVisibleOverrideFn(s.id);
               const hasDraft = !!fichaDrafts[s.id];
               const sysColor =
@@ -356,7 +363,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                   onClick={() => {
                     onSelect(s.id);
                     onFichaSubViewChange('ficha');
-                    if (is3D) onFocus(s.id);
+                    if (hasAnchor) onFocus(s.id);
                   }}
                   className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs transition-colors ${
                     isSel ? 'bg-teal-950/60' : 'hover:bg-slate-900/70'
@@ -392,8 +399,8 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                         {blindMode ? 'nombre oculto' : s.la}
                       </span>
                       <span aria-hidden="true">·</span>
-                      <span className="font-mono text-[10px]">
-                        {is3D ? getModelStateFn(s.id) : 'sin malla'}
+                      <span className={`font-mono text-[10px] ${!is3D && hasAnchor ? 'text-cyan-400/90' : ''}`}>
+                        {is3D ? getModelStateFn(s.id) : hasAnchor ? 'ref. 3D' : 'sin malla'}
                       </span>
                       {matchedTraceId && (
                         <>
@@ -614,7 +621,9 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                     ? `GLB verificado (${loadedModelMeta[selected.id]?.licencia || selected.licencia || 'licencia sin documentar'})`
                     : getModelStateFn(selected.id) === 'esquemático'
                       ? 'representación anatómica procedural (esquemática, no equivale a malla verificada)'
-                      : 'pendiente de modelo 3D'}
+                      : selectedProxyTarget
+                        ? `referencia 3D en ${blindMode ? selectedProxyTarget.id : selectedProxyTarget.es} (pendiente de GLB individual)`
+                        : 'pendiente de modelo 3D'}
                 </span>
               </div>
               {getModelStateFn(selected.id) === 'cargado' && loadedModelMeta[selected.id] && (
@@ -854,7 +863,7 @@ export const CatalogAndFichaTab: React.FC<CatalogAndFichaTabProps> = ({
                             onClick={() => {
                               const targetId = linked ? linked.id : linkedId;
                               onSelect(targetId);
-                              if (hasMeshFn(targetId)) onFocus(targetId);
+                              if (hasMeshFn(targetId) || has3DAnchorFn?.(targetId)) onFocus(targetId);
                             }}
                             className="inline-flex items-center gap-1 font-mono text-teal-300 hover:text-teal-200 underline-offset-2 hover:underline"
                           >

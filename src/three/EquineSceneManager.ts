@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import {
   CutawayMode,
   getCatalogSystem,
@@ -28,6 +29,7 @@ import {
 import { buildMuscularAndTegumentaryParts } from './builders/buildMuscularAndTegumentary';
 import { buildSkeletalAndArticularParts, BuiltPart } from './builders/buildSkeletalAndArticular';
 import { buildVisceraAndNeuroParts } from './builders/buildVisceraAndNeuro';
+import { Anatomy3DAnchor, buildAnatomyAnchorMap } from './anatomyMapping';
 import { MeasurementOverlayManager } from './measurementOverlay';
 import { createProceduralTextures, ProceduralTextureSet } from './textures';
 
@@ -238,6 +240,7 @@ export class EquineSceneManager {
   private referenceAspect = 1.4;
 
   private items: Record<string, SceneItemRuntime> = {};
+  private anchorMap: Record<string, Anatomy3DAnchor> = {};
   private clickableMeshes: THREE.Object3D[] = [];
   private raycaster = new THREE.Raycaster();
   private pointerNDC = new THREE.Vector2();
@@ -317,11 +320,12 @@ export class EquineSceneManager {
     this.controls.maxPolarAngle = Math.PI * 0.52;
     this.controls.update();
 
-    // Local offline Draco decoder for CT-segmented .glb models
+    // Local offline Draco & Meshopt decoders for CT-segmented .glb models
     this.dracoLoader = new DRACOLoader();
     this.dracoLoader.setDecoderPath(`${import.meta.env.BASE_URL}draco/`);
     this.gltfLoader = new GLTFLoader();
     this.gltfLoader.setDRACOLoader(this.dracoLoader);
+    this.gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 
     // Procedural Studio Environment Map
     const pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -633,6 +637,8 @@ export class EquineSceneManager {
       };
     }
 
+    this.anchorMap = buildAnatomyAnchorMap(this.items);
+
     if (!this.isSoftwareGl) {
       this.renderer.compile(this.scene, this.camera);
     }
@@ -667,6 +673,20 @@ export class EquineSceneManager {
     return !!this.items[id]?.hasMesh;
   }
 
+  public get3DAnchor(id: string): Anatomy3DAnchor | null {
+    return this.anchorMap[id] || null;
+  }
+
+  public has3DAnchor(id: string): boolean {
+    return !!this.anchorMap[id];
+  }
+
+  public get3DAnchorTargetRecord(id: string): StructureRecord | null {
+    const anchor = this.anchorMap[id];
+    if (!anchor || !anchor.isProxy) return null;
+    return this.items[anchor.targetId]?.record ?? null;
+  }
+
   public getVisible3DIds(): string[] {
     return Object.values(this.items)
       .filter((it) => it.hasMesh && it.group.visible)
@@ -674,8 +694,9 @@ export class EquineSceneManager {
   }
 
   public isolateStructure(id: string | null): void {
+    const targetId = id ? (this.anchorMap[id]?.targetId ?? id) : null;
     Object.values(this.items).forEach((it) => {
-      it.visibleOverride = id ? it.record.id === id : true;
+      it.visibleOverride = targetId ? it.record.id === targetId : true;
     });
     this.applyVisualConfig(this.config, true);
     this.requestRender();
@@ -734,7 +755,8 @@ export class EquineSceneManager {
   }
 
   public focusOnStructure(id: string): void {
-    const it = this.items[id];
+    const targetId = this.anchorMap[id]?.targetId ?? id;
+    const it = this.items[targetId];
     if (!it || !it.hasMesh) return;
     const worldCenter = it.center.clone().add(it.group.position);
     const offset = this.camera.position.clone().sub(this.controls.target);
@@ -925,6 +947,7 @@ export class EquineSceneManager {
       it.hasMesh = true;
     }
     it.state = 'cargado';
+    this.anchorMap = buildAnatomyAnchorMap(this.items);
     this.applyVisualConfig(this.config, true);
     this.requestRender();
   }
@@ -1174,6 +1197,8 @@ export class EquineSceneManager {
     const clipPlanesForMat = this.activeClippingPlanes.length > 0 ? this.activeClippingPlanes : null;
 
     const ex = this.currentExplode;
+    const selectedTargetId = selectedId ? (this.anchorMap[selectedId]?.targetId ?? selectedId) : null;
+    const hoveredTargetId = hoveredId ? (this.anchorMap[hoveredId]?.targetId ?? hoveredId) : null;
 
     Object.values(this.items).forEach((it) => {
       if (!it.hasMesh) {
@@ -1214,8 +1239,8 @@ export class EquineSceneManager {
       this.applyItemExplosion(it, ex);
 
       const op = layerState.op / 100;
-      const isSel = selectedId === s.id;
-      const isHov = hoveredId === s.id;
+      const isSel = selectedTargetId === s.id;
+      const isHov = hoveredTargetId === s.id;
 
       if (renderMode === 'radiografia') {
         it.meshBackups.forEach((bk, idx) => {
@@ -1611,9 +1636,14 @@ export class EquineSceneManager {
     const candidates: Array<{ distFromCenter: number; label: ScreenLabel }> = [];
     const out: ScreenLabel[] = [];
 
+    const selectedId = this.config.selectedId;
+    const selectedAnchor = selectedId ? this.anchorMap[selectedId] : null;
+    const selectedTargetId = selectedAnchor?.targetId ?? selectedId;
+    const selectedRecord = selectedId ? this.items[selectedId]?.record : null;
+
     for (const it of Object.values(this.items)) {
       if (!it.hasMesh || !it.group.visible) continue;
-      const isSel = this.config.selectedId === it.record.id;
+      const isSel = selectedTargetId === it.record.id;
       if (!isSel && !showAuto) continue;
 
       _v3b.copy(it.center).add(it.group.position);
@@ -1621,10 +1651,11 @@ export class EquineSceneManager {
       if (_proj.z >= 1 || _proj.z < -1) continue;
       if (Math.abs(_proj.x) > 0.96 || Math.abs(_proj.y) > 0.92) continue;
 
+      const labelRecord = isSel && selectedRecord ? selectedRecord : it.record;
       const label: ScreenLabel = {
-        id: it.record.id,
-        es: it.record.es,
-        la: it.record.la,
+        id: labelRecord.id,
+        es: labelRecord.es,
+        la: labelRecord.la,
         x: ((_proj.x + 1) / 2) * w,
         y: ((1 - _proj.y) / 2) * h,
         selected: isSel,
