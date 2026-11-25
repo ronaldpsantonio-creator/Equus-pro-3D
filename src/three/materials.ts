@@ -91,6 +91,8 @@ export function createTissueMaterial(
       });
     case 'fascia':
       return new THREE.MeshPhysicalMaterial({
+        normalMap: tex.tendonNormal,
+        normalScale: new THREE.Vector2(0.32, 0.32),
         color: 0xe2e8f0,
         roughness: 0.32,
         metalness: 0.04,
@@ -127,6 +129,8 @@ export function createTissueMaterial(
       });
     case 'tendon':
       return new THREE.MeshPhysicalMaterial({
+        normalMap: tex.tendonNormal,
+        normalScale: new THREE.Vector2(0.55, 0.55),
         color: 0xf0ebe0,
         roughness: 0.25,
         metalness: 0.05,
@@ -141,8 +145,9 @@ export function createTissueMaterial(
         map: tex.boneColor,
         normalMap: tex.boneNormal,
         normalScale: new THREE.Vector2(0.45, 0.45),
+        roughnessMap: tex.boneRoughness,
         color: 0xf2ead7,
-        roughness: 0.58,
+        roughness: 0.62,
         metalness: 0.04,
         transparent: true,
       });
@@ -151,8 +156,9 @@ export function createTissueMaterial(
         map: tex.boneColor,
         normalMap: tex.boneNormal,
         normalScale: new THREE.Vector2(0.4, 0.4),
+        roughnessMap: tex.boneRoughness,
         color: 0xdccfb4,
-        roughness: 0.62,
+        roughness: 0.66,
         metalness: 0.04,
         transparent: true,
       });
@@ -219,10 +225,14 @@ export function createTissueMaterial(
       });
     case 'brain':
       return new THREE.MeshPhysicalMaterial({
-        color: 0xe6c7a8,
-        roughness: 0.46,
+        map: tex.brainColor,
+        normalMap: tex.brainNormal,
+        normalScale: new THREE.Vector2(0.75, 0.75),
+        color: 0xf2d9c2,
+        roughness: 0.42,
         metalness: 0.02,
-        clearcoat: 0.35,
+        clearcoat: 0.42,
+        clearcoatRoughness: 0.24,
         transparent: true,
       });
     case 'lung':

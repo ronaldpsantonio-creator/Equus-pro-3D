@@ -15,6 +15,7 @@ import {
   BreadcrumbStep,
   CAMERA_PRESETS,
   CameraPreset,
+  CameraProjectionMode,
   CutawayMode,
   FichaData,
   FichaSubView,
@@ -52,6 +53,9 @@ interface NavHistoryEntry {
   cutaway: CutawayMode;
   explode: number;
   renderMode: RenderViewMode;
+  cameraProjection: CameraProjectionMode;
+  xrayExposure: number;
+  xrayInverted: boolean;
   blindMode: boolean;
   dissectMode: boolean;
   mpr: MprSliceState;
@@ -121,6 +125,9 @@ export default function App() {
   const [isolated, setIsolated] = useState(false);
   const [labels, setLabels] = useState<ScreenLabel[]>([]);
   const [renderMode, setRenderMode] = useState<RenderViewMode>('anatomico');
+  const [cameraProjection, setCameraProjection] = useState<CameraProjectionMode>('perspective');
+  const [xrayExposure, setXrayExposure] = useState<number>(1.0);
+  const [xrayInverted, setXrayInverted] = useState<boolean>(false);
   const [sceneTheme, setSceneTheme] = useState<SceneTheme>(() =>
     loadJson<SceneTheme>('va_theme', 'oscuro'),
   );
@@ -137,9 +144,9 @@ export default function App() {
     (pos: [number, number, number], structureId?: string) => void
   >(() => {});
   const [mpr, setMpr] = useState<MprSliceState>({
-    sagittal: { enabled: false, value: 0 },
-    transverse: { enabled: false, value: 0.2 },
-    dorsal: { enabled: false, value: 1.1 },
+    sagittal: { enabled: false, value: 0, flip: false },
+    transverse: { enabled: false, value: 0.2, flip: false },
+    dorsal: { enabled: false, value: 1.1, flip: false },
   });
   const [referencePlane, setReferencePlane] = useState<ReferencePlaneConfig>({
     visible: false,
@@ -190,6 +197,9 @@ export default function App() {
       blindMode,
       vitalSigns,
       renderMode,
+      cameraProjection,
+      xrayExposure,
+      xrayInverted,
       sceneTheme,
       mpr,
     }),
@@ -205,6 +215,9 @@ export default function App() {
       blindMode,
       vitalSigns,
       renderMode,
+      cameraProjection,
+      xrayExposure,
+      xrayInverted,
       sceneTheme,
       mpr,
     ],
@@ -309,6 +322,9 @@ export default function App() {
         cutaway,
         explode,
         renderMode,
+        cameraProjection,
+        xrayExposure,
+        xrayInverted,
         blindMode,
         dissectMode,
         mpr: {
@@ -327,6 +343,9 @@ export default function App() {
       cutaway,
       explode,
       renderMode,
+      cameraProjection,
+      xrayExposure,
+      xrayInverted,
       blindMode,
       dissectMode,
       mpr,
@@ -472,6 +491,9 @@ export default function App() {
       setCutaway(entry.cutaway);
       setExplode(entry.explode);
       setRenderMode(entry.renderMode);
+      setCameraProjection(entry.cameraProjection);
+      setXrayExposure(entry.xrayExposure);
+      setXrayInverted(entry.xrayInverted);
       setBlindMode(entry.blindMode);
       setDissectMode(entry.dissectMode);
       setMpr(entry.mpr);
@@ -496,10 +518,13 @@ export default function App() {
     setMeasurements([]);
     setVitalSigns(false);
     setRenderMode('anatomico');
+    setCameraProjection('perspective');
+    setXrayExposure(1.0);
+    setXrayInverted(false);
     setMpr({
-      sagittal: { enabled: false, value: 0 },
-      transverse: { enabled: false, value: 0.2 },
-      dorsal: { enabled: false, value: 1.1 },
+      sagittal: { enabled: false, value: 0, flip: false },
+      transverse: { enabled: false, value: 0.2, flip: false },
+      dorsal: { enabled: false, value: 1.1, flip: false },
     });
     setReferencePlane((prev) => (prev.visible ? { ...prev, visible: false } : prev));
     setActiveTab('sistemas');
@@ -689,9 +714,9 @@ export default function App() {
 
   const handleResetMpr = useCallback(() => {
     setMpr({
-      sagittal: { enabled: false, value: 0 },
-      transverse: { enabled: false, value: 0.2 },
-      dorsal: { enabled: false, value: 1.1 },
+      sagittal: { enabled: false, value: 0, flip: false },
+      transverse: { enabled: false, value: 0.2, flip: false },
+      dorsal: { enabled: false, value: 1.1, flip: false },
     });
   }, []);
 
@@ -933,6 +958,7 @@ export default function App() {
     cutaway === 'none' &&
     explode === 0 &&
     renderMode === 'anatomico' &&
+    cameraProjection === 'perspective' &&
     !dissectMode &&
     measureMode === 'none' &&
     measurements.length === 0 &&
@@ -980,6 +1006,14 @@ export default function App() {
         id: `mode-${renderMode}`,
         label: renderMode === 'radiografia' ? 'Radiografía Rx' : 'Cortical TC',
         onClick: () => handleRenderModeChange('anatomico'),
+      });
+    }
+
+    if (cameraProjection === 'orthographic') {
+      steps.push({
+        id: 'proj-ortho',
+        label: 'Ortográfica 1:1',
+        onClick: () => setCameraProjection('perspective'),
       });
     }
 
@@ -1053,6 +1087,7 @@ export default function App() {
   }, [
     activeTab,
     blindMode,
+    cameraProjection,
     cutaway,
     fichaSubView,
     handleCutawayChange,
@@ -1080,7 +1115,10 @@ export default function App() {
   return (
     <div
       className={`relative h-screen w-screen overflow-hidden text-slate-100 select-none transition-colors ${
-        sceneTheme === 'atlas' && renderMode === 'anatomico' ? 'bg-[#e8edf3]' : 'bg-[#0c1118]'
+        (sceneTheme === 'atlas' && renderMode === 'anatomico') ||
+        (renderMode === 'radiografia' && xrayInverted)
+          ? 'bg-[#e8edf3]'
+          : 'bg-[#0c1118]'
       }`}
     >
       {/* Dedicated WebGL Mount */}
@@ -1165,6 +1203,7 @@ export default function App() {
         hiddenCount={hiddenCount}
         onRestoreHidden={handleRestoreHidden}
         renderMode={renderMode}
+        xrayInverted={xrayInverted}
         sceneTheme={sceneTheme}
         onToggleTheme={handleToggleTheme}
         canStepBack={navHistory.length > 0}
@@ -1249,6 +1288,12 @@ export default function App() {
         onSelectCameraPreset={handleSelectCameraPreset}
         renderMode={renderMode}
         onRenderModeChange={handleRenderModeChange}
+        cameraProjection={cameraProjection}
+        onCameraProjectionChange={setCameraProjection}
+        xrayExposure={xrayExposure}
+        onXrayExposureChange={setXrayExposure}
+        xrayInverted={xrayInverted}
+        onXrayInvertedChange={setXrayInverted}
         mpr={mpr}
         onMprChange={setMpr}
         onResetMpr={handleResetMpr}

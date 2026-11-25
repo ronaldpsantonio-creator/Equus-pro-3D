@@ -40,6 +40,7 @@ interface TopBarProps {
   hiddenCount: number;
   onRestoreHidden: () => void;
   renderMode: RenderViewMode;
+  xrayInverted?: boolean;
   sceneTheme: SceneTheme;
   onToggleTheme: () => void;
   canStepBack: boolean;
@@ -69,6 +70,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   hiddenCount,
   onRestoreHidden,
   renderMode,
+  xrayInverted,
   sceneTheme,
   onToggleTheme,
   canStepBack,
@@ -80,7 +82,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   hudHidden,
   onToggleHud,
 }) => {
-  const isLightBackdrop = sceneTheme === 'atlas' && renderMode === 'anatomico';
+  const isLightBackdrop =
+    (sceneTheme === 'atlas' && renderMode === 'anatomico') ||
+    (renderMode === 'radiografia' && !!xrayInverted);
 
   if (hudHidden) {
     return (

@@ -5,6 +5,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import {
+  CameraProjectionMode,
   CutawayMode,
   getCatalogSystem,
   LAYERS,
@@ -49,6 +50,7 @@ export interface SceneItemRuntime {
   visibleOverride: boolean;
   materials: THREE.MeshStandardMaterial[];
   baseColorHex: number[];
+  baseSides: THREE.Side[];
   meshBackups: MeshMaterialBackup[];
   xrayMaterials: THREE.ShaderMaterial[];
 }
@@ -65,6 +67,9 @@ export interface SceneVisualConfig {
   blindMode: boolean;
   vitalSigns: boolean;
   renderMode: RenderViewMode;
+  cameraProjection: CameraProjectionMode;
+  xrayExposure: number; // 0.6..1.6
+  xrayInverted: boolean;
   sceneTheme: SceneTheme;
   mpr: MprSliceState;
 }
@@ -113,6 +118,8 @@ uniform float uDensity;
 uniform float uOpacity;
 uniform float uSelected;
 uniform float uHovered;
+uniform float uExposure;
+uniform float uInverted;
 varying vec3 vNormalView;
 varying vec3 vViewPos;
 void main() {
@@ -121,25 +128,42 @@ void main() {
   float ndotv = abs(dot(normalize(vNormalView), V));
   float rim = pow(1.0 - clamp(ndotv, 0.0, 1.0), 1.45);
   float core = mix(0.08, 0.42, uDensity) * (0.35 + 0.65 * ndotv);
-  float intensity = clamp(core + rim * (0.48 + 0.52 * uDensity), 0.04, 1.0);
-  vec3 highlight = mix(uColor, vec3(0.10, 0.92, 0.80), uSelected * 0.72);
-  highlight = mix(highlight, vec3(0.96, 0.65, 0.14), uHovered * 0.55 * (1.0 - uSelected));
-  float alpha = clamp(intensity * uOpacity * (0.28 + 0.72 * uDensity), 0.03, 0.95);
-  gl_FragColor = vec4(highlight * (0.72 + 0.68 * rim), alpha);
+  float intensity = clamp((core + rim * (0.48 + 0.52 * uDensity)) * uExposure, 0.04, 1.0);
+  float alpha = clamp(intensity * uOpacity * (0.28 + 0.72 * uDensity), 0.03, 0.96);
+
+  if (uInverted > 0.5) {
+    vec3 negTone = mix(vec3(0.58, 0.65, 0.74), vec3(0.08, 0.12, 0.19), clamp(uDensity * (0.52 + 0.48 * rim) * uExposure, 0.0, 1.0));
+    negTone = mix(negTone, vec3(0.04, 0.56, 0.50), uSelected * 0.78);
+    negTone = mix(negTone, vec3(0.85, 0.42, 0.06), uHovered * 0.65 * (1.0 - uSelected));
+    gl_FragColor = vec4(negTone, clamp(alpha * 1.08, 0.05, 0.96));
+  } else {
+    vec3 highlight = mix(uColor, vec3(0.10, 0.92, 0.80), uSelected * 0.72);
+    highlight = mix(highlight, vec3(0.96, 0.65, 0.14), uHovered * 0.55 * (1.0 - uSelected));
+    gl_FragColor = vec4(highlight * (0.72 + 0.68 * rim) * uExposure, alpha);
+  }
 }
 `;
 
-function getXraySpecForLayer(layer: LayerCode): { color: number; density: number } {
+function getXraySpecForItem(id: string, layer: LayerCode): { color: number; density: number } {
+  if (id.startsWith('equ.res.pul.') || id.startsWith('equ.res.tra.') || id.startsWith('equ.res.cav.')) {
+    return { color: 0x38bdf8, density: 0.14 }; // radiolucent air-filled airways & lungs
+  }
+  if (id.startsWith('equ.dig.cie.') || id.startsWith('equ.dig.col.')) {
+    return { color: 0x60a5fa, density: 0.24 }; // gas-containing large intestine
+  }
+  if (id.startsWith('equ.teg.cmp.') || id.startsWith('equ.teg.cmt.')) {
+    return { color: 0x93c5fd, density: 0.52 }; // dense keratin hoof wall
+  }
   switch (layer) {
     case 'oss':
       return { color: 0xeaf4ff, density: 1.0 };
     case 'art':
-      return { color: 0xbae6fd, density: 0.6 };
+      return { color: 0xbae6fd, density: 0.58 };
     case 'org':
     case 'vas':
-      return { color: 0x7dd3fc, density: 0.36 };
+      return { color: 0x7dd3fc, density: 0.42 };
     case 'ner':
-      return { color: 0xfde047, density: 0.32 };
+      return { color: 0xfde047, density: 0.34 };
     case 'msu':
     case 'mpr':
     case 'fas':
@@ -151,7 +175,13 @@ function getXraySpecForLayer(layer: LayerCode): { color: number; density: number
   }
 }
 
-function getCtColorForLayer(layer: LayerCode, baseHex: number): number {
+function getCtColorForItem(id: string, layer: LayerCode, baseHex: number): number {
+  if (id.startsWith('equ.res.pul.') || id.startsWith('equ.res.tra.') || id.startsWith('equ.res.cav.')) {
+    return 0x1e293b; // aerated pulmonary parenchyma / airway lumen
+  }
+  if (id.startsWith('equ.teg.cmp.') || id.startsWith('equ.teg.cmt.')) {
+    return 0xd6d3d1; // dense hoof capsule
+  }
   switch (layer) {
     case 'oss':
       return 0xf8fafc;
@@ -165,10 +195,10 @@ function getCtColorForLayer(layer: LayerCode, baseHex: number): number {
       return 0xcbd5e1;
     case 'msu':
     case 'mpr':
-      return 0x94a3b8;
+      return 0x64748b;
     case 'fas':
     case 'pel':
-      return 0x475569;
+      return 0x334155;
     default:
       return baseHex;
   }
@@ -195,7 +225,11 @@ export class EquineSceneManager {
   private isSoftwareGl: boolean;
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
+  private perspCamera: THREE.PerspectiveCamera;
+  private orthoCamera: THREE.OrthographicCamera;
+  private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
+  private readonly orthoBaseHalfHeight = 1.35;
+  private orthoZoomTarget = 1.0;
   private controls: OrbitControls;
   private textures: ProceduralTextureSet;
   private envRT: THREE.WebGLRenderTarget | null = null;
@@ -215,6 +249,7 @@ export class EquineSceneManager {
   private bgStandard = new THREE.Color(0x0c1118);
   private bgAtlas = new THREE.Color(0xe8edf3);
   private bgXray = new THREE.Color(0x04070c);
+  private bgXrayInverted = new THREE.Color(0xf1f5f9);
   private bgCt = new THREE.Color(0x070b11);
 
   // MPR CT-style clipping planes & visual slice guides
@@ -225,6 +260,7 @@ export class EquineSceneManager {
   private lastClipCount = 0;
   private lastRenderMode: RenderViewMode = 'anatomico';
   private lastSceneTheme: SceneTheme = 'oscuro';
+  private lastProjectionMode: CameraProjectionMode = 'perspective';
 
   private sagittalGuide: THREE.LineLoop;
   private transverseGuide: THREE.LineLoop;
@@ -308,8 +344,20 @@ export class EquineSceneManager {
     this.scene.background = this.bgStandard.clone();
     this.scene.fog = new THREE.FogExp2(0x0c1118, 0.055);
 
-    this.camera = new THREE.PerspectiveCamera(40, width / height, 0.05, 60);
-    this.camera.position.copy(_camPosTarget);
+    const aspect = width / height;
+    this.perspCamera = new THREE.PerspectiveCamera(40, aspect, 0.05, 60);
+    this.perspCamera.position.copy(_camPosTarget);
+
+    this.orthoCamera = new THREE.OrthographicCamera(
+      -this.orthoBaseHalfHeight * aspect,
+      this.orthoBaseHalfHeight * aspect,
+      this.orthoBaseHalfHeight,
+      -this.orthoBaseHalfHeight,
+      0.05,
+      60,
+    );
+    this.orthoCamera.position.copy(_camPosTarget);
+    this.camera = this.perspCamera;
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.copy(_camLookTarget);
@@ -317,6 +365,8 @@ export class EquineSceneManager {
     this.controls.dampingFactor = 0.06;
     this.controls.minDistance = 0.45;
     this.controls.maxDistance = 8.5;
+    this.controls.minZoom = 0.3;
+    this.controls.maxZoom = 7.5;
     this.controls.maxPolarAngle = Math.PI * 0.52;
     this.controls.update();
 
@@ -474,8 +524,8 @@ export class EquineSceneManager {
     this.scene.add(fg);
   }
 
-  private buildXrayMaterialForLayer(layer: LayerCode): THREE.ShaderMaterial {
-    const spec = getXraySpecForLayer(layer);
+  private buildXrayMaterialForItem(id: string, layer: LayerCode): THREE.ShaderMaterial {
+    const spec = getXraySpecForItem(id, layer);
     return new THREE.ShaderMaterial({
       uniforms: {
         uColor: { value: new THREE.Color(spec.color) },
@@ -483,6 +533,8 @@ export class EquineSceneManager {
         uOpacity: { value: 1.0 },
         uSelected: { value: 0.0 },
         uHovered: { value: 0.0 },
+        uExposure: { value: 1.0 },
+        uInverted: { value: 0.0 },
       },
       vertexShader: XRAY_VERTEX_SHADER,
       fragmentShader: XRAY_FRAGMENT_SHADER,
@@ -501,11 +553,13 @@ export class EquineSceneManager {
   ): {
     mats: THREE.MeshStandardMaterial[];
     baseColorHex: number[];
+    baseSides: THREE.Side[];
     meshBackups: MeshMaterialBackup[];
     xrayMaterials: THREE.ShaderMaterial[];
   } {
     const mats: THREE.MeshStandardMaterial[] = [];
     const baseColorHex: number[] = [];
+    const baseSides: THREE.Side[] = [];
     const meshBackups: MeshMaterialBackup[] = [];
     const xrayMaterials: THREE.ShaderMaterial[] = [];
 
@@ -519,6 +573,7 @@ export class EquineSceneManager {
             if (mat instanceof THREE.MeshStandardMaterial) {
               mats.push(mat);
               baseColorHex.push(mat.color.getHex());
+              baseSides.push(mat.side);
             }
             return mat;
           });
@@ -530,6 +585,7 @@ export class EquineSceneManager {
           m.material = mat;
           mats.push(mat);
           baseColorHex.push(mat.color.getHex());
+          baseSides.push(mat.side);
         } else {
           const fallbackMat = new THREE.MeshStandardMaterial({
             color: 0xe2dcd0,
@@ -539,10 +595,11 @@ export class EquineSceneManager {
           m.material = fallbackMat;
           mats.push(fallbackMat);
           baseColorHex.push(fallbackMat.color.getHex());
+          baseSides.push(fallbackMat.side);
         }
 
         meshBackups.push({ mesh: m, original: m.material });
-        const xrayMat = this.buildXrayMaterialForLayer(layer);
+        const xrayMat = this.buildXrayMaterialForItem(id, layer);
         xrayMaterials.push(xrayMat);
 
         m.userData.id = id;
@@ -552,7 +609,7 @@ export class EquineSceneManager {
       }
     });
 
-    return { mats, baseColorHex, meshBackups, xrayMaterials };
+    return { mats, baseColorHex, baseSides, meshBackups, xrayMaterials };
   }
 
   public populateCatalog(structures: StructureRecord[]): {
@@ -609,7 +666,7 @@ export class EquineSceneManager {
         matchedIds.add(s.id);
       }
 
-      const { mats, baseColorHex, meshBackups, xrayMaterials } = this.captureMeshMaterialsForItem(
+      const { mats, baseColorHex, baseSides, meshBackups, xrayMaterials } = this.captureMeshMaterialsForItem(
         group,
         s.id,
         s.layer,
@@ -632,6 +689,7 @@ export class EquineSceneManager {
         visibleOverride: true,
         materials: mats,
         baseColorHex,
+        baseSides,
         meshBackups,
         xrayMaterials,
       };
@@ -747,9 +805,40 @@ export class EquineSceneManager {
     this.requestRender();
   }
 
+  private syncProjectionCamera(mode: CameraProjectionMode): void {
+    if (mode === this.lastProjectionMode) return;
+    this.lastProjectionMode = mode;
+    const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(this.perspCamera.fov * 0.5));
+
+    if (mode === 'orthographic') {
+      const dist = Math.max(this.perspCamera.position.distanceTo(this.controls.target), 0.2);
+      const halfH = Math.max(dist * tanHalfFov, 0.18);
+      this.orthoCamera.position.copy(this.perspCamera.position);
+      this.orthoCamera.zoom = THREE.MathUtils.clamp(this.orthoBaseHalfHeight / halfH, 0.3, 7.5);
+      this.orthoZoomTarget = this.orthoCamera.zoom;
+      this.orthoCamera.updateProjectionMatrix();
+      this.camera = this.orthoCamera;
+    } else {
+      const targetHalfH = this.orthoBaseHalfHeight / Math.max(this.orthoCamera.zoom, 0.25);
+      const equivDist = THREE.MathUtils.clamp(targetHalfH / tanHalfFov, 0.45, 8.5);
+      _v3.subVectors(this.orthoCamera.position, this.controls.target);
+      if (_v3.lengthSq() < 1e-6) _v3.set(0, 0, -1);
+      else _v3.normalize();
+      this.perspCamera.position.copy(this.controls.target).addScaledVector(_v3, equivDist);
+      this.perspCamera.updateProjectionMatrix();
+      this.camera = this.perspCamera;
+    }
+
+    this.controls.object = this.camera;
+    this.controls.update();
+  }
+
   public setCameraView(pos: [number, number, number], target: [number, number, number]): void {
     _camPosTarget.set(pos[0], pos[1], pos[2]);
     _camLookTarget.set(target[0], target[1], target[2]);
+    const dist = Math.max(_camPosTarget.distanceTo(_camLookTarget), 0.25);
+    const halfH = dist * Math.tan(THREE.MathUtils.degToRad(this.perspCamera.fov * 0.5));
+    this.orthoZoomTarget = THREE.MathUtils.clamp(this.orthoBaseHalfHeight / halfH, 0.3, 7.5);
     this.cameraAnimating = true;
     this.startLoopIfActive();
   }
@@ -761,9 +850,12 @@ export class EquineSceneManager {
     const worldCenter = it.center.clone().add(it.group.position);
     const offset = this.camera.position.clone().sub(this.controls.target);
     const dist = THREE.MathUtils.clamp(offset.length(), 0.75, 2.2);
+    if (offset.lengthSq() < 1e-6) offset.set(0, 0, -1);
     offset.normalize().multiplyScalar(dist);
     _camLookTarget.copy(worldCenter);
     _camPosTarget.copy(worldCenter).add(offset);
+    const halfH = dist * Math.tan(THREE.MathUtils.degToRad(this.perspCamera.fov * 0.5));
+    this.orthoZoomTarget = THREE.MathUtils.clamp(this.orthoBaseHalfHeight / halfH, 0.3, 7.5);
     this.cameraAnimating = true;
     this.startLoopIfActive();
   }
@@ -772,9 +864,12 @@ export class EquineSceneManager {
     const targetPt = new THREE.Vector3(pos[0], pos[1], pos[2]);
     const offset = this.camera.position.clone().sub(this.controls.target);
     const dist = THREE.MathUtils.clamp(offset.length(), 0.75, 2.4);
+    if (offset.lengthSq() < 1e-6) offset.set(0, 0, -1);
     offset.normalize().multiplyScalar(dist);
     _camLookTarget.copy(targetPt);
     _camPosTarget.copy(targetPt).add(offset);
+    const halfH = dist * Math.tan(THREE.MathUtils.degToRad(this.perspCamera.fov * 0.5));
+    this.orthoZoomTarget = THREE.MathUtils.clamp(this.orthoBaseHalfHeight / halfH, 0.3, 7.5);
     this.cameraAnimating = true;
     this.startLoopIfActive();
   }
@@ -929,6 +1024,7 @@ export class EquineSceneManager {
     );
     it.materials = captured.mats;
     it.baseColorHex = captured.baseColorHex;
+    it.baseSides = captured.baseSides;
     it.meshBackups = captured.meshBackups;
     it.xrayMaterials = captured.xrayMaterials;
 
@@ -1088,24 +1184,40 @@ export class EquineSceneManager {
   public applyVisualConfig(nextConfig: SceneVisualConfig, immediate = false): void {
     const prevVital = this.config.vitalSigns;
     this.config = nextConfig;
-    const { layers, systems, sex, cutaway, selectedId, hoveredId, renderMode, sceneTheme, mpr } =
-      nextConfig;
+    const {
+      layers,
+      systems,
+      sex,
+      cutaway,
+      selectedId,
+      hoveredId,
+      renderMode,
+      cameraProjection,
+      xrayExposure,
+      xrayInverted,
+      sceneTheme,
+      mpr,
+    } = nextConfig;
+
+    this.syncProjectionCamera(cameraProjection);
 
     if (immediate) {
       this.currentExplode = nextConfig.explode / 100;
     }
 
-    // Update scene backdrop, floor, & lighting balance for imaging mode / theme
+    // Update scene backdrop, floor, & lighting balance for imaging mode / theme / projection
     const modeChanged = renderMode !== this.lastRenderMode;
     const themeChanged = sceneTheme !== this.lastSceneTheme;
     this.lastRenderMode = renderMode;
     this.lastSceneTheme = sceneTheme;
+    const fogMult = cameraProjection === 'orthographic' ? 0 : 1;
 
     if (renderMode === 'radiografia') {
-      this.scene.background = this.bgXray;
+      const rxBg = xrayInverted ? this.bgXrayInverted : this.bgXray;
+      this.scene.background = rxBg;
       if (this.scene.fog instanceof THREE.FogExp2) {
-        this.scene.fog.color.copy(this.bgXray);
-        this.scene.fog.density = 0.055;
+        this.scene.fog.color.copy(rxBg);
+        this.scene.fog.density = (xrayInverted ? 0.0 : 0.055) * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = false;
       this.renderer.toneMappingExposure = 1.12;
@@ -1113,7 +1225,7 @@ export class EquineSceneManager {
       this.scene.background = this.bgCt;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(this.bgCt);
-        this.scene.fog.density = 0.055;
+        this.scene.fog.density = 0.055 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
       if (this.floorMat) this.floorMat.color.setHex(0x0f1621);
@@ -1130,7 +1242,7 @@ export class EquineSceneManager {
       this.scene.background = this.bgAtlas;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(this.bgAtlas);
-        this.scene.fog.density = 0.022;
+        this.scene.fog.density = 0.022 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
       if (this.floorMat) this.floorMat.color.setHex(0xdfe5ee);
@@ -1147,7 +1259,7 @@ export class EquineSceneManager {
       this.scene.background = this.bgStandard;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(this.bgStandard);
-        this.scene.fog.density = 0.055;
+        this.scene.fog.density = 0.055 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
       if (this.floorMat) this.floorMat.color.setHex(0x0f1621);
@@ -1163,10 +1275,16 @@ export class EquineSceneManager {
     }
     void themeChanged;
 
-    // Update MPR clipping planes & guide lines
+    // Update bidirectional MPR clipping planes & guide lines
     this.activeClippingPlanes.length = 0;
     if (mpr.sagittal.enabled) {
-      this.sagittalPlane.constant = mpr.sagittal.value;
+      if (mpr.sagittal.flip) {
+        this.sagittalPlane.normal.set(0, 0, 1);
+        this.sagittalPlane.constant = -mpr.sagittal.value;
+      } else {
+        this.sagittalPlane.normal.set(0, 0, -1);
+        this.sagittalPlane.constant = mpr.sagittal.value;
+      }
       this.activeClippingPlanes.push(this.sagittalPlane);
       this.sagittalGuide.position.z = mpr.sagittal.value;
       this.sagittalGuide.visible = true;
@@ -1175,7 +1293,13 @@ export class EquineSceneManager {
     }
 
     if (mpr.transverse.enabled) {
-      this.transversePlane.constant = mpr.transverse.value;
+      if (mpr.transverse.flip) {
+        this.transversePlane.normal.set(1, 0, 0);
+        this.transversePlane.constant = -mpr.transverse.value;
+      } else {
+        this.transversePlane.normal.set(-1, 0, 0);
+        this.transversePlane.constant = mpr.transverse.value;
+      }
       this.activeClippingPlanes.push(this.transversePlane);
       this.transverseGuide.position.x = mpr.transverse.value;
       this.transverseGuide.visible = true;
@@ -1184,7 +1308,13 @@ export class EquineSceneManager {
     }
 
     if (mpr.dorsal.enabled) {
-      this.dorsalPlane.constant = mpr.dorsal.value;
+      if (mpr.dorsal.flip) {
+        this.dorsalPlane.normal.set(0, 1, 0);
+        this.dorsalPlane.constant = -mpr.dorsal.value;
+      } else {
+        this.dorsalPlane.normal.set(0, -1, 0);
+        this.dorsalPlane.constant = mpr.dorsal.value;
+      }
       this.activeClippingPlanes.push(this.dorsalPlane);
       this.dorsalGuide.position.y = mpr.dorsal.value;
       this.dorsalGuide.visible = true;
@@ -1252,6 +1382,8 @@ export class EquineSceneManager {
             xm.uniforms.uOpacity.value = isSel ? Math.max(op, 0.92) : op;
             xm.uniforms.uSelected.value = isSel ? 1.0 : 0.0;
             xm.uniforms.uHovered.value = isHov ? 1.0 : 0.0;
+            xm.uniforms.uExposure.value = xrayExposure;
+            xm.uniforms.uInverted.value = xrayInverted ? 1.0 : 0.0;
             xm.clippingPlanes = clipPlanesForMat;
             if (clipCountChanged || modeChanged) xm.needsUpdate = true;
           }
@@ -1266,7 +1398,7 @@ export class EquineSceneManager {
         it.materials.forEach((m, idx) => {
           const baseHex = it.baseColorHex[idx] ?? 0xe2dcd0;
           if (renderMode === 'tc') {
-            m.color.setHex(getCtColorForLayer(s.layer, baseHex));
+            m.color.setHex(getCtColorForItem(s.id, s.layer, baseHex));
           } else {
             m.color.setHex(baseHex);
           }
@@ -1274,7 +1406,14 @@ export class EquineSceneManager {
           m.depthWrite = op > 0.85;
           m.clippingPlanes = clipPlanesForMat;
           m.clipShadows = true;
-          if (clipCountChanged || modeChanged) m.needsUpdate = true;
+          const desiredSide =
+            clipPlanesForMat !== null ? THREE.DoubleSide : (it.baseSides[idx] ?? THREE.FrontSide);
+          if (m.side !== desiredSide) {
+            m.side = desiredSide;
+            m.needsUpdate = true;
+          } else if (clipCountChanged || modeChanged) {
+            m.needsUpdate = true;
+          }
 
           if (isSel) {
             m.emissive.setHex(0x14b8a6);
@@ -1351,8 +1490,16 @@ export class EquineSceneManager {
     if (this.disposed) return;
     const w = Math.max(this.container.clientWidth, 1);
     const h = Math.max(this.container.clientHeight, 1);
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
+    const aspect = w / h;
+    this.perspCamera.aspect = aspect;
+    this.perspCamera.updateProjectionMatrix();
+
+    this.orthoCamera.left = -this.orthoBaseHalfHeight * aspect;
+    this.orthoCamera.right = this.orthoBaseHalfHeight * aspect;
+    this.orthoCamera.top = this.orthoBaseHalfHeight;
+    this.orthoCamera.bottom = -this.orthoBaseHalfHeight;
+    this.orthoCamera.updateProjectionMatrix();
+
     this.renderer.setSize(w, h, false);
     this.requestRender();
   };
@@ -1563,14 +1710,30 @@ export class EquineSceneManager {
     if (this.cameraAnimating) {
       const posDist = this.camera.position.distanceTo(_camPosTarget);
       const tgtDist = this.controls.target.distanceTo(_camLookTarget);
-      if (posDist > 0.006 || tgtDist > 0.006) {
+      const zoomDiff =
+        this.camera === this.orthoCamera
+          ? Math.abs(this.orthoCamera.zoom - this.orthoZoomTarget)
+          : 0;
+      if (posDist > 0.006 || tgtDist > 0.006 || zoomDiff > 0.008) {
         const alpha = 1 - Math.exp(-7 * dt);
         this.camera.position.lerp(_camPosTarget, alpha);
         this.controls.target.lerp(_camLookTarget, alpha);
+        if (this.camera === this.orthoCamera) {
+          this.orthoCamera.zoom = THREE.MathUtils.lerp(
+            this.orthoCamera.zoom,
+            this.orthoZoomTarget,
+            alpha,
+          );
+          this.orthoCamera.updateProjectionMatrix();
+        }
         active = true;
       } else {
         this.camera.position.copy(_camPosTarget);
         this.controls.target.copy(_camLookTarget);
+        if (this.camera === this.orthoCamera) {
+          this.orthoCamera.zoom = this.orthoZoomTarget;
+          this.orthoCamera.updateProjectionMatrix();
+        }
         this.cameraAnimating = false;
       }
     }

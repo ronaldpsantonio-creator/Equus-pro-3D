@@ -10,9 +10,13 @@ export interface ProceduralTextureSet {
   boneColor: THREE.CanvasTexture;
   boneBump: THREE.CanvasTexture;
   boneNormal: THREE.CanvasTexture;
+  boneRoughness: THREE.CanvasTexture;
   hoofColor: THREE.CanvasTexture;
   hoofBump: THREE.CanvasTexture;
   hoofNormal: THREE.CanvasTexture;
+  brainColor: THREE.CanvasTexture;
+  brainNormal: THREE.CanvasTexture;
+  tendonNormal: THREE.CanvasTexture;
   lungColor: THREE.CanvasTexture;
   floorShadow: THREE.CanvasTexture;
   dispose: () => void;
@@ -252,6 +256,22 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
 
   const boneNormal = bumpCanvasToNormalTexture(boneBC, 1.15, [1, 1], false, aniso);
 
+  const [boneRC, boneRCtx] = makeCanvas(256, 256);
+  boneRCtx.fillStyle = '#9a9a9a';
+  boneRCtx.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 1600; i++) {
+    const x = rand() * 256;
+    const y = rand() * 256;
+    const shade = i % 2 === 0 ? 128 : 178;
+    boneRCtx.fillStyle = `rgb(${shade},${shade},${shade})`;
+    boneRCtx.fillRect(x, y, 2 + rand() * 6, 1 + rand() * 2);
+  }
+  const boneRoughness = new THREE.CanvasTexture(boneRC);
+  boneRoughness.colorSpace = THREE.NoColorSpace;
+  boneRoughness.wrapS = THREE.RepeatWrapping;
+  boneRoughness.wrapT = THREE.RepeatWrapping;
+  boneRoughness.anisotropy = aniso;
+
   // 4. Equine keratin hoof wall texture (vertical horn tubules + horizontal growth rings)
   const [hoofC, hoofCtx] = makeCanvas(256, 256);
   const [hoofBC, hoofBCtx] = makeCanvas(256, 256);
@@ -312,6 +332,52 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   lungColor.wrapT = THREE.RepeatWrapping;
   lungColor.anisotropy = aniso;
 
+  // 5b. Equine cerebral gyri & sulci cortical pattern (256x256 color + normal)
+  const [brC, brCtx] = makeCanvas(256, 256);
+  const [brBC, brBCtx] = makeCanvas(256, 256);
+  brCtx.fillStyle = '#e7c6a9';
+  brCtx.fillRect(0, 0, 256, 256);
+  brBCtx.fillStyle = '#a8a8a8';
+  brBCtx.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 95; i++) {
+    let px = rand() * 256;
+    let py = rand() * 256;
+    let ang = rand() * Math.PI * 2;
+    brCtx.strokeStyle = i % 3 === 0 ? 'rgba(138, 86, 72, 0.34)' : 'rgba(168, 114, 96, 0.25)';
+    brCtx.lineWidth = 2.1;
+    brBCtx.strokeStyle = 'rgb(62,62,62)';
+    brBCtx.lineWidth = 3.2;
+    brCtx.beginPath();
+    brBCtx.beginPath();
+    brCtx.moveTo(px, py);
+    brBCtx.moveTo(px, py);
+    for (let s = 0; s < 5; s++) {
+      ang += (rand() - 0.5) * 1.4;
+      px += Math.cos(ang) * 14;
+      py += Math.sin(ang) * 14;
+      brCtx.lineTo(px, py);
+      brBCtx.lineTo(px, py);
+    }
+    brCtx.stroke();
+    brBCtx.stroke();
+  }
+  const brainColor = new THREE.CanvasTexture(brC);
+  brainColor.colorSpace = THREE.SRGBColorSpace;
+  brainColor.wrapS = THREE.RepeatWrapping;
+  brainColor.wrapT = THREE.RepeatWrapping;
+  brainColor.anisotropy = aniso;
+
+  const brainNormal = bumpCanvasToNormalTexture(brBC, 1.35, [2, 2], false, aniso);
+
+  // 5c. Parallel collagen crimp normal map for tendons & fascia
+  const [tenBC, tenBCtx] = makeCanvas(128, 128);
+  for (let x = 0; x < 128; x += 2) {
+    const v = Math.round(128 + Math.sin((x / 128) * Math.PI * 32) * 38);
+    tenBCtx.fillStyle = `rgb(${v},${v},${v})`;
+    tenBCtx.fillRect(x, 0, 2, 128);
+  }
+  const tendonNormal = bumpCanvasToNormalTexture(tenBC, 1.0, [2, 4], false, aniso);
+
   // 6. Soft radial contact shadow beneath hooves
   const [shC, shCtx] = makeCanvas(512, 512);
   const rad = shCtx.createRadialGradient(256, 256, 28, 256, 256, 245);
@@ -333,9 +399,13 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     boneColor,
     boneBump,
     boneNormal,
+    boneRoughness,
     hoofColor,
     hoofBump,
     hoofNormal,
+    brainColor,
+    brainNormal,
+    tendonNormal,
     lungColor,
     floorShadow,
     dispose: () => {
@@ -348,9 +418,13 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
       boneColor.dispose();
       boneBump.dispose();
       boneNormal.dispose();
+      boneRoughness.dispose();
       hoofColor.dispose();
       hoofBump.dispose();
       hoofNormal.dispose();
+      brainColor.dispose();
+      brainNormal.dispose();
+      tendonNormal.dispose();
       lungColor.dispose();
       floorShadow.dispose();
     },

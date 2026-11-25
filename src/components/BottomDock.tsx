@@ -18,6 +18,7 @@ import {
   BreadcrumbStep,
   CAMERA_PRESETS,
   CameraPreset,
+  CameraProjectionMode,
   CutawayMode,
   FichaData,
   FichaSubView,
@@ -101,6 +102,12 @@ interface BottomDockProps {
   // Imaging (TC / Rx / MPR / Calibrated Plane)
   renderMode: RenderViewMode;
   onRenderModeChange: (mode: RenderViewMode) => void;
+  cameraProjection: CameraProjectionMode;
+  onCameraProjectionChange: (proj: CameraProjectionMode) => void;
+  xrayExposure: number;
+  onXrayExposureChange: (val: number) => void;
+  xrayInverted: boolean;
+  onXrayInvertedChange: (inv: boolean) => void;
   mpr: MprSliceState;
   onMprChange: (next: MprSliceState) => void;
   onResetMpr: () => void;
@@ -205,6 +212,12 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     onSelectCameraPreset,
     renderMode,
     onRenderModeChange,
+    cameraProjection,
+    onCameraProjectionChange,
+    xrayExposure,
+    onXrayExposureChange,
+    xrayInverted,
+    onXrayInvertedChange,
     mpr,
     onMprChange,
     onResetMpr,
@@ -652,6 +665,12 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
               <ImagingTab
                 renderMode={renderMode}
                 onRenderModeChange={onRenderModeChange}
+                cameraProjection={cameraProjection}
+                onCameraProjectionChange={onCameraProjectionChange}
+                xrayExposure={xrayExposure}
+                onXrayExposureChange={onXrayExposureChange}
+                xrayInverted={xrayInverted}
+                onXrayInvertedChange={onXrayInvertedChange}
                 mpr={mpr}
                 onMprChange={onMprChange}
                 onResetMpr={onResetMpr}
@@ -659,9 +678,14 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 onReferencePlaneChange={onReferencePlaneChange}
                 onUploadReferenceImage={onUploadReferenceImage}
                 onSelectPresetCamera={(mode) => {
-                  const targetPreset = CAMERA_PRESETS.find((p) =>
-                    mode === 'distal' ? p.id === 'casco' : p.id === 'lat-izq',
-                  );
+                  const idMap = {
+                    distal: 'casco',
+                    lat: 'lat-izq',
+                    frontal: 'frontal',
+                    dorsal: 'dorsal',
+                    cabeza: 'cabeza',
+                  } as const;
+                  const targetPreset = CAMERA_PRESETS.find((p) => p.id === idMap[mode]);
                   if (targetPreset) onSelectCameraPreset(targetPreset);
                 }}
                 measureMode={measureMode}
@@ -675,9 +699,34 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
             {/* Tab 4: Camera Presets */}
             {activeTab === 'camaras' && (
               <div className="space-y-2.5">
-                <div className="text-[11px] text-slate-400">
-                  Vistas anatómicas rápidas · Doble clic en cualquier estructura del caballo para
-                  enfocarla directamente
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] text-slate-400">
+                    Vistas anatómicas rápidas · Doble clic en cualquier estructura para enfocarla
+                  </div>
+                  <div className="flex items-center gap-0.5 rounded-lg border border-slate-800 bg-slate-950/70 p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => onCameraProjectionChange('perspective')}
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        cameraProjection === 'perspective'
+                          ? 'bg-slate-700 text-white'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      Perspectiva
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onCameraProjectionChange('orthographic')}
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        cameraProjection === 'orthographic'
+                          ? 'bg-cyan-500 text-slate-950'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      Ortográfica 1:1
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {CAMERA_PRESETS.map((preset) => (
@@ -733,6 +782,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 sex={sex}
                 progress={quizProgress}
                 hasMeshFn={hasMeshFn}
+                has3DAnchorFn={has3DAnchorFn}
                 getVisible3DIdsFn={getVisible3DIdsFn}
                 onProgressChange={onQuizProgressChange}
                 onHighlightStructure={onQuizHighlight}

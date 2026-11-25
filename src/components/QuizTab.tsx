@@ -14,6 +14,7 @@ interface QuizTabProps {
   sex: SexFilter;
   progress: QuizProgress;
   hasMeshFn: (id: string) => boolean;
+  has3DAnchorFn?: (id: string) => boolean;
   getVisible3DIdsFn: () => string[];
   onProgressChange: (next: QuizProgress) => void;
   onHighlightStructure: (id: string | null, forceBlind: boolean) => void;
@@ -76,6 +77,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({
   sex,
   progress,
   hasMeshFn,
+  has3DAnchorFn,
   getVisible3DIdsFn,
   onProgressChange,
   onHighlightStructure,
@@ -115,7 +117,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({
       const toEs = Math.random() < 0.5;
       const ans = toEs ? baseName(target) : target.la;
       const dist = buildDistractors(valid, target, (x) => (toEs ? baseName(x) : x.la), ans);
-      onHighlightStructure(hasMeshFn(target.id) ? target.id : null, false);
+      const has3D = hasMeshFn(target.id) || (has3DAnchorFn?.(target.id) ?? false);
+      onHighlightStructure(has3D ? target.id : null, false);
       setCurrent({
         mode: 'nombre',
         id: target.id,
@@ -208,6 +211,11 @@ export const QuizTab: React.FC<QuizTabProps> = ({
   const topMissed = Object.values(progress.miss)
     .sort((a, b) => b.c - a.c)
     .slice(0, 4);
+
+  const practicedSystems = SYSTEMS.map((sy) => ({
+    ...sy,
+    stat: progress.sys[sy.code],
+  })).filter((item) => item.stat && item.stat.n > 0);
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
@@ -411,6 +419,38 @@ export const QuizTab: React.FC<QuizTabProps> = ({
             </div>
           </div>
         </div>
+
+        {practicedSystems.length > 0 && (
+          <div>
+            <div className="text-[11px] font-medium text-slate-400">Rendimiento por sistema</div>
+            <div className="mt-1 space-y-1">
+              {practicedSystems.slice(0, 5).map((item) => {
+                const n = item.stat?.n || 0;
+                const ok = item.stat?.ok || 0;
+                const ratio = n > 0 ? Math.round((ok / n) * 100) : 0;
+                return (
+                  <div key={item.code} className="flex items-center gap-2 text-[11px]">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-sm"
+                      style={{ backgroundColor: item.color }}
+                      aria-hidden="true"
+                    />
+                    <span className="w-24 truncate text-slate-300">{item.label}</span>
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-800">
+                      <div
+                        className="h-full rounded-full bg-teal-400"
+                        style={{ width: `${ratio}%` }}
+                      />
+                    </div>
+                    <span className="font-mono text-[10px] text-slate-400 tabular-nums shrink-0">
+                      {ok}/{n}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {topMissed.length > 0 && (
           <div>

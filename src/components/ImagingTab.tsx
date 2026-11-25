@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import {
+  ArrowLeftRight,
+  Box,
   DraftingCompass,
   EyeOff,
   ImagePlus,
@@ -8,6 +10,8 @@ import {
   Ruler,
   ScanLine,
   SlidersHorizontal,
+  Square,
+  SunMoon,
   Trash2,
 } from 'lucide-react';
 import {
@@ -15,6 +19,7 @@ import {
   EquineMeasurePreset,
 } from '../three/measurementOverlay';
 import {
+  CameraProjectionMode,
   MeasureToolMode,
   MprSliceState,
   ReferencePlaneConfig,
@@ -25,13 +30,19 @@ import {
 interface ImagingTabProps {
   renderMode: RenderViewMode;
   onRenderModeChange: (mode: RenderViewMode) => void;
+  cameraProjection: CameraProjectionMode;
+  onCameraProjectionChange: (proj: CameraProjectionMode) => void;
+  xrayExposure: number;
+  onXrayExposureChange: (val: number) => void;
+  xrayInverted: boolean;
+  onXrayInvertedChange: (inv: boolean) => void;
   mpr: MprSliceState;
   onMprChange: (next: MprSliceState) => void;
   onResetMpr: () => void;
   referencePlane: ReferencePlaneConfig;
   onReferencePlaneChange: (next: ReferencePlaneConfig) => void;
   onUploadReferenceImage: () => void;
-  onSelectPresetCamera?: (mode: 'lat' | 'distal') => void;
+  onSelectPresetCamera?: (mode: 'lat' | 'distal' | 'frontal' | 'dorsal' | 'cabeza') => void;
   measureMode: MeasureToolMode;
   onMeasureModeChange: (mode: MeasureToolMode) => void;
   measurementCount: number;
@@ -41,9 +52,62 @@ interface ImagingTabProps {
 
 type ImagingSubTab = 'mpr' | 'plano' | 'medicion';
 
+const MPR_PRESETS: ReadonlyArray<{
+  id: string;
+  label: string;
+  mpr: MprSliceState;
+  camera?: 'lat' | 'distal' | 'frontal' | 'cabeza';
+}> = [
+  {
+    id: 'sag-med',
+    label: 'Sagital medio',
+    mpr: {
+      sagittal: { enabled: true, value: 0, flip: false },
+      transverse: { enabled: false, value: 0.2, flip: false },
+      dorsal: { enabled: false, value: 1.1, flip: false },
+    },
+    camera: 'lat',
+  },
+  {
+    id: 'torax-t10',
+    label: 'Tórax (T10)',
+    mpr: {
+      sagittal: { enabled: false, value: 0, flip: false },
+      transverse: { enabled: true, value: 0.12, flip: false },
+      dorsal: { enabled: false, value: 1.1, flip: false },
+    },
+  },
+  {
+    id: 'craneo-senos',
+    label: 'Cráneo / Senos',
+    mpr: {
+      sagittal: { enabled: true, value: 0, flip: false },
+      transverse: { enabled: true, value: 1.02, flip: true },
+      dorsal: { enabled: false, value: 1.1, flip: false },
+    },
+    camera: 'cabeza',
+  },
+  {
+    id: 'distal-casco',
+    label: 'Menudillo / Casco',
+    mpr: {
+      sagittal: { enabled: false, value: 0, flip: false },
+      transverse: { enabled: false, value: 0.2, flip: false },
+      dorsal: { enabled: true, value: 0.44, flip: false },
+    },
+    camera: 'distal',
+  },
+];
+
 export const ImagingTab: React.FC<ImagingTabProps> = ({
   renderMode,
   onRenderModeChange,
+  cameraProjection,
+  onCameraProjectionChange,
+  xrayExposure,
+  onXrayExposureChange,
+  xrayInverted,
+  onXrayInvertedChange,
   mpr,
   onMprChange,
   onResetMpr,
@@ -62,34 +126,69 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
 
   return (
     <div className="space-y-2">
-      {/* Compact top bar: 3D Modality + Section selector */}
+      {/* Compact top bar: 3D Modality + Projection + Section selector */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div
-          className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-950/70 p-0.5"
-          role="group"
-          aria-label="Modalidad de visualización 3D"
-        >
-          <ScanLine className="ml-1.5 mr-0.5 hidden h-3.5 w-3.5 text-teal-400 sm:block" />
-          {(
-            [
-              ['anatomico', 'Anatómico'],
-              ['radiografia', 'Radiografía Rx'],
-              ['tc', 'Cortical TC'],
-            ] as const
-          ).map(([mode, label]) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <div
+            className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-950/70 p-0.5"
+            role="group"
+            aria-label="Modalidad de visualización 3D"
+          >
+            <ScanLine className="ml-1.5 mr-0.5 hidden h-3.5 w-3.5 text-teal-400 sm:block" />
+            {(
+              [
+                ['anatomico', 'Anatómico'],
+                ['radiografia', 'Radiografía Rx'],
+                ['tc', 'Cortical TC'],
+              ] as const
+            ).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => onRenderModeChange(mode)}
+                className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap sm:px-2.5 sm:text-xs ${
+                  renderMode === mode
+                    ? 'bg-amber-500 text-slate-950'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div
+            className="flex items-center gap-0.5 rounded-lg border border-slate-800 bg-slate-950/70 p-0.5"
+            role="group"
+            aria-label="Tipo de cámara"
+          >
             <button
-              key={mode}
               type="button"
-              onClick={() => onRenderModeChange(mode)}
-              className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap sm:px-2.5 sm:text-xs ${
-                renderMode === mode
-                  ? 'bg-amber-500 text-slate-950'
-                  : 'text-slate-300 hover:text-white'
+              onClick={() => onCameraProjectionChange('perspective')}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap ${
+                cameraProjection === 'perspective'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
+              title="Vista con perspectiva cónica natural"
             >
-              {label}
+              <Box className="h-3 w-3" />
+              <span>Persp.</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => onCameraProjectionChange('orthographic')}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap ${
+                cameraProjection === 'orthographic'
+                  ? 'bg-cyan-500 text-slate-950'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Vista ortográfica sin distorsión para superposición Rx/TC"
+            >
+              <Square className="h-3 w-3" />
+              <span>Orto.</span>
+            </button>
+          </div>
         </div>
 
         <div
@@ -155,13 +254,61 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
         </div>
       </div>
 
-      {/* Sub-panel 1: Compact Multiplanar Reconstruction (MPR) Sliders */}
+      {/* Radiographic Windowing Strip (when Radiografía Rx mode is active) */}
+      {renderMode === 'radiografia' && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cyan-500/30 bg-cyan-950/20 px-2.5 py-1.5 text-[11px]">
+          <div className="flex flex-1 min-w-[200px] items-center gap-2">
+            <span className="text-slate-300 whitespace-nowrap">Exposición Rx</span>
+            <input
+              type="range"
+              min={0.6}
+              max={1.6}
+              step={0.05}
+              value={xrayExposure}
+              onChange={(e) => onXrayExposureChange(Number(e.target.value))}
+              className="anatomy-slider flex-1"
+              aria-label="Exposición radiográfica"
+            />
+            <span className="w-10 text-right font-mono text-cyan-300 tabular-nums">
+              {xrayExposure.toFixed(2)}×
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onXrayInvertedChange(!xrayInverted)}
+            className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap ${
+              xrayInverted
+                ? 'border-amber-400 bg-amber-500 text-slate-950'
+                : 'border-slate-700 bg-slate-900/80 text-slate-200 hover:border-cyan-500/60'
+            }`}
+            title="Alternar entre radiografía digital oscura y negatoscopio clásico claro"
+          >
+            <SunMoon className="h-3.5 w-3.5" />
+            <span>{xrayInverted ? 'Negatoscopio claro' : 'Placa digital oscura'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Sub-panel 1: Bidirectional Multiplanar Reconstruction (MPR) Sliders & Clinical Presets */}
       {subTab === 'mpr' && (
         <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-2.5 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-slate-300">
-              Cortes multiplanares en tiempo real (MPR tipo TC)
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
+            <div className="flex flex-wrap items-center gap-1">
+              {MPR_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => {
+                    onMprChange(preset.mpr);
+                    if (preset.camera) onSelectPresetCamera?.(preset.camera);
+                  }}
+                  className="rounded border border-slate-700/80 bg-slate-950/70 px-2 py-0.5 text-[11px] text-slate-300 transition-colors hover:border-cyan-500/60 hover:text-white whitespace-nowrap"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
             {anyMprActive && (
               <button
                 type="button"
@@ -177,7 +324,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             {/* Sagittal plane Z */}
             <div className="rounded-md border border-slate-800/80 bg-slate-950/50 px-2.5 py-1.5">
-              <div className="flex items-center justify-between gap-2 text-[11px]">
+              <div className="flex items-center justify-between gap-1.5 text-[11px]">
                 <label className="flex cursor-pointer items-center gap-1.5 text-slate-200">
                   <input
                     type="checkbox"
@@ -192,10 +339,30 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                   />
                   <span>Sagital (Z)</span>
                 </label>
-                <span className="font-mono text-[11px] text-cyan-300 tabular-nums">
-                  {mpr.sagittal.value >= 0 ? '+' : ''}
-                  {mpr.sagittal.value.toFixed(2)} m
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onMprChange({
+                        ...mpr,
+                        sagittal: { ...mpr.sagittal, enabled: true, flip: !mpr.sagittal.flip },
+                      })
+                    }
+                    className={`flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] transition-colors ${
+                      mpr.sagittal.flip
+                        ? 'border-cyan-500/60 bg-cyan-950/70 text-cyan-200'
+                        : 'border-slate-700/80 text-slate-400 hover:text-slate-200'
+                    }`}
+                    title="Invertir hemisferio visible (Izquierdo / Derecho)"
+                  >
+                    <ArrowLeftRight className="h-2.5 w-2.5" />
+                    <span>{mpr.sagittal.flip ? 'Der' : 'Izq'}</span>
+                  </button>
+                  <span className="font-mono text-[11px] text-cyan-300 tabular-nums">
+                    {mpr.sagittal.value >= 0 ? '+' : ''}
+                    {mpr.sagittal.value.toFixed(2)} m
+                  </span>
+                </div>
               </div>
               <input
                 type="range"
@@ -206,7 +373,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                 onChange={(e) =>
                   onMprChange({
                     ...mpr,
-                    sagittal: { enabled: true, value: Number(e.target.value) },
+                    sagittal: { ...mpr.sagittal, enabled: true, value: Number(e.target.value) },
                   })
                 }
                 className="anatomy-slider mt-1 w-full"
@@ -216,7 +383,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
 
             {/* Transverse plane X */}
             <div className="rounded-md border border-slate-800/80 bg-slate-950/50 px-2.5 py-1.5">
-              <div className="flex items-center justify-between gap-2 text-[11px]">
+              <div className="flex items-center justify-between gap-1.5 text-[11px]">
                 <label className="flex cursor-pointer items-center gap-1.5 text-slate-200">
                   <input
                     type="checkbox"
@@ -231,10 +398,34 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                   />
                   <span>Transverso (X)</span>
                 </label>
-                <span className="font-mono text-[11px] text-amber-300 tabular-nums">
-                  {mpr.transverse.value >= 0 ? '+' : ''}
-                  {mpr.transverse.value.toFixed(2)} m
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onMprChange({
+                        ...mpr,
+                        transverse: {
+                          ...mpr.transverse,
+                          enabled: true,
+                          flip: !mpr.transverse.flip,
+                        },
+                      })
+                    }
+                    className={`flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] transition-colors ${
+                      mpr.transverse.flip
+                        ? 'border-amber-500/60 bg-amber-950/70 text-amber-200'
+                        : 'border-slate-700/80 text-slate-400 hover:text-slate-200'
+                    }`}
+                    title="Invertir segmento visible (Caudal / Craneal)"
+                  >
+                    <ArrowLeftRight className="h-2.5 w-2.5" />
+                    <span>{mpr.transverse.flip ? 'Cra' : 'Cau'}</span>
+                  </button>
+                  <span className="font-mono text-[11px] text-amber-300 tabular-nums">
+                    {mpr.transverse.value >= 0 ? '+' : ''}
+                    {mpr.transverse.value.toFixed(2)} m
+                  </span>
+                </div>
               </div>
               <input
                 type="range"
@@ -245,7 +436,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                 onChange={(e) =>
                   onMprChange({
                     ...mpr,
-                    transverse: { enabled: true, value: Number(e.target.value) },
+                    transverse: { ...mpr.transverse, enabled: true, value: Number(e.target.value) },
                   })
                 }
                 className="anatomy-slider mt-1 w-full"
@@ -255,7 +446,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
 
             {/* Dorsal plane Y */}
             <div className="rounded-md border border-slate-800/80 bg-slate-950/50 px-2.5 py-1.5">
-              <div className="flex items-center justify-between gap-2 text-[11px]">
+              <div className="flex items-center justify-between gap-1.5 text-[11px]">
                 <label className="flex cursor-pointer items-center gap-1.5 text-slate-200">
                   <input
                     type="checkbox"
@@ -270,9 +461,29 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                   />
                   <span>Dorsal (Y)</span>
                 </label>
-                <span className="font-mono text-[11px] text-emerald-300 tabular-nums">
-                  {mpr.dorsal.value.toFixed(2)} m
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onMprChange({
+                        ...mpr,
+                        dorsal: { ...mpr.dorsal, enabled: true, flip: !mpr.dorsal.flip },
+                      })
+                    }
+                    className={`flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] transition-colors ${
+                      mpr.dorsal.flip
+                        ? 'border-emerald-500/60 bg-emerald-950/70 text-emerald-200'
+                        : 'border-slate-700/80 text-slate-400 hover:text-slate-200'
+                    }`}
+                    title="Invertir mitad visible (Ventral / Dorsal)"
+                  >
+                    <ArrowLeftRight className="h-2.5 w-2.5" />
+                    <span>{mpr.dorsal.flip ? 'Dor' : 'Ven'}</span>
+                  </button>
+                  <span className="font-mono text-[11px] text-emerald-300 tabular-nums">
+                    {mpr.dorsal.value.toFixed(2)} m
+                  </span>
+                </div>
               </div>
               <input
                 type="range"
@@ -283,7 +494,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                 onChange={(e) =>
                   onMprChange({
                     ...mpr,
-                    dorsal: { enabled: true, value: Number(e.target.value) },
+                    dorsal: { ...mpr.dorsal, enabled: true, value: Number(e.target.value) },
                   })
                 }
                 className="anatomy-slider mt-1 w-full"
@@ -294,7 +505,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
         </div>
       )}
 
-      {/* Sub-panel 2: Calibrated Radiograph / CT Reference Plane */}
+      {/* Sub-panel 2: Calibrated Radiograph / CT Reference Plane in Orthographic Projection */}
       {subTab === 'plano' && (
         <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-2.5 space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -302,6 +513,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  onCameraProjectionChange('orthographic');
                   onReferencePlaneChange({
                     visible: true,
                     projection: 'LM',
@@ -310,7 +522,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                     offsetX: 0,
                     offsetY: 0,
                     imageUrl: `${import.meta.env.BASE_URL}assets/laminas/rx-guia-lateral-equino.svg`,
-                    label: 'Guía esquemática lateral (LM · cuerpo completo)',
+                    label: 'Guía ortográfica lateral (LM · cuerpo completo)',
                   });
                   onSelectPresetCamera?.('lat');
                 }}
@@ -321,6 +533,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  onCameraProjectionChange('orthographic');
                   onReferencePlaneChange({
                     visible: true,
                     projection: 'LM',
@@ -329,7 +542,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                     offsetX: 0.25,
                     offsetY: -0.76,
                     imageUrl: `${import.meta.env.BASE_URL}assets/laminas/rx-guia-dedo-lm.svg`,
-                    label: 'Guía esquemática distal (LM · eje podofalángico ~52°)',
+                    label: 'Guía ortográfica distal (LM · eje podofalángico ~52°)',
                   });
                   onSelectPresetCamera?.('distal');
                 }}
@@ -339,7 +552,10 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
               </button>
               <button
                 type="button"
-                onClick={onUploadReferenceImage}
+                onClick={() => {
+                  onCameraProjectionChange('orthographic');
+                  onUploadReferenceImage();
+                }}
                 className="flex items-center gap-1.5 rounded-lg border border-teal-500/50 bg-teal-950/50 px-2.5 py-1 text-[11px] font-medium text-teal-200 hover:border-teal-400 whitespace-nowrap"
               >
                 <ImagePlus className="h-3.5 w-3.5" />
@@ -373,14 +589,19 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
                     <button
                       key={proj}
                       type="button"
-                      onClick={() =>
-                        onReferencePlaneChange({ ...referencePlane, projection: proj })
-                      }
+                      onClick={() => {
+                        onCameraProjectionChange('orthographic');
+                        onReferencePlaneChange({ ...referencePlane, projection: proj });
+                        if (proj === 'LM') onSelectPresetCamera?.('lat');
+                        else if (proj === 'DP') onSelectPresetCamera?.('frontal');
+                        else onSelectPresetCamera?.('dorsal');
+                      }}
                       className={`rounded px-2 py-0.5 text-[10px] font-mono font-medium ${
                         referencePlane.projection === proj
                           ? 'bg-cyan-500 text-slate-950'
                           : 'text-slate-300 hover:text-white'
                       }`}
+                      title={`Alinear plano y vista ortográfica ${proj}`}
                     >
                       {proj}
                     </button>
@@ -483,9 +704,7 @@ export const ImagingTab: React.FC<ImagingTabProps> = ({
             </div>
           ) : (
             <div className="rounded-md border border-slate-800/80 bg-slate-950/50 px-2.5 py-2 text-[11px] text-slate-400">
-              Superpone una radiografía o corte tomográfico real (PNG/JPG) en 1:1. Decodificadores locales Draco y Meshopt activos sin conexión para modelos{' '}
-              <span className="font-mono text-slate-300">.glb</span> con metadatos{' '}
-              <span className="font-mono text-slate-300">&lt;ID&gt;.meta.json</span>.
+              Superpone una radiografía o corte tomográfico real (PNG/JPG) en vista ortográfica 1:1 sin distorsión de perspectiva.
             </div>
           )}
         </div>

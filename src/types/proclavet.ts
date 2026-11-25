@@ -29,6 +29,7 @@ export type LayerCode =
 export type SexFilter = 'all' | 'm' | 'f';
 export type CutawayMode = 'none' | 'left' | 'right';
 export type RenderViewMode = 'anatomico' | 'radiografia' | 'tc';
+export type CameraProjectionMode = 'perspective' | 'orthographic';
 export type SceneTheme = 'oscuro' | 'atlas';
 export type FichaSubView = 'ficha' | 'coverage' | 'edit';
 export type ReferenceProjection = 'LM' | 'DP' | 'DV';
@@ -78,7 +79,8 @@ export interface BreadcrumbStep {
 
 export interface MprAxisSlice {
   enabled: boolean;
-  value: number; // -1..1 normalized or world meters
+  value: number; // world meters
+  flip?: boolean;
 }
 
 export interface MprSliceState {
