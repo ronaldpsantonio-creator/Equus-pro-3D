@@ -261,7 +261,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
   if (hudHidden) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-1/2 z-20 w-[min(980px,95vw)] -translate-x-1/2">
+    <div className="pointer-events-none fixed bottom-2.5 sm:bottom-4 left-1/2 z-20 w-[min(980px,96vw)] -translate-x-1/2">
       <div className="pointer-events-auto">
         <MeasureBar
           measureMode={measureMode}
@@ -321,10 +321,10 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
 
         {/* Dock container */}
         {!collapsed && (
-          <div className="rounded-xl border border-slate-700/80 bg-[#0e141d]/95 p-3.5 shadow-2xl">
+          <div className="rounded-xl border border-slate-700/80 bg-[#0e141d]/92 p-2.5 sm:p-3.5 shadow-2xl backdrop-blur-sm">
             {/* Sequential Breadcrumb & Quick Return Bar */}
             {(breadcrumbs.length > 1 || canStepBack || !isAtHome) && (
-              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800/90 bg-slate-900/75 px-2.5 py-1.5 text-xs">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800/90 bg-slate-900/75 px-2.5 py-1 text-xs">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
                   <button
                     type="button"
@@ -388,8 +388,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
             )}
 
             {/* Tab bar */}
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
-              <div className="flex flex-wrap items-center gap-1">
+            <div className="mb-2 flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <div className="anatomy-scroll flex flex-1 items-center gap-1 overflow-x-auto">
                 {(
                   [
                     ['sistemas', 'Sistemas y planos', Layers],
@@ -404,7 +404,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                     key={id}
                     type="button"
                     onClick={() => onTabChange(id)}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
+                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
                       activeTab === id
                         ? 'bg-amber-500 text-slate-950'
                         : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
@@ -416,7 +416,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 ))}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {hiddenCount > 0 && (
                   <button
                     type="button"
@@ -429,6 +429,8 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 )}
               </div>
             </div>
+
+            <div className="anatomy-scroll max-h-[34vh] sm:max-h-[40vh] overflow-y-auto pr-0.5">
 
             {/* Tab 1: Systems & Study Presets */}
             {activeTab === 'sistemas' && (
@@ -742,6 +744,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                 }}
               />
             )}
+            </div>
           </div>
         )}
       </div>

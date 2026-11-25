@@ -99,7 +99,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   }
 
   return (
-    <header className="pointer-events-none fixed top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+    <header className="pointer-events-none fixed top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-between gap-1.5 sm:gap-3 px-3 py-2 sm:px-5 sm:py-3.5">
       {/* Left: Brand & quiet unboxed telemetry */}
       <div className="pointer-events-auto flex flex-col gap-0.5">
         <div className="flex items-baseline gap-3">
