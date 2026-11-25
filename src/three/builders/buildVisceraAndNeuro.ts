@@ -424,8 +424,28 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   push('equ.end.sup.001-i', createOrganMesh(V3(-0.44, 1.27, -0.055), [0.022, 0.012, 0.012], endMat(), undefined, 10), 'left');
   push('equ.end.sup.001-d', createOrganMesh(V3(-0.33, 1.28, 0.06), [0.022, 0.012, 0.012], endMat(), undefined, 10), 'right');
 
-  push('equ.sen.ocu.001-i', createOrganMesh(HEAD.orbitCenter(-1), [0.024, 0.023, 0.022], eyeMat(), undefined, 16), 'left');
-  push('equ.sen.ocu.001-d', createOrganMesh(HEAD.orbitCenter(1), [0.024, 0.023, 0.022], eyeMat(), undefined, 16), 'right');
+  push(
+    'equ.sen.ocu.001-i',
+    createOrganMesh(
+      V3(1.195, 1.695, -0.075),
+      [0.018, 0.021, 0.022],
+      eyeMat(),
+      [0, Math.PI / 2 - 0.26, 0.06],
+      20,
+    ),
+    'left',
+  );
+  push(
+    'equ.sen.ocu.001-d',
+    createOrganMesh(
+      V3(1.195, 1.695, 0.075),
+      [0.018, 0.021, 0.022],
+      eyeMat(),
+      [0, -Math.PI / 2 + 0.26, 0.06],
+      20,
+    ),
+    'right',
+  );
 
   return parts;
 }

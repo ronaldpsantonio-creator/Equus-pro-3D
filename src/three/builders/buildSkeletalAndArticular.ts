@@ -15,9 +15,12 @@ import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import {
   createAnatomicalExtrudedPlate,
+  createAnatomicalLongBoneMesh,
   createCoffinBoneMesh,
   createFacetedTarsalOrCarpalBlock,
+  createFlatRibMesh,
   createLongBoneMesh,
+  createMultiStationLoftTube,
   createOrganMesh,
   createTubeCurveMesh,
 } from './geomHelpers';
@@ -131,10 +134,20 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     );
     push(`equ.ske.cra.008-${tag}`, tempGrp, side);
 
-    // Nasal with rostral pointed nasal process (nasoincisive notch silhouette)
+    // Nasal with curved bridge & rostral pointed nasal process (nasoincisive notch silhouette)
     const nasalGrp = new THREE.Group();
-    nasalGrp.add(createLongBoneMesh(V3(1.26, 1.645, 0.02 * sd), V3(1.505, 1.468, 0.013 * sd), 0.021, 0.025, boneMat(), 0.65));
-    nasalGrp.add(createLongBoneMesh(V3(1.48, 1.482, 0.01 * sd), V3(1.535, 1.445, 0.006 * sd), 0.006, 0.01, darkBoneMat(), 0.55));
+    nasalGrp.add(
+      createMultiStationLoftTube(
+        [
+          { pos: V3(1.255, 1.652, 0.022 * sd), rx: 0.015, ry: 0.025 },
+          { pos: V3(1.36, 1.575, 0.019 * sd), rx: 0.013, ry: 0.023 },
+          { pos: V3(1.46, 1.502, 0.014 * sd), rx: 0.011, ry: 0.018 },
+          { pos: V3(1.535, 1.448, 0.006 * sd), rx: 0.005, ry: 0.007 },
+        ],
+        boneMat(),
+        12,
+      ),
+    );
     push(`equ.ske.cra.009-${tag}`, nasalGrp, side);
 
     push(
@@ -150,20 +163,31 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
         [V3(1.155, 1.645, 0.084 * sd), V3(1.205, 1.645, 0.085 * sd), V3(1.265, 1.575, 0.070 * sd)],
         0.013,
         boneMat(),
-        10,
+        12,
         8,
       ),
       side,
     );
 
-    // Maxilar + cresta facial + arcada premolar/molar superior
+    // Maxilar + cresta facial + diastema + arcada premolar/molar superior
     push(
       `equ.ske.cra.012-${tag}`,
       (() => {
         const g = new THREE.Group();
-        g.add(createLongBoneMesh(V3(1.24, 1.53, 0.054 * sd), V3(1.46, 1.41, 0.04 * sd), 0.045, 0.039, boneMat(), 0.62));
+        g.add(
+          createMultiStationLoftTube(
+            [
+              { pos: V3(1.23, 1.545, 0.052 * sd), rx: 0.034, ry: 0.048 },
+              { pos: V3(1.33, 1.488, 0.046 * sd), rx: 0.031, ry: 0.042 },
+              { pos: V3(1.42, 1.435, 0.036 * sd), rx: 0.024, ry: 0.032 },
+              { pos: V3(1.48, 1.402, 0.028 * sd), rx: 0.019, ry: 0.024 },
+            ],
+            boneMat(),
+            14,
+          ),
+        );
         // Cresta facial equina prominente
-        g.add(createLongBoneMesh(V3(1.20, 1.59, 0.072 * sd), V3(1.34, 1.515, 0.061 * sd), 0.009, 0.011, darkBoneMat(), 0.52));
+        g.add(createLongBoneMesh(V3(1.195, 1.592, 0.073 * sd), V3(1.345, 1.515, 0.062 * sd), 0.009, 0.012, darkBoneMat(), 0.5));
         for (let m = 0; m < 6; m++) {
           const mt = m / 5;
           g.add(
@@ -390,7 +414,7 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     push(id, createOrganMesh(V3(x, y, 0), [0.018, r, r], boneMat(), [0, 0, 0.45], 10), 'center');
   }
 
-  // --- 3. RIBCAGE & STERNUM ---
+  // --- 3. RIBCAGE & STERNUM (flattened equine costal blades) ---
   for (let r = 1; r <= 18; r++) {
     for (const sd of [-1, 1] as const) {
       const tag = sd === -1 ? 'i' : 'd';
@@ -398,8 +422,9 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       const pts = ribArcPoints(r, sd);
       const id = `equ.ske.cos.${String(r).padStart(3, '0')}-${tag}`;
       const g = new THREE.Group();
-      g.add(createTubeCurveMesh(pts.slice(0, 4), 0.0115, boneMat(), 16, 8));
-      g.add(createTubeCurveMesh(pts.slice(3), 0.0095, cartMat(), 8, 7));
+      const widthScale = r <= 7 ? 1.12 : r >= 15 ? 0.84 : 1.0;
+      g.add(createFlatRibMesh(pts.slice(0, 4), 0.014 * widthScale, 0.0072, boneMat(), 18, 10));
+      g.add(createFlatRibMesh(pts.slice(3), 0.0105, 0.0062, cartMat(), 8, 8));
       push(id, g, side, pts[2]);
     }
   }
@@ -473,14 +498,49 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     scap.add(createOrganMesh(scapMid.clone().add(V3(0, 0.03, 0.022 * sd)), [0.022, 0.032, 0.014], darkBoneMat(), [0, 0, 0.45], 10));
     push(`equ.ske.mto.001-${tag}`, scap, side);
 
-    // Húmero (002) with greater tubercle & deltoid tuberosity
+    // Húmero (002) with greater tubercle, deltoid tuberosity & bicondylar trochlea
     const humGrp = new THREE.Group();
-    humGrp.add(createLongBoneMesh(fl.shoulder, fl.elbow, 0.035, 0.054, boneMat(), 0.82));
+    humGrp.add(
+      createAnatomicalLongBoneMesh(
+        fl.shoulder,
+        fl.elbow,
+        {
+          rMid: 0.032,
+          rProxX: 0.052,
+          rProxZ: 0.044,
+          rDistX: 0.046,
+          rDistZ: 0.042,
+          bicondylarDistal: true,
+          proximalTubercle: 0.014,
+          cranialBow: 0.01,
+          midFlattenZ: 0.82,
+        },
+        boneMat(),
+      ),
+    );
     humGrp.add(createOrganMesh(fl.shoulder.clone().add(V3(0.028, 0.015, 0.018 * sd)), [0.024, 0.026, 0.02], darkBoneMat(), undefined, 10));
     push(`equ.ske.mto.002-${tag}`, humGrp, side);
 
     // Radio (003) & Ulna with Olecranon (004)
-    push(`equ.ske.mto.003-${tag}`, createLongBoneMesh(fl.elbow, fl.carpus, 0.026, 0.042, boneMat(), 0.78), side);
+    push(
+      `equ.ske.mto.003-${tag}`,
+      createAnatomicalLongBoneMesh(
+        fl.elbow,
+        fl.carpus,
+        {
+          rMid: 0.025,
+          rProxX: 0.039,
+          rProxZ: 0.034,
+          rDistX: 0.038,
+          rDistZ: 0.036,
+          bicondylarDistal: true,
+          cranialBow: 0.008,
+          midFlattenZ: 0.78,
+        },
+        boneMat(),
+      ),
+      side,
+    );
     const ulnaGrp = new THREE.Group();
     ulnaGrp.add(
       createLongBoneMesh(
@@ -518,7 +578,24 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     }
 
     // Metacarpus III "Caña" (012) & Splint bones II/IV (013, 014)
-    push(`equ.ske.mto.012-${tag}`, createLongBoneMesh(fl.carpus, fl.fetlock, 0.02, 0.028, boneMat(), 0.78), side);
+    push(
+      `equ.ske.mto.012-${tag}`,
+      createAnatomicalLongBoneMesh(
+        fl.carpus,
+        fl.fetlock,
+        {
+          rMid: 0.018,
+          rProxX: 0.024,
+          rProxZ: 0.026,
+          rDistX: 0.023,
+          rDistZ: 0.025,
+          bicondylarDistal: true,
+          midFlattenZ: 0.82,
+        },
+        boneMat(),
+      ),
+      side,
+    );
     push(
       `equ.ske.mto.013-${tag}`,
       createLongBoneMesh(
@@ -543,8 +620,26 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     );
 
     // Forelimb Phalanges P1, P2, P3 (015..017) & Sesamoids (018..020)
-    push(`equ.ske.mto.015-${tag}`, createLongBoneMesh(fl.fetlock, fl.pasternMid, 0.019, 0.026, boneMat(), 0.85), side);
-    push(`equ.ske.mto.016-${tag}`, createLongBoneMesh(fl.pasternMid, fl.coronet, 0.019, 0.024, boneMat(), 0.88), side);
+    push(
+      `equ.ske.mto.015-${tag}`,
+      createAnatomicalLongBoneMesh(
+        fl.fetlock,
+        fl.pasternMid,
+        { rMid: 0.017, rProxX: 0.024, rProxZ: 0.025, rDistX: 0.021, rDistZ: 0.022, bicondylarDistal: true, midFlattenZ: 0.88 },
+        boneMat(),
+      ),
+      side,
+    );
+    push(
+      `equ.ske.mto.016-${tag}`,
+      createAnatomicalLongBoneMesh(
+        fl.pasternMid,
+        fl.coronet,
+        { rMid: 0.018, rProxX: 0.023, rProxZ: 0.024, rDistX: 0.022, rDistZ: 0.024, bicondylarDistal: true, midFlattenZ: 0.9 },
+        boneMat(),
+      ),
+      side,
+    );
     push(`equ.ske.mto.017-${tag}`, createCoffinBoneMesh(fl.hoofCenter.clone().add(V3(0.003, 0.006, 0)), darkBoneMat()), side);
     push(
       `equ.ske.mto.018-${tag}`, // Sesamoideo proximal medial
@@ -596,9 +691,26 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     coxal.add(createOrganMesh(hl.hip, [0.034, 0.034, 0.024], darkBoneMat(), undefined, 12));
     push(`equ.ske.mpe.001-${tag}`, coxal, side);
 
-    // Fémur (002) with greater trochanter & third trochanter
+    // Fémur (002) with greater trochanter, third trochanter & bicondylar trochlea
     const femGrp = new THREE.Group();
-    femGrp.add(createLongBoneMesh(hl.hip, hl.stifle, 0.04, 0.062, boneMat(), 0.85));
+    femGrp.add(
+      createAnatomicalLongBoneMesh(
+        hl.hip,
+        hl.stifle,
+        {
+          rMid: 0.037,
+          rProxX: 0.056,
+          rProxZ: 0.048,
+          rDistX: 0.056,
+          rDistZ: 0.052,
+          bicondylarDistal: true,
+          proximalTubercle: 0.012,
+          cranialBow: 0.014,
+          midFlattenZ: 0.85,
+        },
+        boneMat(),
+      ),
+    );
     femGrp.add(createOrganMesh(hl.hip.clone().add(V3(-0.025, 0.055, 0.022 * sd)), [0.026, 0.036, 0.02], darkBoneMat(), undefined, 10)); // Trocánter mayor
     femGrp.add(createOrganMesh(hl.hip.clone().lerp(hl.stifle, 0.32).add(V3(-0.01, 0, 0.038 * sd)), [0.02, 0.026, 0.014], darkBoneMat(), undefined, 8)); // Tercer trocánter
     push(`equ.ske.mpe.002-${tag}`, femGrp, side);
@@ -609,7 +721,26 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       createFacetedTarsalOrCarpalBlock(hl.stifle.clone().add(V3(0.044, 0.015, 0)), [0.032, 0.042, 0.032], darkBoneMat(), [0, 0, -0.25]),
       side,
     );
-    push(`equ.ske.mpe.004-${tag}`, createLongBoneMesh(hl.stifle, hl.hock, 0.029, 0.047, boneMat(), 0.82), side); // Tibia
+    push(
+      `equ.ske.mpe.004-${tag}`,
+      createAnatomicalLongBoneMesh(
+        hl.stifle,
+        hl.hock,
+        {
+          rMid: 0.026,
+          rProxX: 0.048,
+          rProxZ: 0.044,
+          rDistX: 0.036,
+          rDistZ: 0.036,
+          bicondylarDistal: true,
+          proximalTubercle: 0.012,
+          cranialBow: 0.01,
+          midFlattenZ: 0.82,
+        },
+        boneMat(),
+      ),
+      side,
+    ); // Tibia
     push(
       `equ.ske.mpe.005-${tag}`, // Fíbula
       createLongBoneMesh(hl.stifle.clone().add(V3(-0.02, -0.02, 0.022 * sd)), hl.stifle.clone().add(V3(-0.08, -0.18, 0.015 * sd)), 0.007, 0.01, darkBoneMat()),
@@ -645,7 +776,24 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     }
 
     // Metatarsus III (012) & Splints (013, 014)
-    push(`equ.ske.mpe.012-${tag}`, createLongBoneMesh(hl.hock, hl.fetlock, 0.021, 0.029, boneMat(), 0.8), side);
+    push(
+      `equ.ske.mpe.012-${tag}`,
+      createAnatomicalLongBoneMesh(
+        hl.hock,
+        hl.fetlock,
+        {
+          rMid: 0.019,
+          rProxX: 0.026,
+          rProxZ: 0.026,
+          rDistX: 0.024,
+          rDistZ: 0.025,
+          bicondylarDistal: true,
+          midFlattenZ: 0.82,
+        },
+        boneMat(),
+      ),
+      side,
+    );
     push(
       `equ.ske.mpe.013-${tag}`,
       createLongBoneMesh(
@@ -670,8 +818,26 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     );
 
     // Hind Phalanges & Sesamoids (015..020)
-    push(`equ.ske.mpe.015-${tag}`, createLongBoneMesh(hl.fetlock, hl.pasternMid, 0.019, 0.026, boneMat(), 0.85), side);
-    push(`equ.ske.mpe.016-${tag}`, createLongBoneMesh(hl.pasternMid, hl.coronet, 0.019, 0.024, boneMat(), 0.88), side);
+    push(
+      `equ.ske.mpe.015-${tag}`,
+      createAnatomicalLongBoneMesh(
+        hl.fetlock,
+        hl.pasternMid,
+        { rMid: 0.017, rProxX: 0.024, rProxZ: 0.025, rDistX: 0.021, rDistZ: 0.022, bicondylarDistal: true, midFlattenZ: 0.88 },
+        boneMat(),
+      ),
+      side,
+    );
+    push(
+      `equ.ske.mpe.016-${tag}`,
+      createAnatomicalLongBoneMesh(
+        hl.pasternMid,
+        hl.coronet,
+        { rMid: 0.018, rProxX: 0.023, rProxZ: 0.024, rDistX: 0.022, rDistZ: 0.024, bicondylarDistal: true, midFlattenZ: 0.9 },
+        boneMat(),
+      ),
+      side,
+    );
     push(`equ.ske.mpe.017-${tag}`, createCoffinBoneMesh(hl.hoofCenter.clone().add(V3(0.003, 0.006, 0)), darkBoneMat()), side);
     push(
       `equ.ske.mpe.018-${tag}`,

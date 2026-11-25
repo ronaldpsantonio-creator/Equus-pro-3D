@@ -3,12 +3,15 @@ import { ProceduralTextureSet } from './textures';
 
 export type TissueKind =
   | 'skin'
+  | 'skin_coat'
   | 'skin_points'
   | 'mane'
   | 'hoof'
   | 'fascia'
   | 'muscle_sup'
   | 'muscle_deep'
+  | 'muscle_ecorche_sup'
+  | 'muscle_ecorche_deep'
   | 'tendon'
   | 'bone'
   | 'bone_dark'
@@ -53,6 +56,21 @@ export function createTissueMaterial(
         transparent: true,
         side: THREE.DoubleSide,
       });
+    case 'skin_coat':
+      return new THREE.MeshPhysicalMaterial({
+        map: tex.coatColor,
+        normalMap: tex.coatNormal,
+        normalScale: new THREE.Vector2(0.48, 0.48),
+        color: 0xffffff,
+        vertexColors: true,
+        roughness: 0.58,
+        metalness: 0.02,
+        sheen: 0.62,
+        sheenRoughness: 0.46,
+        sheenColor: new THREE.Color(0xf0c7a4),
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
     case 'skin_points':
       return new THREE.MeshPhysicalMaterial({
         map: tex.coatColor,
@@ -69,12 +87,14 @@ export function createTissueMaterial(
       });
     case 'mane':
       return new THREE.MeshPhysicalMaterial({
-        color: 0x1d1612,
-        roughness: 0.78,
+        normalMap: tex.tendonNormal,
+        normalScale: new THREE.Vector2(0.32, 0.32),
+        color: 0x1a1411,
+        roughness: 0.72,
         metalness: 0.02,
-        sheen: 0.3,
-        sheenRoughness: 0.65,
-        sheenColor: new THREE.Color(0x4a3b32),
+        sheen: 0.42,
+        sheenRoughness: 0.56,
+        sheenColor: new THREE.Color(0x524035),
         transparent: true,
       });
     case 'hoof':
@@ -125,6 +145,33 @@ export function createTissueMaterial(
         metalness: 0.03,
         sheen: 0.24,
         sheenColor: new THREE.Color(0xe08d82),
+        transparent: true,
+      });
+    case 'muscle_ecorche_sup':
+      return new THREE.MeshPhysicalMaterial({
+        map: tex.muscleColor,
+        normalMap: tex.muscleNormal,
+        normalScale: new THREE.Vector2(0.88, 0.88),
+        color: 0xffffff,
+        vertexColors: true,
+        roughness: 0.42,
+        metalness: 0.03,
+        sheen: 0.4,
+        sheenRoughness: 0.46,
+        sheenColor: new THREE.Color(0xf8cbc2),
+        transparent: true,
+      });
+    case 'muscle_ecorche_deep':
+      return new THREE.MeshPhysicalMaterial({
+        map: tex.muscleColor,
+        normalMap: tex.muscleNormal,
+        normalScale: new THREE.Vector2(0.74, 0.74),
+        color: 0xffffff,
+        vertexColors: true,
+        roughness: 0.48,
+        metalness: 0.03,
+        sheen: 0.28,
+        sheenColor: new THREE.Color(0xe59d93),
         transparent: true,
       });
     case 'tendon':
@@ -326,11 +373,12 @@ export function createTissueMaterial(
       });
     case 'eye':
       return new THREE.MeshPhysicalMaterial({
-        color: 0x16120f,
-        roughness: 0.06,
-        metalness: 0.05,
+        map: tex.eyeColor,
+        color: 0xffffff,
+        roughness: 0.04,
+        metalness: 0.04,
         clearcoat: 1.0,
-        clearcoatRoughness: 0.04,
+        clearcoatRoughness: 0.03,
         transparent: true,
       });
     case 'cavity':
