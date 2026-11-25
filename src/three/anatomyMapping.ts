@@ -198,7 +198,7 @@ const REGION_RULES: Record<
     if (/boca|mejilla|buccin/.test(t)) return ['equ.mus.cab.014', 'equ.mus.cab.013'];
     if (/cigom[aá]t/.test(t)) return ['equ.mus.cab.015'];
     if (/nariz|nasal|ollar/.test(t)) return ['equ.mus.cab.049', 'equ.mus.cab.011'];
-    if (/temporal|auricul|oreja/.test(t)) return ['equ.mus.cab.019', 'equ.ske.oid.001'];
+    if (/temporal|auricul|oreja/.test(t)) return ['equ.mus.cab.019', 'equ.ske.cra.008'];
     if (/maset|pterigoid|dig[aá]str/.test(t)) return ['equ.mus.cab.018'];
     return ['equ.mus.cab.018', 'equ.mus.cab.014'];
   },
@@ -252,7 +252,7 @@ const REGION_RULES: Record<
   'equ.ner.cra': (t) => {
     if (/vago|lar[ií]ngeo|esof[aá]g|card[ií]ac/.test(t)) return ['equ.ner.cra.077', 'equ.ner.enc.001'];
     if (/[oó]ptico|oculomotor|troclear|abducens|oft[aá]lmic/.test(t)) return ['equ.sen.ocu.001', 'equ.ner.enc.001'];
-    if (/vestibulococlear/.test(t)) return ['equ.ske.oid.001', 'equ.ner.enc.001'];
+    if (/vestibulococlear/.test(t)) return ['equ.ske.cra.008', 'equ.ner.enc.001'];
     return ['equ.ner.enc.001', 'equ.ner.cra.077'];
   },
   'equ.ner.bra': () => ['equ.ner.bra.001'],
@@ -304,9 +304,9 @@ const REGION_RULES: Record<
   // === SENSORIAL ===
   'equ.sen.ocu': () => ['equ.sen.ocu.001'],
   'equ.sen.ane': () => ['equ.sen.ocu.001'],
-  'equ.sen.oex': () => ['equ.ske.oid.001'],
-  'equ.sen.omd': () => ['equ.ske.oid.001'],
-  'equ.sen.oin': () => ['equ.ske.oid.001'],
+  'equ.sen.oex': () => ['equ.ske.cra.008'],
+  'equ.sen.omd': () => ['equ.ske.cra.008'],
+  'equ.sen.oin': () => ['equ.ske.cra.008'],
   'equ.sen.olf': () => ['equ.res.cav.001'],
   'equ.sen.gus': () => ['equ.ske.cra.017', 'equ.mus.cab.014'],
 
@@ -381,7 +381,7 @@ const SYSTEM_FALLBACKS: Record<SystemCode, string[]> = {
   rep: ['equ.rep.ute.001', 'equ.rep.tes.001'],
   teg: ['equ.teg.pie.001', 'equ.teg.cmt.001'],
   end: ['equ.end.tir.001', 'equ.end.hip.001'],
-  sen: ['equ.sen.ocu.001', 'equ.ske.oid.001'],
+  sen: ['equ.sen.ocu.001', 'equ.ske.cra.008'],
 };
 
 export function resolveSingleStructureAnchor(
