@@ -283,17 +283,52 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       side,
     );
 
-    // Hyoid apparatus (equ.ske.oid.001..005)
-    for (let h = 1; h <= 5; h++) {
-      const hy = 1.60 - h * 0.022;
-      const hx = 1.07 + h * 0.014;
-      push(
-        `equ.ske.oid.00${h}-${tag}`,
-        createLongBoneMesh(V3(hx, hy + 0.014, 0.042 * sd), V3(hx + 0.02, hy - 0.01, 0.024 * sd), 0.008, 0.011, darkBoneMat()),
-        side,
-      );
-    }
+    // Aparato hioideo (equ.ske.hyo.003..006): estilohioides, epihioides, ceratohioides y cartílago timpanohioideo
+    push(
+      `equ.ske.hyo.006-${tag}`, // Cartílago timpanohioideo
+      createOrganMesh(V3(1.045, 1.625, 0.048 * sd), [0.008, 0.012, 0.006], cartMat()),
+      side,
+    );
+    push(
+      `equ.ske.hyo.005-${tag}`, // Epihioides
+      createLongBoneMesh(V3(1.05, 1.615, 0.047 * sd), V3(1.07, 1.585, 0.044 * sd), 0.006, 0.008, darkBoneMat()),
+      side,
+    );
+    push(
+      `equ.ske.hyo.004-${tag}`, // Estilohioides
+      createLongBoneMesh(V3(1.07, 1.585, 0.044 * sd), V3(1.13, 1.525, 0.034 * sd), 0.008, 0.01, darkBoneMat()),
+      side,
+    );
+    push(
+      `equ.ske.hyo.003-${tag}`, // Ceratohioides
+      createLongBoneMesh(V3(1.13, 1.525, 0.034 * sd), V3(1.155, 1.505, 0.016 * sd), 0.006, 0.008, darkBoneMat()),
+      side,
+    );
+
+    // Concha nasal ventral (equ.ske.cra.019): lámina enrollada dentro de la cavidad nasal
+    push(
+      `equ.ske.cra.019-${tag}`,
+      createLongBoneMesh(V3(1.3, 1.545, 0.018 * sd), V3(1.5, 1.44, 0.013 * sd), 0.01, 0.006, boneMat(), 0.5),
+      side,
+    );
   }
+
+  // Basihioides (hyo.001) y procesos tirohioideos bilaterales (hyo.002), en la línea media
+  push(
+    'equ.ske.hyo.001',
+    createLongBoneMesh(V3(1.16, 1.5, -0.02), V3(1.16, 1.5, 0.02), 0.008, 0.007, darkBoneMat(), 0.9),
+    'center',
+  );
+  push(
+    'equ.ske.hyo.002',
+    buildBilateralArticular((sd) =>
+      createLongBoneMesh(V3(1.158, 1.498, 0.016 * sd), V3(1.12, 1.47, 0.026 * sd), 0.006, 0.008, darkBoneMat()),
+    ),
+    'center',
+  );
+
+  // Basioccipital (cra.018): porción basilar del occipital, extensión rostroventral
+  push('equ.ske.cra.018', createOrganMesh(V3(1.065, 1.7, 0), [0.03, 0.011, 0.02], darkBoneMat()), 'center');
 
   // --- 2. VERTEBRAL COLUMN (C1-C7, T1-T18, L1-L6, S1-S5, Caudal) ---
   for (let c = 1; c <= 7; c++) {
@@ -407,8 +442,12 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     push(id, g, 'center', V3(x, y, 0));
   }
 
-  for (let ca = 1; ca <= 18; ca++) {
-    const [x, y] = caudalPos(ca);
+  for (let ca = 1; ca <= 21; ca++) {
+    // caudalPos satura en la vértebra 18; Cd19-Cd21 se extrapolan siguiendo la curva de la cola
+    const [bx, by] = caudalPos(Math.min(ca, 18));
+    const ext = Math.max(ca - 18, 0);
+    const x = bx - 0.02 * ext;
+    const y = by - 0.035 * ext;
     const id = `equ.ske.cau.${String(ca).padStart(3, '0')}`;
     const r = Math.max(0.007, 0.021 - ca * 0.0008);
     push(id, createOrganMesh(V3(x, y, 0), [0.018, r, r], boneMat(), [0, 0, 0.45], 10), 'center');
