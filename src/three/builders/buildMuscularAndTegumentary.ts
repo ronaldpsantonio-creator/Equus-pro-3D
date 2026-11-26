@@ -11,15 +11,14 @@ import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import { BuiltPart } from './buildSkeletalAndArticular';
 import {
-  createCurvedMuscleSheetMesh,
+  createBiospheraMuscleMesh,
   createEquineEarPinnaMesh,
   createEquineEyelidMesh,
   createHoofMesh,
-  createMuscleBellyMesh,
-  createMuscleUnitWithTendonCaps,
   createOrganMesh,
   createOrientedHalfBodyCoatMesh,
   createSculptedEquineLimbMesh,
+  createSculptedMuscleSheetMesh,
   createTaperedHairStrandMesh,
   createTubeCurveMesh,
   OrientedCoatStation,
@@ -361,122 +360,193 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     push(`equ.teg.cmp.001-${tag}`, createHoofMesh(hl.hoofCenter.x, hl.hoofCenter.z, hoofMat(), 0.22), side);
   }
 
-  // --- 2. HEAD & FACIAL ÉCORCHÉ MUSCULATURE (consolidated bilateral + paired) ---
-  // Masetero (equ.mus.cab.018 — curved cheek fan + glistening dorsal aponeurosis)
+  // --- 2. HEAD & FACIAL ÉCORCHÉ MUSCULATURE (Biosphera sculpted sheets & curved bellies) ---
+  // Masetero (equ.mus.cab.018 — sculpted cheek fan + glistening dorsal aponeurosis)
   push(
     'equ.mus.cab.018',
     buildBilateralMuscular((sd) => {
       const g = new THREE.Group();
       g.add(
-        createCurvedMuscleSheetMesh(
+        createSculptedMuscleSheetMesh(
           [
-            { x: 1.06, yTop: 1.62, yBot: 1.50, zMid: 0.068, zBow: 0.012 },
-            { x: 1.13, yTop: 1.62, yBot: 1.47, zMid: 0.072, zBow: 0.016 },
-            { x: 1.21, yTop: 1.58, yBot: 1.48, zMid: 0.065, zBow: 0.014 },
+            { x: 1.06, yTop: 1.62, yBot: 1.50, zMid: 0.068, zBow: 0.014 },
+            { x: 1.13, yTop: 1.625, yBot: 1.465, zMid: 0.073, zBow: 0.018 },
+            { x: 1.21, yTop: 1.585, yBot: 1.475, zMid: 0.066, zBow: 0.015 },
             { x: 1.27, yTop: 1.54, yBot: 1.49, zMid: 0.056, zBow: 0.008 },
           ],
           sd,
           msuMat(),
-          8,
-          false,
-          true,
+          {
+            verticalSegs: 12,
+            longSubdivs: 3,
+            horizontalFibers: false,
+            aponeuroticEdgeFade: true,
+            dorsalAponeurosis: 0.28,
+            ventralAponeurosis: 0.12,
+            thickness: 0.016,
+          },
         ),
       );
-      g.add(createTubeCurveMesh([V3(1.13, 1.615, 0.074 * sd), V3(1.26, 1.54, 0.063 * sd)], 0.006, tenMat(), 8, 6));
+      g.add(createTubeCurveMesh([V3(1.12, 1.62, 0.075 * sd), V3(1.26, 1.54, 0.063 * sd)], 0.0055, tenMat(), 10, 6));
       return g;
     }),
     'center',
     V3(1.15, 1.55, 0),
   );
 
-  // Músculo temporal (equ.mus.cab.019 — deep muscle filling temporal fossa above eye/TMJ)
+  // Músculo temporal (equ.mus.cab.019 — curved fan filling temporal fossa above eye/TMJ)
   push(
     'equ.mus.cab.019',
     buildBilateralMuscular((sd) =>
-      createOrganMesh(V3(1.11, 1.72, 0.052 * sd), [0.055, 0.036, 0.02], mprMat(), [0, 0, -0.35], 12),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.06, 1.755, 0.025 * sd), rx: 0.016, ry: 0.026 },
+          { pos: V3(1.115, 1.725, 0.048 * sd), rx: 0.024, ry: 0.042 },
+          { pos: V3(1.15, 1.675, 0.056 * sd), rx: 0.015, ry: 0.026 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.16, insertionTendonFrac: 0.22, radialSegs: 14, grooveAO: 0.2 },
+      ),
     ),
     'center',
     V3(1.11, 1.72, 0),
   );
 
-  // Orbicular del ojo (equ.mus.cab.002)
+  // Orbicular del ojo (equ.mus.cab.002 — contoured peri-orbital ring hugging lateral skull)
   push(
     'equ.mus.cab.002',
     buildBilateralMuscular((sd) => {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.024, 0.006, 8, 16), msuMat());
-      ring.position.set(1.195, 1.695, 0.078 * sd);
-      ring.rotation.y = (Math.PI / 2) * sd;
-      return ring;
+      const pts: { pos: THREE.Vector3; rx: number; ry: number }[] = [];
+      const oc = V3(1.195, 1.695, 0.074 * sd);
+      for (let i = 0; i <= 12; i++) {
+        const ang = (i / 12) * Math.PI * 2;
+        pts.push({
+          pos: V3(
+            oc.x + Math.cos(ang) * 0.026,
+            oc.y + Math.sin(ang) * 0.021,
+            oc.z + Math.cos(ang * 0.6) * 0.004 * sd,
+          ),
+          rx: 0.0055,
+          ry: 0.0075,
+        });
+      }
+      return createBiospheraMuscleMesh(pts, msuMat(), {
+        originTendonFrac: 0,
+        insertionTendonFrac: 0,
+        radialSegs: 8,
+        subdivsPerSpan: 1,
+        grooveAO: 0.16,
+      });
     }),
     'center',
     V3(1.195, 1.695, 0),
   );
 
-  // Elevador nasolabial (equ.mus.cab.011 — long fan from frontal bridge down to upper lip/nostril)
+  // Elevador nasolabial (equ.mus.cab.011 — sculpted broad strap from frontal bridge to upper lip/nostril)
   push(
     'equ.mus.cab.011',
     buildBilateralMuscular((sd) =>
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
-          { x: 1.25, yTop: 1.65, yBot: 1.59, zMid: 0.025, zBow: 0.02 },
-          { x: 1.38, yTop: 1.55, yBot: 1.48, zMid: 0.032, zBow: 0.018 },
-          { x: 1.50, yTop: 1.44, yBot: 1.38, zMid: 0.032, zBow: 0.012 },
+          { x: 1.24, yTop: 1.65, yBot: 1.59, zMid: 0.024, zBow: 0.022 },
+          { x: 1.38, yTop: 1.55, yBot: 1.48, zMid: 0.032, zBow: 0.019 },
+          { x: 1.51, yTop: 1.435, yBot: 1.375, zMid: 0.032, zBow: 0.013 },
         ],
         sd,
         msuMat(),
-        6,
-        true,
-        true,
+        {
+          verticalSegs: 8,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.22,
+          ventralAponeurosis: 0.2,
+          thickness: 0.008,
+        },
       ),
     ),
     'center',
     V3(1.38, 1.51, 0),
   );
 
-  // Elevador del labio superior (equ.mus.cab.012)
+  // Elevador del labio superior (equ.mus.cab.012 — curved belly with long dorsal nasal tendon)
   push(
     'equ.mus.cab.012',
     buildBilateralMuscular((sd) =>
-      createMuscleUnitWithTendonCaps(V3(1.27, 1.59, 0.052 * sd), V3(1.52, 1.42, 0.014 * sd), 0.011, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.45),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.26, 1.59, 0.054 * sd), rx: 0.008, ry: 0.013 },
+          { pos: V3(1.35, 1.54, 0.048 * sd), rx: 0.011, ry: 0.016 },
+          { pos: V3(1.44, 1.48, 0.03 * sd), rx: 0.006, ry: 0.008 },
+          { pos: V3(1.52, 1.415, 0.012 * sd), rx: 0.004, ry: 0.005 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.44, radialSegs: 12 },
+      ),
     ),
     'center',
     V3(1.40, 1.50, 0),
   );
 
-  // Músculo cigomático (equ.mus.cab.015 — thin ribbon facial crest -> lip commissure)
+  // Músculo cigomático (equ.mus.cab.015 — curved cheek ribbon facial crest -> lip commissure)
   push(
     'equ.mus.cab.015',
     buildBilateralMuscular((sd) =>
-      createMuscleUnitWithTendonCaps(V3(1.25, 1.57, 0.064 * sd), V3(1.48, 1.38, 0.044 * sd), 0.009, 0.5, msuMat(), tenMat(), 0.5, 0.18, 0.18),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.245, 1.57, 0.065 * sd), rx: 0.005, ry: 0.01 },
+          { pos: V3(1.36, 1.48, 0.056 * sd), rx: 0.006, ry: 0.012 },
+          { pos: V3(1.485, 1.382, 0.043 * sd), rx: 0.005, ry: 0.008 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.22, insertionTendonFrac: 0.16, radialSegs: 10 },
+      ),
     ),
     'center',
     V3(1.36, 1.48, 0),
   );
 
-  // Buccinador (equ.mus.cab.014 — cheek wall closing space cranial to masseter)
+  // Buccinador (equ.mus.cab.014 — thick cheek wall closing space cranial to masseter)
   push(
     'equ.mus.cab.014',
     buildBilateralMuscular((sd) =>
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
-          { x: 1.24, yTop: 1.52, yBot: 1.44, zMid: 0.046, zBow: 0.012 },
-          { x: 1.36, yTop: 1.46, yBot: 1.38, zMid: 0.042, zBow: 0.012 },
-          { x: 1.47, yTop: 1.40, yBot: 1.35, zMid: 0.036, zBow: 0.008 },
+          { x: 1.24, yTop: 1.52, yBot: 1.435, zMid: 0.046, zBow: 0.014 },
+          { x: 1.36, yTop: 1.46, yBot: 1.375, zMid: 0.042, zBow: 0.013 },
+          { x: 1.475, yTop: 1.40, yBot: 1.345, zMid: 0.036, zBow: 0.009 },
         ],
         sd,
         mprMat(),
-        6,
+        {
+          verticalSegs: 8,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.14,
+          ventralAponeurosis: 0.14,
+          thickness: 0.011,
+        },
       ),
     ),
     'center',
     V3(1.36, 1.43, 0),
   );
 
-  // Orbicular de la boca (equ.mus.cab.013) & Depresor del labio inferior (equ.mus.cab.016)
+  // Orbicular de la boca (equ.mus.cab.013 — horseshoe muzzle sphincter) & Depresor labio inferior (cab.016)
   push(
     'equ.mus.cab.013',
     buildBilateralMuscular((sd) =>
-      createOrganMesh(V3(1.525, 1.37, 0.025 * sd), [0.026, 0.024, 0.02], msuMat(), [0, 0, -0.45], 10),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.495, 1.39, 0.038 * sd), rx: 0.012, ry: 0.016 },
+          { pos: V3(1.542, 1.38, 0.025 * sd), rx: 0.015, ry: 0.02 },
+          { pos: V3(1.546, 1.355, 0.016 * sd), rx: 0.014, ry: 0.018 },
+          { pos: V3(1.505, 1.338, 0.028 * sd), rx: 0.011, ry: 0.014 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.06, insertionTendonFrac: 0.06, radialSegs: 12 },
+      ),
     ),
     'center',
     V3(1.525, 1.37, 0),
@@ -484,7 +554,15 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   push(
     'equ.mus.cab.016',
     buildBilateralMuscular((sd) =>
-      createMuscleBellyMesh(V3(1.30, 1.41, 0.042 * sd), V3(1.49, 1.32, 0.024 * sd), 0.009, 0.55, msuMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.29, 1.415, 0.044 * sd), rx: 0.006, ry: 0.01 },
+          { pos: V3(1.39, 1.368, 0.036 * sd), rx: 0.007, ry: 0.011 },
+          { pos: V3(1.495, 1.322, 0.022 * sd), rx: 0.005, ry: 0.008 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.14, insertionTendonFrac: 0.18, radialSegs: 10 },
+      ),
     ),
     'center',
     V3(1.40, 1.36, 0),
@@ -498,92 +576,262 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     const hl = hindlimbLandmarks(sd);
 
     // Facial malar & nasal transversus
-    push(`equ.mus.cab.028-${tag}`, createMuscleBellyMesh(V3(1.22, 1.63, 0.068 * sd), V3(1.29, 1.54, 0.058 * sd), 0.014, 0.4, msuMat()), side);
-    push(`equ.mus.cab.049-${tag}`, createOrganMesh(V3(1.51, 1.42, 0.016 * sd), [0.02, 0.012, 0.015], msuMat(), [0, 0, -0.4], 10), side);
-
-    // NECK ÉCORCHÉ
     push(
-      `equ.mus.cue.002-${tag}`, // Braquiocefálico
-      createMuscleUnitWithTendonCaps(V3(0.99, 1.66, 0.056 * sd), fl.shoulder.clone().add(V3(0.03, 0.02, 0.01 * sd)), 0.058, 0.48, msuMat(), tenMat(), 0.45, 0.1, 0.14),
+      `equ.mus.cab.028-${tag}`,
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.215, 1.638, 0.068 * sd), rx: 0.007, ry: 0.014 },
+          { pos: V3(1.255, 1.59, 0.066 * sd), rx: 0.008, ry: 0.016 },
+          { pos: V3(1.295, 1.54, 0.058 * sd), rx: 0.006, ry: 0.012 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.12, radialSegs: 10 },
+      ),
       side,
     );
     push(
-      `equ.mus.cue.003-${tag}`, // Esternocefálico
-      createMuscleUnitWithTendonCaps(HEAD.jawAngle(sd), V3(0.49, 0.94, 0.04 * sd), 0.035, 0.55, msuMat(), tenMat(), 0.5, 0.18, 0.14),
+      `equ.mus.cab.049-${tag}`,
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.495, 1.422, 0.004 * sd), rx: 0.009, ry: 0.011 },
+          { pos: V3(1.515, 1.415, 0.022 * sd), rx: 0.011, ry: 0.014 },
+          { pos: V3(1.53, 1.398, 0.036 * sd), rx: 0.008, ry: 0.01 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.15, insertionTendonFrac: 0.1, radialSegs: 10 },
+      ),
+      side,
+    );
+
+    // NECK ÉCORCHÉ (S-curved Biosphera bellies & overlapping broad sheets)
+    push(
+      `equ.mus.cue.002-${tag}`, // Braquiocefálico (arched jugular dorsal border)
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.99, 1.655, 0.056 * sd), rx: 0.026, ry: 0.042 },
+          { pos: V3(0.83, 1.51, 0.078 * sd), rx: 0.038, ry: 0.064 },
+          { pos: V3(0.65, 1.32, 0.098 * sd), rx: 0.044, ry: 0.072 },
+          { pos: V3(0.50, 1.15, 0.128 * sd), rx: 0.04, ry: 0.064 },
+          { pos: fl.shoulder.clone().add(V3(0.03, -0.04, 0.008 * sd)), rx: 0.026, ry: 0.038 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.15, radialSegs: 16, grooveAO: 0.28 },
+      ),
+      side,
+    );
+    push(
+      `equ.mus.cue.003-${tag}`, // Esternocefálico (jugular ventral border)
+      createBiospheraMuscleMesh(
+        [
+          { pos: HEAD.jawAngle(sd), rx: 0.018, ry: 0.024 },
+          { pos: V3(0.86, 1.42, 0.056 * sd), rx: 0.024, ry: 0.038 },
+          { pos: V3(0.67, 1.16, 0.052 * sd), rx: 0.026, ry: 0.04 },
+          { pos: V3(0.49, 0.94, 0.026 * sd), rx: 0.018, ry: 0.026 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.22, insertionTendonFrac: 0.16, radialSegs: 14, grooveAO: 0.24 },
+      ),
       side,
     );
     push(
       `equ.mus.ext.006-${tag}`, // Omotransverso
-      createMuscleUnitWithTendonCaps(V3(0.95, 1.69, 0.054 * sd), fl.shoulder.clone().add(V3(0.01, 0.09, 0.024 * sd)), 0.042, 0.45, msuMat(), tenMat(), 0.48, 0.12, 0.16),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.95, 1.68, 0.054 * sd), rx: 0.02, ry: 0.038 },
+          { pos: V3(0.75, 1.50, 0.088 * sd), rx: 0.028, ry: 0.05 },
+          { pos: V3(0.55, 1.32, 0.125 * sd), rx: 0.028, ry: 0.048 },
+          { pos: fl.shoulder.clone().add(V3(0.01, 0.09, 0.024 * sd)), rx: 0.022, ry: 0.036 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.16, radialSegs: 14, grooveAO: 0.24 },
+      ),
       side,
     );
     push(
-      `equ.mus.cue.007-${tag}`, // Esplenio
-      createMuscleBellyMesh(V3(0.97, 1.74, 0.044 * sd), V3(0.44, 1.44, 0.058 * sd), 0.068, 0.4, msuMat(), 0.45),
+      `equ.mus.cue.007-${tag}`, // Esplenio (sculpted arched neck sheet)
+      createSculptedMuscleSheetMesh(
+        [
+          { x: 0.36, yTop: 1.54, yBot: 1.38, zMid: 0.072, zBow: 0.022 },
+          { x: 0.56, yTop: 1.61, yBot: 1.41, zMid: 0.064, zBow: 0.026 },
+          { x: 0.78, yTop: 1.70, yBot: 1.51, zMid: 0.052, zBow: 0.022 },
+          { x: 0.98, yTop: 1.76, yBot: 1.63, zMid: 0.036, zBow: 0.014 },
+        ],
+        sd,
+        msuMat(),
+        {
+          verticalSegs: 12,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.18,
+          ventralAponeurosis: 0.22,
+          thickness: 0.016,
+        },
+      ),
       side,
     );
     push(
       `equ.mus.ext.007-${tag}`, // Serrato ventral cervical
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
-          { x: 0.40, yTop: 1.43, yBot: 1.24, zMid: 0.11, zBow: 0.028 },
-          { x: 0.56, yTop: 1.49, yBot: 1.29, zMid: 0.085, zBow: 0.028 },
-          { x: 0.72, yTop: 1.56, yBot: 1.38, zMid: 0.062, zBow: 0.024 },
-          { x: 0.85, yTop: 1.63, yBot: 1.48, zMid: 0.046, zBow: 0.015 },
+          { x: 0.38, yTop: 1.44, yBot: 1.24, zMid: 0.112, zBow: 0.028 },
+          { x: 0.56, yTop: 1.50, yBot: 1.29, zMid: 0.088, zBow: 0.028 },
+          { x: 0.72, yTop: 1.57, yBot: 1.38, zMid: 0.064, zBow: 0.024 },
+          { x: 0.86, yTop: 1.64, yBot: 1.49, zMid: 0.048, zBow: 0.015 },
         ],
         sd,
         mprMat(),
-        8,
+        {
+          verticalSegs: 10,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.18,
+          ventralAponeurosis: 0.24,
+          thickness: 0.015,
+        },
       ),
       side,
     );
     push(
       `equ.mus.ext.003-${tag}`, // Romboides cervical
-      createMuscleBellyMesh(V3(0.94, 1.75, 0.022 * sd), V3(0.36, 1.46, 0.055 * sd), 0.036, 0.45, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.94, 1.75, 0.022 * sd), rx: 0.018, ry: 0.032 },
+          { pos: V3(0.68, 1.65, 0.036 * sd), rx: 0.024, ry: 0.044 },
+          { pos: V3(0.36, 1.46, 0.055 * sd), rx: 0.022, ry: 0.04 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.14, insertionTendonFrac: 0.14, radialSegs: 12 },
+      ),
       side,
     );
     push(
       `equ.mus.cue.008-${tag}`, // Semiespinoso de la cabeza
-      createMuscleBellyMesh(V3(1.00, 1.75, 0.03 * sd), V3(0.42, 1.42, 0.042 * sd), 0.048, 0.55, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(1.00, 1.75, 0.03 * sd), rx: 0.026, ry: 0.042 },
+          { pos: V3(0.72, 1.61, 0.04 * sd), rx: 0.034, ry: 0.052 },
+          { pos: V3(0.42, 1.42, 0.044 * sd), rx: 0.028, ry: 0.044 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.14, insertionTendonFrac: 0.14, radialSegs: 14 },
+      ),
       side,
     );
     push(
       `equ.mus.cue.011-${tag}`, // Longuísimo del cuello
-      createMuscleBellyMesh(V3(0.86, 1.62, 0.038 * sd), V3(0.50, 1.26, 0.048 * sd), 0.038, 0.65, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.86, 1.62, 0.038 * sd), rx: 0.024, ry: 0.034 },
+          { pos: V3(0.68, 1.43, 0.048 * sd), rx: 0.03, ry: 0.04 },
+          { pos: V3(0.50, 1.26, 0.048 * sd), rx: 0.024, ry: 0.034 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.12, radialSegs: 12 },
+      ),
       side,
     );
     push(
-      `equ.mus.cue.004-${tag}`, // Omohioideo & Esternohioideo (005)
-      createMuscleBellyMesh(V3(0.95, 1.59, 0.028 * sd), V3(0.54, 1.16, 0.048 * sd), 0.024, 0.45, mprMat()),
+      `equ.mus.cue.004-${tag}`, // Omohioideo
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.95, 1.59, 0.028 * sd), rx: 0.012, ry: 0.022 },
+          { pos: V3(0.74, 1.36, 0.044 * sd), rx: 0.014, ry: 0.026 },
+          { pos: V3(0.54, 1.16, 0.048 * sd), rx: 0.012, ry: 0.022 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.14, insertionTendonFrac: 0.14, radialSegs: 10 },
+      ),
       side,
     );
     push(
-      `equ.mus.cue.005-${tag}`,
-      createMuscleBellyMesh(V3(0.93, 1.56, 0.016 * sd), V3(0.49, 0.96, 0.018 * sd), 0.019, 0.65, mprMat()),
+      `equ.mus.cue.005-${tag}`, // Esternohioideo
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.93, 1.56, 0.016 * sd), rx: 0.012, ry: 0.016 },
+          { pos: V3(0.72, 1.26, 0.02 * sd), rx: 0.014, ry: 0.019 },
+          { pos: V3(0.49, 0.96, 0.018 * sd), rx: 0.012, ry: 0.016 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.14, radialSegs: 10 },
+      ),
       side,
     );
 
     // WITHERS, BACK & THORAX ÉCORCHÉ
     push(
-      `equ.mus.ext.001-${tag}`, // Trapecio cervical
-      createMuscleBellyMesh(V3(0.84, 1.66, 0.04 * sd), V3(0.36, 1.38, 0.115 * sd), 0.068, 0.3, msuMat(), 0.55),
+      `equ.mus.ext.001-${tag}`, // Trapecio cervical (broad triangular fan from nuchal crest to scapular spine)
+      createSculptedMuscleSheetMesh(
+        [
+          { x: 0.30, yTop: 1.54, yBot: 1.33, zMid: 0.105, zBow: 0.028 },
+          { x: 0.48, yTop: 1.59, yBot: 1.39, zMid: 0.088, zBow: 0.026 },
+          { x: 0.68, yTop: 1.66, yBot: 1.51, zMid: 0.062, zBow: 0.02 },
+          { x: 0.85, yTop: 1.72, yBot: 1.64, zMid: 0.036, zBow: 0.012 },
+        ],
+        sd,
+        msuMat(),
+        {
+          verticalSegs: 12,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.26,
+          ventralAponeurosis: 0.2,
+          thickness: 0.014,
+        },
+      ),
       side,
     );
     push(
-      `equ.mus.ext.002-${tag}`, // Trapecio torácico
-      createMuscleBellyMesh(V3(0.32, 1.46, 0.04 * sd), V3(0.18, 1.26, 0.14 * sd), 0.062, 0.3, msuMat(), 0.45),
+      `equ.mus.ext.002-${tag}`, // Trapecio torácico (triangular sheet from withers to scapular spine)
+      createSculptedMuscleSheetMesh(
+        [
+          { x: 0.02, yTop: 1.40, yBot: 1.34, zMid: 0.048, zBow: 0.02 },
+          { x: 0.16, yTop: 1.48, yBot: 1.30, zMid: 0.095, zBow: 0.038 },
+          { x: 0.30, yTop: 1.53, yBot: 1.29, zMid: 0.112, zBow: 0.034 },
+        ],
+        sd,
+        msuMat(),
+        {
+          verticalSegs: 10,
+          longSubdivs: 3,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.28,
+          ventralAponeurosis: 0.2,
+          thickness: 0.014,
+        },
+      ),
       side,
     );
     push(
       `equ.mus.ext.004-${tag}`, // Romboides torácico
-      createMuscleBellyMesh(V3(0.40, 1.47, 0.03 * sd), V3(0.24, 1.35, 0.125 * sd), 0.042, 0.38, mprMat()),
+      createSculptedMuscleSheetMesh(
+        [
+          { x: 0.14, yTop: 1.47, yBot: 1.36, zMid: 0.05, zBow: 0.025 },
+          { x: 0.28, yTop: 1.49, yBot: 1.35, zMid: 0.08, zBow: 0.03 },
+          { x: 0.40, yTop: 1.48, yBot: 1.36, zMid: 0.07, zBow: 0.02 },
+        ],
+        sd,
+        mprMat(),
+        {
+          verticalSegs: 8,
+          longSubdivs: 2,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.18,
+          ventralAponeurosis: 0.16,
+          thickness: 0.012,
+        },
+      ),
       side,
     );
 
     // Longuísimo lumbar (dor.003) & torácico (dor.004) + Iliocostal lumbar (dor.001) & torácico (dor.002)
     push(
       `equ.mus.dor.003-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.76, yTop: 1.39, yBot: 1.27, zMid: 0.035, zBow: 0.055 },
           { x: -0.56, yTop: 1.40, yBot: 1.27, zMid: 0.04, zBow: 0.065 },
@@ -591,44 +839,56 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         msuMat(),
-        8,
-        true,
-        true,
+        { verticalSegs: 10, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.28, ventralAponeurosis: 0.14, thickness: 0.018 },
       ),
       side,
     );
     push(
       `equ.mus.dor.004-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.35, yTop: 1.39, yBot: 1.27, zMid: 0.04, zBow: 0.065 },
-          { x: -0.05, yTop: 1.38, yBot: 1.25, zMid: 0.045, zBow: 0.07 },
-          { x: 0.25, yTop: 1.38, yBot: 1.24, zMid: 0.045, zBow: 0.06 },
+          { x: -0.05, yTop: 1.38, yBot: 1.25, zMid: 0.045, zBow: 0.072 },
+          { x: 0.25, yTop: 1.38, yBot: 1.24, zMid: 0.045, zBow: 0.062 },
           { x: 0.46, yTop: 1.34, yBot: 1.23, zMid: 0.04, zBow: 0.04 },
         ],
         sd,
         msuMat(),
-        8,
-        true,
-        true,
+        { verticalSegs: 10, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.26, ventralAponeurosis: 0.14, thickness: 0.018 },
       ),
       side,
     );
     push(
       `equ.mus.dor.001-${tag}`,
-      createMuscleBellyMesh(V3(-0.70, 1.33, 0.095 * sd), V3(-0.34, 1.28, 0.125 * sd), 0.034, 0.6, msuMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.70, 1.33, 0.095 * sd), rx: 0.022, ry: 0.032 },
+          { pos: V3(-0.52, 1.31, 0.118 * sd), rx: 0.026, ry: 0.038 },
+          { pos: V3(-0.34, 1.28, 0.125 * sd), rx: 0.022, ry: 0.032 },
+        ],
+        msuMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
     push(
       `equ.mus.dor.002-${tag}`,
-      createMuscleBellyMesh(V3(-0.34, 1.28, 0.125 * sd), V3(0.38, 1.22, 0.105 * sd), 0.032, 0.55, msuMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.34, 1.28, 0.125 * sd), rx: 0.02, ry: 0.032 },
+          { pos: V3(0.02, 1.25, 0.132 * sd), rx: 0.024, ry: 0.036 },
+          { pos: V3(0.38, 1.22, 0.105 * sd), rx: 0.018, ry: 0.028 },
+        ],
+        msuMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
 
-    // Serrato dorsal craneal (tor.001) & caudal (tor.002)
+    // Serrato dorsal craneal (tor.001) & caudal (tor.002) with serrated ventral digitations
     push(
       `equ.mus.tor.001-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.02, yTop: 1.32, yBot: 1.19, zMid: 0.14, zBow: 0.065 },
           { x: 0.16, yTop: 1.33, yBot: 1.19, zMid: 0.13, zBow: 0.06 },
@@ -636,13 +896,13 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         msuMat(),
-        6,
+        { verticalSegs: 8, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.34, ventralAponeurosis: 0.12, costalDigitations: 4, thickness: 0.011 },
       ),
       side,
     );
     push(
       `equ.mus.tor.002-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.36, yTop: 1.31, yBot: 1.16, zMid: 0.14, zBow: 0.06 },
           { x: -0.18, yTop: 1.32, yBot: 1.16, zMid: 0.15, zBow: 0.07 },
@@ -650,19 +910,30 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         msuMat(),
-        6,
+        { verticalSegs: 8, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.34, ventralAponeurosis: 0.12, costalDigitations: 4, thickness: 0.011 },
       ),
       side,
     );
 
-    // Serrato ventral torácico (equ.mus.ext.008-i/d)
+    // Serrato ventral torácico (equ.mus.ext.008-i/d — 7 curved fan digitations wrapping ribs up to scapula)
     const serrThor = new THREE.Group();
     for (let dig = 0; dig < 7; dig++) {
       const rIdx = 2 + dig;
       const arc = ribArcPoints(rIdx, sd);
       const originRib = arc[2].clone().lerp(arc[3], 0.35 + dig * 0.05);
       const insScap = fl.scapulaTop.clone().lerp(fl.shoulder, 0.25).add(V3(-0.02 + dig * 0.008, -0.02, -0.015 * sd));
-      serrThor.add(createMuscleUnitWithTendonCaps(originRib, insScap, 0.028, 0.38, mprMat(), tenMat(), 0.42, 0.2, 0.1));
+      const midRib = originRib.clone().lerp(insScap, 0.5).add(V3(0, 0.01, 0.012 * sd));
+      serrThor.add(
+        createBiospheraMuscleMesh(
+          [
+            { pos: originRib, rx: 0.012, ry: 0.024 },
+            { pos: midRib, rx: 0.016, ry: 0.032 },
+            { pos: insScap, rx: 0.012, ry: 0.022 },
+          ],
+          mprMat(),
+          { originTendonFrac: 0.2, insertionTendonFrac: 0.14, radialSegs: 12, grooveAO: 0.22 },
+        ),
+      );
     }
     push(`equ.mus.ext.008-${tag}`, serrThor, side);
 
@@ -704,19 +975,17 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     // Dorsal ancho / Latissimus dorsi (equ.mus.ext.005-i/d)
     push(
       `equ.mus.ext.005-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
-          { x: -0.34, yTop: 1.37, yBot: 1.24, zMid: 0.15, zBow: 0.05 },
-          { x: -0.14, yTop: 1.35, yBot: 1.15, zMid: 0.19, zBow: 0.065 },
-          { x: 0.08, yTop: 1.33, yBot: 1.07, zMid: 0.21, zBow: 0.06 },
-          { x: 0.28, yTop: 1.26, yBot: 0.99, zMid: 0.18, zBow: 0.035 },
+          { x: -0.34, yTop: 1.38, yBot: 1.24, zMid: 0.15, zBow: 0.052 },
+          { x: -0.14, yTop: 1.36, yBot: 1.15, zMid: 0.19, zBow: 0.068 },
+          { x: 0.08, yTop: 1.33, yBot: 1.07, zMid: 0.21, zBow: 0.062 },
+          { x: 0.28, yTop: 1.26, yBot: 0.99, zMid: 0.18, zBow: 0.036 },
           { x: 0.42, yTop: 1.12, yBot: 0.98, zMid: 0.155, zBow: 0.015 },
         ],
         sd,
         msuMat(),
-        12,
-        true,
-        true,
+        { verticalSegs: 14, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.36, ventralAponeurosis: 0.14, thickness: 0.015 },
       ),
       side,
     );
@@ -724,7 +993,7 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     // Fascia toracolumbar (equ.mus.tor.011-i/d)
     push(
       `equ.mus.tor.011-${tag}`,
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.78, yTop: 1.40, yBot: 1.26, zMid: 0.05, zBow: 0.068 },
           { x: -0.55, yTop: 1.44, yBot: 1.25, zMid: 0.06, zBow: 0.082 },
@@ -733,7 +1002,7 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         fasMat(),
-        8,
+        { verticalSegs: 10, longSubdivs: 3, aponeuroticEdgeFade: false, thickness: 0.008 },
       ),
       side,
     );
@@ -741,56 +1010,87 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     // Pectoral descendente (009), transverso (010), profundo ascendente (011)
     push(
       `equ.mus.ext.009-${tag}`,
-      createMuscleBellyMesh(V3(0.49, 0.93, 0.02 * sd), fl.shoulder.clone().add(V3(0.02, -0.12, 0)), 0.082, 0.72, msuMat(), 0.45),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.49, 0.95, 0.018 * sd), rx: 0.04, ry: 0.055 },
+          { pos: V3(0.48, 0.89, 0.072 * sd), rx: 0.062, ry: 0.086 },
+          { pos: fl.shoulder.clone().add(V3(0.02, -0.13, 0.005 * sd)), rx: 0.036, ry: 0.052 },
+        ],
+        msuMat(),
+        { radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
       `equ.mus.ext.010-${tag}`,
-      createMuscleBellyMesh(V3(0.34, 0.85, 0.02 * sd), fl.elbow.clone().add(V3(0, 0.02, -0.02 * sd)), 0.048, 0.55, msuMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.35, 0.84, 0.018 * sd), rx: 0.026, ry: 0.042 },
+          { pos: V3(0.34, 0.82, 0.082 * sd), rx: 0.034, ry: 0.052 },
+          { pos: fl.elbow.clone().add(V3(0.01, 0.02, -0.02 * sd)), rx: 0.024, ry: 0.036 },
+        ],
+        msuMat(),
+        { radialSegs: 14, grooveAO: 0.24 },
+      ),
       side,
     );
     push(
       `equ.mus.ext.011-${tag}`,
-      createMuscleBellyMesh(V3(-0.04, 0.80, 0.075 * sd), fl.shoulder.clone().add(V3(0.01, 0.02, -0.02 * sd)), 0.072, 0.48, mprMat(), 0.52),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.04, 0.80, 0.075 * sd), rx: 0.038, ry: 0.068 },
+          { pos: V3(0.18, 0.82, 0.118 * sd), rx: 0.046, ry: 0.082 },
+          { pos: fl.shoulder.clone().add(V3(0.01, 0.02, -0.02 * sd)), rx: 0.032, ry: 0.056 },
+        ],
+        mprMat(),
+        { radialSegs: 14, grooveAO: 0.22 },
+      ),
       side,
     );
 
-    // ABDOMINAL WALL ÉCORCHÉ
+    // ABDOMINAL WALL ÉCORCHÉ (signature Biosphera costal digitations + ventral aponeurosis)
     push(
       `equ.mus.abd.001-${tag}`, // Oblicuo externo del abdomen
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
-          { x: -0.68, yTop: 1.24, yBot: 0.96, zMid: 0.15, zBow: 0.05 },
-          { x: -0.48, yTop: 1.23, yBot: 0.87, zMid: 0.16, zBow: 0.08 },
-          { x: -0.25, yTop: 1.21, yBot: 0.82, zMid: 0.17, zBow: 0.095 },
-          { x: -0.02, yTop: 1.18, yBot: 0.81, zMid: 0.17, zBow: 0.09 },
-          { x: 0.16, yTop: 1.13, yBot: 0.84, zMid: 0.15, zBow: 0.055 },
+          { x: -0.68, yTop: 1.24, yBot: 0.96, zMid: 0.15, zBow: 0.052 },
+          { x: -0.48, yTop: 1.23, yBot: 0.87, zMid: 0.16, zBow: 0.082 },
+          { x: -0.25, yTop: 1.21, yBot: 0.82, zMid: 0.17, zBow: 0.096 },
+          { x: -0.02, yTop: 1.18, yBot: 0.81, zMid: 0.17, zBow: 0.092 },
+          { x: 0.16, yTop: 1.13, yBot: 0.84, zMid: 0.15, zBow: 0.056 },
         ],
         sd,
         msuMat(),
-        12,
-        true,
-        true,
+        {
+          verticalSegs: 14,
+          longSubdivs: 4,
+          horizontalFibers: true,
+          aponeuroticEdgeFade: true,
+          dorsalAponeurosis: 0.1,
+          ventralAponeurosis: 0.34,
+          costalDigitations: 6,
+          thickness: 0.015,
+        },
       ),
       side,
     );
     push(
       `equ.mus.abd.002-${tag}`, // Oblicuo interno del abdomen
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.71, yTop: 1.32, yBot: 1.00, zMid: 0.15, zBow: 0.045 },
-          { x: -0.56, yTop: 1.26, yBot: 0.91, zMid: 0.16, zBow: 0.06 },
-          { x: -0.38, yTop: 1.20, yBot: 0.86, zMid: 0.165, zBow: 0.07 },
+          { x: -0.56, yTop: 1.26, yBot: 0.91, zMid: 0.16, zBow: 0.062 },
+          { x: -0.38, yTop: 1.20, yBot: 0.86, zMid: 0.165, zBow: 0.072 },
         ],
         sd,
         mprMat(),
-        8,
+        { verticalSegs: 10, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.12, ventralAponeurosis: 0.28, thickness: 0.013 },
       ),
       side,
     );
     push(
       `equ.mus.abd.004-${tag}`, // Recto del abdomen
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.75, yTop: 1.06, yBot: 0.98, zMid: 0.015, zBow: 0.05 },
           { x: -0.50, yTop: 0.89, yBot: 0.82, zMid: 0.015, zBow: 0.085 },
@@ -799,13 +1099,13 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         mprMat(),
-        6,
+        { verticalSegs: 8, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.14, ventralAponeurosis: 0.18, thickness: 0.014 },
       ),
       side,
     );
     push(
       `equ.mus.abd.006-${tag}`, // Túnica flava del abdomen
-      createCurvedMuscleSheetMesh(
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.62, yTop: 0.97, yBot: 0.89, zMid: 0.04, zBow: 0.09 },
           { x: -0.32, yTop: 0.87, yBot: 0.77, zMid: 0.03, zBow: 0.14 },
@@ -813,65 +1113,157 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         fasMat(),
-        6,
+        { verticalSegs: 8, longSubdivs: 3, aponeuroticEdgeFade: false, thickness: 0.008 },
       ),
       side,
     );
 
-    // FORELIMB ÉCORCHÉ
+    // FORELIMB ÉCORCHÉ (sculpted interlocking curved shoulder, triceps & forearm bellies)
     push(
       `equ.mus.hom.001-${tag}`, // Supraespinoso
-      createMuscleUnitWithTendonCaps(fl.scapulaTop.clone().add(V3(0.04, -0.02, 0.02 * sd)), fl.shoulder.clone().add(V3(0.03, 0.02, 0.01 * sd)), 0.056, 0.48, mprMat(), tenMat(), 0.45, 0.08, 0.18),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.scapulaTop.clone().add(V3(0.04, -0.02, 0.02 * sd)), rx: 0.026, ry: 0.048 },
+          { pos: fl.scapulaTop.clone().lerp(fl.shoulder, 0.5).add(V3(0.045, 0.01, 0.026 * sd)), rx: 0.032, ry: 0.06 },
+          { pos: fl.shoulder.clone().add(V3(0.03, 0.02, 0.01 * sd)), rx: 0.024, ry: 0.042 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.2, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
       `equ.mus.hom.002-${tag}`, // Infraespinoso
-      createMuscleUnitWithTendonCaps(fl.scapulaTop.clone().add(V3(-0.04, -0.02, 0.02 * sd)), fl.shoulder.clone().add(V3(-0.02, 0.01, 0.03 * sd)), 0.054, 0.42, mprMat(), tenMat(), 0.45, 0.08, 0.2),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.scapulaTop.clone().add(V3(-0.04, -0.02, 0.02 * sd)), rx: 0.024, ry: 0.046 },
+          { pos: fl.scapulaTop.clone().lerp(fl.shoulder, 0.52).add(V3(-0.035, 0, 0.032 * sd)), rx: 0.03, ry: 0.058 },
+          { pos: fl.shoulder.clone().add(V3(-0.02, 0.01, 0.03 * sd)), rx: 0.022, ry: 0.042 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.22, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
-      `equ.mus.hom.003-${tag}`, // Deltoides
-      createMuscleUnitWithTendonCaps(V3(0.34, 1.34, 0.165 * sd), fl.shoulder.clone().add(V3(-0.04, -0.09, 0.026 * sd)), 0.052, 0.45, msuMat(), tenMat(), 0.42, 0.12, 0.18),
+      `equ.mus.hom.003-${tag}`, // Deltoides (curved acromial/scapular spine arc)
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.34, 1.34, 0.165 * sd), rx: 0.022, ry: 0.044 },
+          { pos: V3(0.37, 1.19, 0.184 * sd), rx: 0.028, ry: 0.056 },
+          { pos: fl.shoulder.clone().add(V3(-0.04, -0.09, 0.028 * sd)), rx: 0.02, ry: 0.038 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.18, insertionTendonFrac: 0.18, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
       `equ.mus.hom.005-${tag}`, // Redondo mayor
-      createMuscleBellyMesh(fl.scapulaTop.clone().add(V3(-0.06, -0.06, -0.01 * sd)), fl.elbow.clone().add(V3(0.02, 0.14, -0.02 * sd)), 0.036, 0.5, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.scapulaTop.clone().add(V3(-0.06, -0.06, -0.01 * sd)), rx: 0.018, ry: 0.032 },
+          { pos: fl.scapulaTop.clone().lerp(fl.elbow, 0.45).add(V3(-0.03, 0.03, -0.02 * sd)), rx: 0.022, ry: 0.04 },
+          { pos: fl.elbow.clone().add(V3(0.02, 0.14, -0.02 * sd)), rx: 0.016, ry: 0.028 },
+        ],
+        mprMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
     push(
-      `equ.mus.bra.007-${tag}`, // Tríceps cabeza larga
-      createMuscleUnitWithTendonCaps(V3(0.28, 1.24, 0.16 * sd), fl.elbow.clone().add(V3(-0.02, 0.06, 0.01 * sd)), 0.082, 0.55, msuMat(), tenMat(), 0.42, 0.1, 0.15),
+      `equ.mus.bra.007-${tag}`, // Tríceps cabeza larga (massive triangular Biosphera dome)
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.28, 1.24, 0.16 * sd), rx: 0.042, ry: 0.068 },
+          { pos: V3(0.295, 1.07, 0.174 * sd), rx: 0.052, ry: 0.09 },
+          { pos: fl.elbow.clone().add(V3(-0.02, 0.06, 0.012 * sd)), rx: 0.034, ry: 0.054 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.16, radialSegs: 16, grooveAO: 0.28 },
+      ),
       side,
     );
     push(
       `equ.mus.bra.008-${tag}`, // Tríceps cabeza lateral
-      createMuscleUnitWithTendonCaps(fl.shoulder.clone().add(V3(-0.03, -0.03, 0.024 * sd)), fl.elbow.clone().add(V3(-0.01, 0.05, 0.022 * sd)), 0.048, 0.55, msuMat(), tenMat(), 0.46, 0.12, 0.15),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.shoulder.clone().add(V3(-0.03, -0.03, 0.026 * sd)), rx: 0.028, ry: 0.044 },
+          { pos: fl.shoulder.clone().lerp(fl.elbow, 0.48).add(V3(-0.02, 0.01, 0.034 * sd)), rx: 0.034, ry: 0.052 },
+          { pos: fl.elbow.clone().add(V3(-0.01, 0.05, 0.024 * sd)), rx: 0.024, ry: 0.038 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.14, insertionTendonFrac: 0.18, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
       `equ.mus.bra.002-${tag}`, // Tensor de la fascia del antebrazo
-      createMuscleBellyMesh(V3(0.26, 1.18, 0.14 * sd), fl.elbow.clone().add(V3(-0.036, 0.07, 0)), 0.032, 0.35, msuMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(0.26, 1.18, 0.14 * sd), rx: 0.012, ry: 0.028 },
+          { pos: V3(0.26, 1.01, 0.15 * sd), rx: 0.015, ry: 0.036 },
+          { pos: fl.elbow.clone().add(V3(-0.038, 0.07, 0)), rx: 0.012, ry: 0.026 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.15, insertionTendonFrac: 0.25, radialSegs: 12 },
+      ),
       side,
     );
     push(
       `equ.mus.bra.004-${tag}`, // Bíceps braquial
-      createMuscleUnitWithTendonCaps(fl.shoulder.clone().add(V3(0.02, 0.01, 0)), fl.elbow.clone().add(V3(0.02, -0.02, 0)), 0.044, 0.72, mprMat(), tenMat(), 0.48, 0.16, 0.18),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.shoulder.clone().add(V3(0.02, 0.01, 0)), rx: 0.028, ry: 0.038 },
+          { pos: fl.shoulder.clone().lerp(fl.elbow, 0.48).add(V3(0.03, 0, 0.008 * sd)), rx: 0.036, ry: 0.048 },
+          { pos: fl.elbow.clone().add(V3(0.02, -0.02, 0)), rx: 0.024, ry: 0.032 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.18, insertionTendonFrac: 0.18, radialSegs: 14 },
+      ),
       side,
     );
     push(
-      `equ.mus.bra.005-${tag}`, // Braquial
-      createMuscleBellyMesh(fl.shoulder.clone().add(V3(-0.02, -0.04, 0.022 * sd)), fl.elbow.clone().add(V3(0.015, -0.01, 0.01 * sd)), 0.032, 0.65, mprMat()),
+      `equ.mus.bra.005-${tag}`, // Braquial (spiraling in musculospiral groove)
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.shoulder.clone().add(V3(-0.02, -0.04, 0.022 * sd)), rx: 0.02, ry: 0.028 },
+          { pos: fl.shoulder.clone().lerp(fl.elbow, 0.5).add(V3(0.01, -0.01, 0.024 * sd)), rx: 0.024, ry: 0.034 },
+          { pos: fl.elbow.clone().add(V3(0.015, -0.01, 0.01 * sd)), rx: 0.018, ry: 0.024 },
+        ],
+        mprMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
 
     const ercGrp = new THREE.Group();
-    ercGrp.add(createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(0.025, 0.02, 0.008 * sd)), fl.carpus.clone().add(V3(0.018, 0.08, 0)), 0.036, 0.65, msuMat(), tenMat(), 0.3, 0.1, 0.25));
+    ercGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(0.025, 0.02, 0.008 * sd)), rx: 0.022, ry: 0.032 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.32).add(V3(0.032, 0, 0.008 * sd)), rx: 0.026, ry: 0.04 },
+          { pos: fl.carpus.clone().add(V3(0.018, 0.08, 0)), rx: 0.014, ry: 0.022 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.3, radialSegs: 14, grooveAO: 0.24 },
+      ),
+    );
     ercGrp.add(createTubeCurveMesh([fl.carpus.clone().add(V3(0.018, 0.08, 0)), fl.carpus.clone().add(V3(0.018, -0.03, -0.004 * sd))], 0.007, tenMat(), 8, 6));
     push(`equ.mus.ant.001-${tag}`, ercGrp, side);
 
     const edcGrp = new THREE.Group();
-    edcGrp.add(createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(0.015, 0.0, 0.022 * sd)), fl.carpus.clone().add(V3(0.016, 0.08, 0.01 * sd)), 0.027, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.22));
+    edcGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(0.015, 0.0, 0.022 * sd)), rx: 0.016, ry: 0.024 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.34).add(V3(0.02, 0, 0.022 * sd)), rx: 0.02, ry: 0.03 },
+          { pos: fl.carpus.clone().add(V3(0.016, 0.08, 0.01 * sd)), rx: 0.011, ry: 0.016 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.28, radialSegs: 12, grooveAO: 0.22 },
+      ),
+    );
     edcGrp.add(
       createTubeCurveMesh(
         [
@@ -890,28 +1282,72 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     push(`equ.mus.ant.002-${tag}`, edcGrp, side);
 
     const edlFore = new THREE.Group();
-    edlFore.add(createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(0.002, -0.01, 0.028 * sd)), fl.carpus.clone().add(V3(0.006, 0.08, 0.02 * sd)), 0.019, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.22));
+    edlFore.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(0.002, -0.01, 0.028 * sd)), rx: 0.012, ry: 0.018 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.36).add(V3(0.006, 0, 0.028 * sd)), rx: 0.015, ry: 0.022 },
+          { pos: fl.carpus.clone().add(V3(0.006, 0.08, 0.02 * sd)), rx: 0.008, ry: 0.012 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.26, radialSegs: 12 },
+      ),
+    );
     edlFore.add(createTubeCurveMesh([fl.carpus.clone().add(V3(0.006, 0.08, 0.02 * sd)), fl.carpus.clone().add(V3(0.008, 0, 0.018 * sd)), fl.fetlock.clone().add(V3(0.012, 0, 0.01 * sd))], 0.0045, tenMat(), 12, 6));
     push(`equ.mus.ant.003-${tag}`, edlFore, side);
 
     push(
       `equ.mus.ant.004-${tag}`,
-      createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(-0.014, -0.01, 0.026 * sd)), fl.carpus.clone().add(V3(-0.024, 0.02, 0.016 * sd)), 0.026, 0.62, msuMat(), tenMat(), 0.34, 0.1, 0.25),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(-0.014, -0.01, 0.026 * sd)), rx: 0.015, ry: 0.024 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.38).add(V3(-0.024, 0, 0.026 * sd)), rx: 0.019, ry: 0.03 },
+          { pos: fl.carpus.clone().add(V3(-0.024, 0.02, 0.016 * sd)), rx: 0.01, ry: 0.016 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.28, radialSegs: 12, grooveAO: 0.22 },
+      ),
       side,
     );
     push(
       `equ.mus.ant.006-${tag}`,
-      createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(-0.015, -0.01, -0.02 * sd)), fl.carpus.clone().add(V3(-0.018, 0.02, -0.016 * sd)), 0.023, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.24),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(-0.015, -0.01, -0.02 * sd)), rx: 0.014, ry: 0.022 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.36).add(V3(-0.022, 0, -0.02 * sd)), rx: 0.017, ry: 0.026 },
+          { pos: fl.carpus.clone().add(V3(-0.018, 0.02, -0.016 * sd)), rx: 0.009, ry: 0.014 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.26, radialSegs: 12 },
+      ),
       side,
     );
     push(
       `equ.mus.ant.007-${tag}`,
-      createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(-0.03, 0.02, -0.008 * sd)), fl.carpus.clone().add(V3(-0.026, 0.02, 0.012 * sd)), 0.026, 0.58, msuMat(), tenMat(), 0.34, 0.1, 0.22),
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(-0.03, 0.02, -0.008 * sd)), rx: 0.015, ry: 0.024 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.35).add(V3(-0.032, 0, 0.006 * sd)), rx: 0.018, ry: 0.028 },
+          { pos: fl.carpus.clone().add(V3(-0.026, 0.02, 0.012 * sd)), rx: 0.01, ry: 0.016 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.24, radialSegs: 12 },
+      ),
       side,
     );
 
     const sdfGrp = new THREE.Group();
-    sdfGrp.add(createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(-0.02, -0.01, -0.005 * sd)), fl.carpus.clone().add(V3(-0.024, 0.10, 0)), 0.032, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.2));
+    sdfGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(-0.02, -0.01, -0.005 * sd)), rx: 0.02, ry: 0.03 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.36).add(V3(-0.028, 0, 0)), rx: 0.024, ry: 0.036 },
+          { pos: fl.carpus.clone().add(V3(-0.024, 0.10, 0)), rx: 0.013, ry: 0.02 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.24, radialSegs: 12 },
+      ),
+    );
     const sdfFet = fl.fetlock.clone().add(V3(-0.026, 0, 0));
     sdfGrp.add(createTubeCurveMesh([fl.carpus.clone().add(V3(-0.024, 0.10, 0)), fl.carpus.clone().add(V3(-0.028, 0, 0)), sdfFet], 0.007, tenMat(), 12, 7));
     sdfGrp.add(createTubeCurveMesh([sdfFet, fl.pasternMid.clone().add(V3(-0.016, -0.008, -0.013 * sd))], 0.005, tenMat(), 8, 6));
@@ -919,7 +1355,17 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     push(`equ.mus.ant.008-${tag}`, sdfGrp, side);
 
     const ddfGrp = new THREE.Group();
-    ddfGrp.add(createMuscleUnitWithTendonCaps(fl.elbow.clone().add(V3(-0.012, -0.02, 0.005 * sd)), fl.carpus.clone().add(V3(-0.018, 0.11, 0)), 0.03, 0.65, mprMat(), tenMat(), 0.35, 0.1, 0.2));
+    ddfGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: fl.elbow.clone().add(V3(-0.012, -0.02, 0.005 * sd)), rx: 0.018, ry: 0.028 },
+          { pos: fl.elbow.clone().lerp(fl.carpus, 0.36).add(V3(-0.02, 0, 0.004 * sd)), rx: 0.022, ry: 0.034 },
+          { pos: fl.carpus.clone().add(V3(-0.018, 0.11, 0)), rx: 0.012, ry: 0.018 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.24, radialSegs: 12 },
+      ),
+    );
     ddfGrp.add(
       createTubeCurveMesh(
         [
@@ -937,42 +1383,63 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     );
     push(`equ.mus.ant.010-${tag}`, ddfGrp, side);
 
-    // HINDLIMB & CROUP ÉCORCHÉ
+    // HINDLIMB & CROUP ÉCORCHÉ (Biosphera croup dome, sculpted hamstring clefts & thigh contours)
     push(
       `equ.mus.cad.001-${tag}`, // Glúteo superficial
-      createMuscleUnitWithTendonCaps(V3(-0.74, 1.32, 0.16 * sd), hl.hip.clone().add(V3(-0.04, -0.04, 0.04 * sd)), 0.058, 0.42, msuMat(), tenMat(), 0.45, 0.14, 0.18),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.74, 1.33, 0.145 * sd), rx: 0.024, ry: 0.056 },
+          { pos: V3(-0.74, 1.24, 0.188 * sd), rx: 0.03, ry: 0.066 },
+          { pos: hl.hip.clone().add(V3(-0.04, -0.04, 0.04 * sd)), rx: 0.022, ry: 0.046 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.18, insertionTendonFrac: 0.22, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
-      `equ.mus.cad.002-${tag}`, // Glúteo medio
-      createCurvedMuscleSheetMesh(
+      `equ.mus.cad.002-${tag}`, // Glúteo medio (voluminous rounded equine croup dome)
+      createSculptedMuscleSheetMesh(
         [
-          { x: -0.96, yTop: 1.34, yBot: 1.18, zMid: 0.09, zBow: 0.06 },
-          { x: -0.82, yTop: 1.39, yBot: 1.15, zMid: 0.11, zBow: 0.09 },
-          { x: -0.66, yTop: 1.38, yBot: 1.16, zMid: 0.11, zBow: 0.085 },
-          { x: -0.54, yTop: 1.35, yBot: 1.21, zMid: 0.09, zBow: 0.05 },
+          { x: -0.96, yTop: 1.34, yBot: 1.18, zMid: 0.09, zBow: 0.064 },
+          { x: -0.82, yTop: 1.39, yBot: 1.15, zMid: 0.115, zBow: 0.094 },
+          { x: -0.66, yTop: 1.38, yBot: 1.16, zMid: 0.115, zBow: 0.088 },
+          { x: -0.54, yTop: 1.35, yBot: 1.21, zMid: 0.09, zBow: 0.052 },
         ],
         sd,
         msuMat(),
-        10,
-        true,
-        true,
+        { verticalSegs: 12, longSubdivs: 3, aponeuroticEdgeFade: true, dorsalAponeurosis: 0.22, ventralAponeurosis: 0.12, thickness: 0.032 },
       ),
       side,
     );
     push(
       `equ.mus.cad.003-${tag}`, // Glúteo profundo
-      createMuscleBellyMesh(V3(-0.78, 1.25, 0.11 * sd), hl.hip.clone().add(V3(-0.01, 0.04, 0.01 * sd)), 0.04, 0.55, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.78, 1.25, 0.11 * sd), rx: 0.022, ry: 0.038 },
+          { pos: hl.hip.clone().add(V3(-0.01, 0.04, 0.01 * sd)), rx: 0.026, ry: 0.042 },
+        ],
+        mprMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
     push(
       `equ.mus.cad.004-${tag}`, // Tensor de la fascia lata
-      createMuscleUnitWithTendonCaps(hl.tuberCoxae, hl.stifle.clone().add(V3(0.01, 0.11, 0.03 * sd)), 0.055, 0.34, msuMat(), tenMat(), 0.35, 0.08, 0.25),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.tuberCoxae, rx: 0.02, ry: 0.052 },
+          { pos: hl.tuberCoxae.clone().lerp(hl.stifle, 0.44).add(V3(0.015, 0.02, 0.024 * sd)), rx: 0.026, ry: 0.064 },
+          { pos: hl.stifle.clone().add(V3(0.01, 0.11, 0.03 * sd)), rx: 0.018, ry: 0.044 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.28, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
-      `equ.mus.fas.017-${tag}`, // Fascia lata
-      createCurvedMuscleSheetMesh(
+      `equ.mus.fas.017-${tag}`, // Fascia lata (glistening silvery lateral thigh sheet)
+      createSculptedMuscleSheetMesh(
         [
           { x: -0.78, yTop: 1.22, yBot: 0.90, zMid: 0.14, zBow: 0.065 },
           { x: -0.69, yTop: 1.20, yBot: 0.87, zMid: 0.15, zBow: 0.072 },
@@ -980,69 +1447,161 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
         ],
         sd,
         fasMat(),
-        8,
+        { verticalSegs: 10, longSubdivs: 3, aponeuroticEdgeFade: false, thickness: 0.009 },
       ),
       side,
     );
 
-    // Cuádriceps femoral
+    // Cuádriceps femoral (contoured cranial thigh bellies bowing around femur shaft)
     push(
       `equ.mus.fem.004-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.hip.clone().add(V3(0.04, 0.02, 0)), hl.stifle.clone().add(V3(0.04, 0.03, 0)), 0.052, 0.72, mprMat(), tenMat(), 0.45, 0.1, 0.15),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.hip.clone().add(V3(0.04, 0.02, 0)), rx: 0.036, ry: 0.048 },
+          { pos: hl.hip.clone().lerp(hl.stifle, 0.48).add(V3(0.062, 0, 0)), rx: 0.046, ry: 0.058 },
+          { pos: hl.stifle.clone().add(V3(0.04, 0.03, 0)), rx: 0.032, ry: 0.04 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.18, radialSegs: 14 },
+      ),
       side,
     );
     push(
       `equ.mus.fem.005-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.hip.clone().add(V3(-0.01, 0.02, 0.03 * sd)), hl.stifle.clone().add(V3(0.03, 0.02, 0.025 * sd)), 0.062, 0.55, mprMat(), tenMat(), 0.46, 0.1, 0.15),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.hip.clone().add(V3(-0.01, 0.02, 0.032 * sd)), rx: 0.034, ry: 0.062 },
+          { pos: hl.hip.clone().lerp(hl.stifle, 0.48).add(V3(0.028, 0.01, 0.045 * sd)), rx: 0.042, ry: 0.072 },
+          { pos: hl.stifle.clone().add(V3(0.03, 0.02, 0.026 * sd)), rx: 0.03, ry: 0.05 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.18, radialSegs: 14, grooveAO: 0.24 },
+      ),
       side,
     );
     push(
       `equ.mus.fem.006-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.hip.clone().add(V3(0.01, -0.02, -0.02 * sd)), hl.stifle.clone().add(V3(0.03, 0.02, -0.02 * sd)), 0.048, 0.6, mprMat(), tenMat(), 0.46, 0.1, 0.15),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.hip.clone().add(V3(0.01, -0.02, -0.022 * sd)), rx: 0.028, ry: 0.048 },
+          { pos: hl.hip.clone().lerp(hl.stifle, 0.48).add(V3(0.03, 0, -0.024 * sd)), rx: 0.034, ry: 0.056 },
+          { pos: hl.stifle.clone().add(V3(0.03, 0.02, -0.02 * sd)), rx: 0.024, ry: 0.042 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.18, radialSegs: 14 },
+      ),
       side,
     );
 
-    // Bíceps femoral, Semitendinoso, Semimembranoso, Sartorio, Grácil
+    // Bíceps femoral, Semitendinoso, Semimembranoso, Aductor, Sartorio, Grácil
     push(
-      `equ.mus.fem.012-${tag}`,
-      createMuscleUnitWithTendonCaps(V3(-0.88, 1.24, 0.165 * sd), hl.stifle.clone().add(V3(-0.04, -0.04, 0.03 * sd)), 0.086, 0.55, msuMat(), tenMat(), 0.38, 0.12, 0.18),
+      `equ.mus.fem.012-${tag}`, // Bíceps femoral (wide sweeping lateral hamstring plate)
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.88, 1.25, 0.155 * sd), rx: 0.042, ry: 0.088 },
+          { pos: V3(-0.85, 1.07, 0.186 * sd), rx: 0.052, ry: 0.108 },
+          { pos: hl.stifle.clone().add(V3(-0.07, 0.02, 0.068 * sd)), rx: 0.046, ry: 0.092 },
+          { pos: hl.stifle.clone().add(V3(-0.04, -0.06, 0.032 * sd)), rx: 0.03, ry: 0.06 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.12, insertionTendonFrac: 0.2, radialSegs: 16, grooveAO: 0.3 },
+      ),
       side,
     );
     push(
-      `equ.mus.fem.013-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.tuberIschii.clone().add(V3(0.02, -0.02, 0.02 * sd)), hl.hock.clone().add(V3(0.01, 0.24, 0.02 * sd)), 0.064, 0.5, msuMat(), tenMat(), 0.38, 0.1, 0.22),
+      `equ.mus.fem.013-${tag}`, // Semitendinoso (graceful curved caudal buttock line)
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.tuberIschii.clone().add(V3(0.02, -0.01, 0.025 * sd)), rx: 0.036, ry: 0.064 },
+          { pos: V3(-1.00, 1.04, 0.115 * sd), rx: 0.044, ry: 0.074 },
+          { pos: V3(-0.92, 0.81, 0.098 * sd), rx: 0.036, ry: 0.06 },
+          { pos: hl.hock.clone().add(V3(0.01, 0.24, 0.02 * sd)), rx: 0.022, ry: 0.036 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.24, radialSegs: 16, grooveAO: 0.3 },
+      ),
       side,
     );
     push(
-      `equ.mus.fem.002-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.tuberIschii.clone().add(V3(0, 0.03, 0.01 * sd)), hl.hock.clone().add(V3(0.02, 0.18, -0.02 * sd)), 0.064, 0.65, msuMat(), tenMat(), 0.35, 0.1, 0.22),
+      `equ.mus.fem.002-${tag}`, // Aductor
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.tuberIschii.clone().add(V3(0, 0.03, 0.01 * sd)), rx: 0.04, ry: 0.058 },
+          { pos: V3(-0.82, 0.96, 0.08 * sd), rx: 0.046, ry: 0.068 },
+          { pos: hl.hock.clone().add(V3(0.02, 0.18, -0.02 * sd)), rx: 0.028, ry: 0.042 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.22, radialSegs: 14, grooveAO: 0.26 },
+      ),
       side,
     );
     push(
-      `equ.mus.fem.003-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.tuberIschii.clone().add(V3(0.02, -0.02, -0.035 * sd)), hl.stifle.clone().add(V3(-0.03, -0.02, -0.03 * sd)), 0.074, 0.55, msuMat(), tenMat(), 0.42, 0.1, 0.16),
+      `equ.mus.fem.003-${tag}`, // Semimembranoso
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.tuberIschii.clone().add(V3(0.02, -0.02, -0.032 * sd)), rx: 0.042, ry: 0.068 },
+          { pos: V3(-0.87, 1.03, 0.042 * sd), rx: 0.05, ry: 0.082 },
+          { pos: hl.stifle.clone().add(V3(-0.03, -0.02, -0.03 * sd)), rx: 0.034, ry: 0.056 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.16, radialSegs: 14, grooveAO: 0.28 },
+      ),
       side,
     );
     push(
-      `equ.mus.fem.008-${tag}`,
-      createMuscleBellyMesh(V3(-0.70, 1.22, 0.04 * sd), hl.stifle.clone().add(V3(0, -0.02, -0.045 * sd)), 0.02, 0.45, msuMat()),
+      `equ.mus.fem.008-${tag}`, // Sartorio
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.70, 1.22, 0.04 * sd), rx: 0.012, ry: 0.022 },
+          { pos: V3(-0.70, 1.04, 0.048 * sd), rx: 0.014, ry: 0.026 },
+          { pos: hl.stifle.clone().add(V3(0, -0.02, -0.045 * sd)), rx: 0.012, ry: 0.02 },
+        ],
+        msuMat(),
+        { radialSegs: 10 },
+      ),
       side,
     );
     push(
-      `equ.mus.fem.009-${tag}`,
-      createMuscleBellyMesh(V3(-0.84, 1.07, 0.04 * sd), hl.stifle.clone().add(V3(-0.02, -0.07, -0.035 * sd)), 0.056, 0.28, msuMat()),
+      `equ.mus.fem.009-${tag}`, // Grácil
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.84, 1.07, 0.04 * sd), rx: 0.018, ry: 0.056 },
+          { pos: V3(-0.81, 0.94, 0.052 * sd), rx: 0.02, ry: 0.062 },
+          { pos: hl.stifle.clone().add(V3(-0.02, -0.07, -0.035 * sd)), rx: 0.015, ry: 0.044 },
+        ],
+        msuMat(),
+        { radialSegs: 12, grooveAO: 0.24 },
+      ),
       side,
     );
 
-    // GASKIN / LEG ÉCORCHÉ
+    // GASKIN / LEG ÉCORCHÉ (contoured gastrocnemius & digital extensors/flexors -> crisp Achilles tendon)
     const gastGrp = new THREE.Group();
-    gastGrp.add(createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(-0.04, -0.02, 0.01 * sd)), hl.calcaneusTip.clone().add(V3(0.01, 0.12, 0)), 0.048, 0.72, msuMat(), tenMat(), 0.32, 0.1, 0.25));
+    gastGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(-0.04, -0.02, 0.01 * sd)), rx: 0.032, ry: 0.044 },
+          { pos: hl.stifle.clone().lerp(hl.calcaneusTip, 0.34).add(V3(-0.02, 0.01, 0.012 * sd)), rx: 0.038, ry: 0.052 },
+          { pos: hl.calcaneusTip.clone().add(V3(0.01, 0.12, 0)), rx: 0.016, ry: 0.022 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.28, radialSegs: 14, grooveAO: 0.26 },
+      ),
+    );
     gastGrp.add(createTubeCurveMesh([hl.calcaneusTip.clone().add(V3(0.01, 0.13, 0)), hl.calcaneusTip], 0.01, tenMat(), 10, 7));
     push(`equ.mus.pie.001-${tag}`, gastGrp, side);
 
     push(
       `equ.mus.pie.002-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(-0.04, -0.02, -0.012 * sd)), hl.calcaneusTip.clone().add(V3(0.01, 0.10, 0)), 0.044, 0.7, msuMat(), tenMat(), 0.32, 0.1, 0.28),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(-0.04, -0.02, -0.012 * sd)), rx: 0.03, ry: 0.042 },
+          { pos: hl.stifle.clone().lerp(hl.calcaneusTip, 0.34).add(V3(-0.02, 0.01, -0.014 * sd)), rx: 0.035, ry: 0.048 },
+          { pos: hl.calcaneusTip.clone().add(V3(0.01, 0.10, 0)), rx: 0.015, ry: 0.02 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.28, radialSegs: 14 },
+      ),
       side,
     );
 
@@ -1059,13 +1618,31 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     push(`equ.mus.pie.004-${tag}`, sdfHGrp, side);
 
     const fdlHGrp = new THREE.Group();
-    fdlHGrp.add(createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(-0.02, -0.06, 0.015 * sd)), hl.hock.clone().add(V3(-0.015, 0.08, 0)), 0.034, 0.65, mprMat(), tenMat(), 0.36, 0.1, 0.24));
+    fdlHGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(-0.02, -0.06, 0.015 * sd)), rx: 0.022, ry: 0.032 },
+          { pos: hl.stifle.clone().lerp(hl.hock, 0.36).add(V3(-0.022, 0, 0.014 * sd)), rx: 0.026, ry: 0.038 },
+          { pos: hl.hock.clone().add(V3(-0.015, 0.08, 0)), rx: 0.013, ry: 0.018 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.26, radialSegs: 12 },
+      ),
+    );
     fdlHGrp.add(createTubeCurveMesh([hl.hock.clone().add(V3(-0.018, 0.08, 0)), hl.hock.clone().add(V3(-0.02, 0, 0)), hl.fetlock.clone().add(V3(-0.02, 0, 0)), hl.hoofCenter.clone().add(V3(-0.008, 0.01, 0))], 0.007, tenMat(), 16, 7));
     push(`equ.mus.pie.005-${tag}`, fdlHGrp, side);
 
     push(
       `equ.mus.pie.008-${tag}`,
-      createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(0.01, -0.05, 0)), hl.hock.clone().add(V3(0.018, 0.04, -0.01 * sd)), 0.026, 0.65, mprMat(), tenMat(), 0.32, 0.08, 0.25),
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(0.01, -0.05, 0)), rx: 0.017, ry: 0.024 },
+          { pos: hl.stifle.clone().lerp(hl.hock, 0.34).add(V3(0.016, 0, -0.004 * sd)), rx: 0.02, ry: 0.03 },
+          { pos: hl.hock.clone().add(V3(0.018, 0.04, -0.01 * sd)), rx: 0.01, ry: 0.014 },
+        ],
+        mprMat(),
+        { originTendonFrac: 0.08, insertionTendonFrac: 0.25, radialSegs: 12 },
+      ),
       side,
     );
     push(
@@ -1075,7 +1652,17 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     );
 
     const edlHGrp = new THREE.Group();
-    edlHGrp.add(createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(0.022, -0.02, 0.015 * sd)), hl.hock.clone().add(V3(0.02, 0.07, 0)), 0.03, 0.68, msuMat(), tenMat(), 0.32, 0.1, 0.25));
+    edlHGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(0.022, -0.02, 0.015 * sd)), rx: 0.02, ry: 0.028 },
+          { pos: hl.stifle.clone().lerp(hl.hock, 0.34).add(V3(0.028, 0, 0.012 * sd)), rx: 0.024, ry: 0.034 },
+          { pos: hl.hock.clone().add(V3(0.02, 0.07, 0)), rx: 0.012, ry: 0.016 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.28, radialSegs: 12, grooveAO: 0.22 },
+      ),
+    );
     edlHGrp.add(
       createTubeCurveMesh(
         [hl.hock.clone().add(V3(0.02, 0.07, 0)), hl.hock.clone().add(V3(0.02, 0, 0)), hl.fetlock.clone().add(V3(0.022, 0, 0)), hl.pasternMid.clone().add(V3(0.018, 0, 0)), hl.hoofCenter.clone().add(V3(0.02, 0.042, 0))],
@@ -1088,20 +1675,60 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
     push(`equ.mus.pie.010-${tag}`, edlHGrp, side);
 
     const edLatHGrp = new THREE.Group();
-    edLatHGrp.add(createMuscleUnitWithTendonCaps(hl.stifle.clone().add(V3(-0.005, -0.06, 0.026 * sd)), hl.hock.clone().add(V3(0.008, 0.06, 0.018 * sd)), 0.021, 0.62, msuMat(), tenMat(), 0.36, 0.1, 0.24));
+    edLatHGrp.add(
+      createBiospheraMuscleMesh(
+        [
+          { pos: hl.stifle.clone().add(V3(-0.005, -0.06, 0.026 * sd)), rx: 0.014, ry: 0.02 },
+          { pos: hl.stifle.clone().lerp(hl.hock, 0.36).add(V3(0.002, 0, 0.026 * sd)), rx: 0.017, ry: 0.024 },
+          { pos: hl.hock.clone().add(V3(0.008, 0.06, 0.018 * sd)), rx: 0.009, ry: 0.014 },
+        ],
+        msuMat(),
+        { originTendonFrac: 0.1, insertionTendonFrac: 0.24, radialSegs: 12 },
+      ),
+    );
     edLatHGrp.add(createTubeCurveMesh([hl.hock.clone().add(V3(0.008, 0.06, 0.018 * sd)), hl.hock.clone().lerp(hl.fetlock, 0.4).add(V3(0.016, 0, 0.01 * sd)), hl.fetlock.clone().add(V3(0.022, 0, 0))], 0.0045, tenMat(), 10, 6));
     push(`equ.mus.pie.011-${tag}`, edLatHGrp, side);
 
     // Tail dock musculature
     const c1 = V3(...caudalPos(1));
     const c6 = V3(...caudalPos(7));
-    push(`equ.mus.col.001-${tag}`, createMuscleBellyMesh(c1.clone().add(V3(0.05, 0.025, 0.018 * sd)), c6.clone().add(V3(0, 0.015, 0.012 * sd)), 0.022, 0.7, mprMat()), side);
-    push(`equ.mus.col.003-${tag}`, createMuscleBellyMesh(c1.clone().add(V3(0.05, -0.02, 0.018 * sd)), c6.clone().add(V3(0, -0.015, 0.012 * sd)), 0.02, 0.7, mprMat()), side);
+    push(
+      `equ.mus.col.001-${tag}`,
+      createBiospheraMuscleMesh(
+        [
+          { pos: c1.clone().add(V3(0.05, 0.025, 0.018 * sd)), rx: 0.016, ry: 0.022 },
+          { pos: c6.clone().add(V3(0, 0.015, 0.012 * sd)), rx: 0.009, ry: 0.012 },
+        ],
+        mprMat(),
+        { radialSegs: 10 },
+      ),
+      side,
+    );
+    push(
+      `equ.mus.col.003-${tag}`,
+      createBiospheraMuscleMesh(
+        [
+          { pos: c1.clone().add(V3(0.05, -0.02, 0.018 * sd)), rx: 0.014, ry: 0.02 },
+          { pos: c6.clone().add(V3(0, -0.015, 0.012 * sd)), rx: 0.008, ry: 0.011 },
+        ],
+        mprMat(),
+        { radialSegs: 10 },
+      ),
+      side,
+    );
 
     // Deep Psoas mayor
     push(
       `equ.mus.sub.001-${tag}`,
-      createMuscleBellyMesh(V3(-0.36, 1.28, 0.05 * sd), hl.hip.clone().add(V3(0.05, 0.04, -0.02 * sd)), 0.032, 0.7, mprMat()),
+      createBiospheraMuscleMesh(
+        [
+          { pos: V3(-0.36, 1.28, 0.05 * sd), rx: 0.022, ry: 0.032 },
+          { pos: V3(-0.58, 1.24, 0.048 * sd), rx: 0.026, ry: 0.036 },
+          { pos: hl.hip.clone().add(V3(0.05, 0.04, -0.02 * sd)), rx: 0.018, ry: 0.026 },
+        ],
+        mprMat(),
+        { radialSegs: 12 },
+      ),
       side,
     );
   }

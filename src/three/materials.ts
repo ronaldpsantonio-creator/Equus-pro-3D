@@ -15,6 +15,7 @@ export type TissueKind =
   | 'tendon'
   | 'bone'
   | 'bone_dark'
+  | 'bone_sculpted'
   | 'teeth'
   | 'cartilage'
   | 'ligament'
@@ -53,7 +54,7 @@ export function createTissueMaterial(
         sheen: 0.54,
         sheenRoughness: 0.52,
         sheenColor: new THREE.Color(0xe6b58f),
-        transparent: true,
+        transparent: false,
         side: THREE.DoubleSide,
       });
     case 'skin_coat':
@@ -68,7 +69,7 @@ export function createTissueMaterial(
         sheen: 0.62,
         sheenRoughness: 0.46,
         sheenColor: new THREE.Color(0xf0c7a4),
-        transparent: true,
+        transparent: false,
         side: THREE.DoubleSide,
       });
     case 'skin_points':
@@ -82,7 +83,7 @@ export function createTissueMaterial(
         sheen: 0.38,
         sheenRoughness: 0.58,
         sheenColor: new THREE.Color(0x6e5243),
-        transparent: true,
+        transparent: false,
         side: THREE.DoubleSide,
       });
     case 'mane':
@@ -95,7 +96,7 @@ export function createTissueMaterial(
         sheen: 0.42,
         sheenRoughness: 0.56,
         sheenColor: new THREE.Color(0x524035),
-        transparent: true,
+        transparent: false,
       });
     case 'hoof':
       return new THREE.MeshPhysicalMaterial({
@@ -107,107 +108,128 @@ export function createTissueMaterial(
         metalness: 0.05,
         clearcoat: 0.45,
         clearcoatRoughness: 0.3,
-        transparent: true,
+        transparent: false,
       });
     case 'fascia':
       return new THREE.MeshPhysicalMaterial({
         normalMap: tex.tendonNormal,
-        normalScale: new THREE.Vector2(0.32, 0.32),
-        color: 0xe2e8f0,
-        roughness: 0.32,
+        normalScale: new THREE.Vector2(0.42, 0.42),
+        color: 0xe9eef4,
+        roughness: 0.28,
         metalness: 0.04,
-        sheen: 0.5,
+        sheen: 0.6,
         sheenColor: new THREE.Color(0xffffff),
-        clearcoat: 0.2,
-        transparent: true,
+        clearcoat: 0.36,
+        clearcoatRoughness: 0.22,
+        transparent: false,
         side: THREE.DoubleSide,
       });
     case 'muscle_sup':
       return new THREE.MeshPhysicalMaterial({
         map: tex.muscleColor,
         normalMap: tex.muscleNormal,
-        normalScale: new THREE.Vector2(0.85, 0.85),
-        color: 0xd14d41,
-        roughness: 0.44,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        color: 0xd04b3e,
+        roughness: 0.40,
         metalness: 0.03,
-        sheen: 0.38,
-        sheenRoughness: 0.48,
-        sheenColor: new THREE.Color(0xf4beb3),
-        transparent: true,
+        sheen: 0.44,
+        sheenRoughness: 0.44,
+        sheenColor: new THREE.Color(0xf7c5bb),
+        clearcoat: 0.16,
+        clearcoatRoughness: 0.38,
+        transparent: false,
       });
     case 'muscle_deep':
       return new THREE.MeshPhysicalMaterial({
         map: tex.muscleColor,
         normalMap: tex.muscleNormal,
-        normalScale: new THREE.Vector2(0.7, 0.7),
-        color: 0x9b322a,
-        roughness: 0.5,
+        normalScale: new THREE.Vector2(0.85, 0.85),
+        color: 0x992e26,
+        roughness: 0.46,
         metalness: 0.03,
-        sheen: 0.24,
-        sheenColor: new THREE.Color(0xe08d82),
-        transparent: true,
+        sheen: 0.3,
+        sheenColor: new THREE.Color(0xe39488),
+        clearcoat: 0.12,
+        clearcoatRoughness: 0.44,
+        transparent: false,
       });
     case 'muscle_ecorche_sup':
+      return new THREE.MeshPhysicalMaterial({
+        map: tex.muscleColor,
+        normalMap: tex.muscleNormal,
+        normalScale: new THREE.Vector2(1.05, 1.05),
+        color: 0xffffff,
+        vertexColors: true,
+        roughness: 0.39,
+        metalness: 0.03,
+        sheen: 0.46,
+        sheenRoughness: 0.42,
+        sheenColor: new THREE.Color(0xf9cfc6),
+        clearcoat: 0.18,
+        clearcoatRoughness: 0.36,
+        transparent: false,
+      });
+    case 'muscle_ecorche_deep':
       return new THREE.MeshPhysicalMaterial({
         map: tex.muscleColor,
         normalMap: tex.muscleNormal,
         normalScale: new THREE.Vector2(0.88, 0.88),
         color: 0xffffff,
         vertexColors: true,
-        roughness: 0.42,
+        roughness: 0.45,
         metalness: 0.03,
-        sheen: 0.4,
-        sheenRoughness: 0.46,
-        sheenColor: new THREE.Color(0xf8cbc2),
-        transparent: true,
-      });
-    case 'muscle_ecorche_deep':
-      return new THREE.MeshPhysicalMaterial({
-        map: tex.muscleColor,
-        normalMap: tex.muscleNormal,
-        normalScale: new THREE.Vector2(0.74, 0.74),
-        color: 0xffffff,
-        vertexColors: true,
-        roughness: 0.48,
-        metalness: 0.03,
-        sheen: 0.28,
-        sheenColor: new THREE.Color(0xe59d93),
-        transparent: true,
+        sheen: 0.32,
+        sheenColor: new THREE.Color(0xe8a499),
+        clearcoat: 0.12,
+        clearcoatRoughness: 0.42,
+        transparent: false,
       });
     case 'tendon':
       return new THREE.MeshPhysicalMaterial({
         normalMap: tex.tendonNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55),
-        color: 0xf0ebe0,
-        roughness: 0.25,
+        normalScale: new THREE.Vector2(0.6, 0.6),
+        color: 0xf4efe6,
+        roughness: 0.22,
         metalness: 0.05,
-        sheen: 0.36,
+        sheen: 0.46,
         sheenColor: new THREE.Color(0xffffff),
-        clearcoat: 0.38,
-        clearcoatRoughness: 0.24,
-        transparent: true,
+        clearcoat: 0.48,
+        clearcoatRoughness: 0.2,
+        transparent: false,
       });
     case 'bone':
       return new THREE.MeshStandardMaterial({
         map: tex.boneColor,
         normalMap: tex.boneNormal,
-        normalScale: new THREE.Vector2(0.45, 0.45),
+        normalScale: new THREE.Vector2(0.48, 0.48),
         roughnessMap: tex.boneRoughness,
-        color: 0xf2ead7,
-        roughness: 0.62,
+        color: 0xf4ecda,
+        roughness: 0.56,
         metalness: 0.04,
-        transparent: true,
+        transparent: false,
       });
     case 'bone_dark':
       return new THREE.MeshStandardMaterial({
         map: tex.boneColor,
         normalMap: tex.boneNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(0.44, 0.44),
         roughnessMap: tex.boneRoughness,
-        color: 0xdccfb4,
-        roughness: 0.66,
+        color: 0xdfd3ba,
+        roughness: 0.6,
         metalness: 0.04,
-        transparent: true,
+        transparent: false,
+      });
+    case 'bone_sculpted':
+      return new THREE.MeshStandardMaterial({
+        map: tex.boneColor,
+        normalMap: tex.boneNormal,
+        normalScale: new THREE.Vector2(0.5, 0.5),
+        roughnessMap: tex.boneRoughness,
+        color: 0xffffff,
+        vertexColors: true,
+        roughness: 0.54,
+        metalness: 0.04,
+        transparent: false,
       });
     case 'teeth':
       return new THREE.MeshPhysicalMaterial({
@@ -216,7 +238,7 @@ export function createTissueMaterial(
         metalness: 0.03,
         clearcoat: 0.55,
         clearcoatRoughness: 0.22,
-        transparent: true,
+        transparent: false,
       });
     case 'cartilage':
       return new THREE.MeshPhysicalMaterial({
@@ -224,14 +246,14 @@ export function createTissueMaterial(
         roughness: 0.24,
         metalness: 0.02,
         clearcoat: 0.52,
-        transparent: true,
+        transparent: false,
       });
     case 'ligament':
       return new THREE.MeshStandardMaterial({
         color: 0xa3e0b2,
         roughness: 0.42,
         metalness: 0.04,
-        transparent: true,
+        transparent: false,
       });
     case 'artery':
       return new THREE.MeshPhysicalMaterial({
@@ -239,7 +261,7 @@ export function createTissueMaterial(
         roughness: 0.32,
         metalness: 0.05,
         clearcoat: 0.4,
-        transparent: true,
+        transparent: false,
       });
     case 'vein':
       return new THREE.MeshPhysicalMaterial({
@@ -247,7 +269,7 @@ export function createTissueMaterial(
         roughness: 0.36,
         metalness: 0.05,
         clearcoat: 0.35,
-        transparent: true,
+        transparent: false,
       });
     case 'heart':
       return new THREE.MeshPhysicalMaterial({
@@ -259,7 +281,7 @@ export function createTissueMaterial(
         metalness: 0.04,
         clearcoat: 0.48,
         clearcoatRoughness: 0.22,
-        transparent: true,
+        transparent: false,
       });
     case 'nerve':
       return new THREE.MeshStandardMaterial({
@@ -268,7 +290,7 @@ export function createTissueMaterial(
         metalness: 0.06,
         emissive: new THREE.Color(0x3a2800),
         emissiveIntensity: 0.25,
-        transparent: true,
+        transparent: false,
       });
     case 'brain':
       return new THREE.MeshPhysicalMaterial({
@@ -280,7 +302,7 @@ export function createTissueMaterial(
         metalness: 0.02,
         clearcoat: 0.42,
         clearcoatRoughness: 0.24,
-        transparent: true,
+        transparent: false,
       });
     case 'lung':
       return new THREE.MeshPhysicalMaterial({
@@ -289,14 +311,14 @@ export function createTissueMaterial(
         roughness: 0.56,
         metalness: 0.02,
         sheen: 0.25,
-        transparent: true,
+        transparent: false,
       });
     case 'trachea':
       return new THREE.MeshStandardMaterial({
         color: 0xcbe4eb,
         roughness: 0.42,
         metalness: 0.04,
-        transparent: true,
+        transparent: false,
       });
     case 'liver':
       return new THREE.MeshPhysicalMaterial({
@@ -305,7 +327,7 @@ export function createTissueMaterial(
         metalness: 0.05,
         clearcoat: 0.58,
         clearcoatRoughness: 0.18,
-        transparent: true,
+        transparent: false,
       });
     case 'stomach':
       return new THREE.MeshPhysicalMaterial({
@@ -313,7 +335,7 @@ export function createTissueMaterial(
         roughness: 0.42,
         metalness: 0.02,
         clearcoat: 0.32,
-        transparent: true,
+        transparent: false,
       });
     case 'intestine':
       return new THREE.MeshPhysicalMaterial({
@@ -321,7 +343,7 @@ export function createTissueMaterial(
         roughness: 0.44,
         metalness: 0.02,
         clearcoat: 0.28,
-        transparent: true,
+        transparent: false,
       });
     case 'cecum':
       return new THREE.MeshPhysicalMaterial({
@@ -329,7 +351,7 @@ export function createTissueMaterial(
         roughness: 0.5,
         metalness: 0.02,
         clearcoat: 0.22,
-        transparent: true,
+        transparent: false,
       });
     case 'colon':
       return new THREE.MeshPhysicalMaterial({
@@ -337,7 +359,7 @@ export function createTissueMaterial(
         roughness: 0.46,
         metalness: 0.02,
         clearcoat: 0.24,
-        transparent: true,
+        transparent: false,
       });
     case 'kidney':
       return new THREE.MeshPhysicalMaterial({
@@ -345,7 +367,7 @@ export function createTissueMaterial(
         roughness: 0.28,
         metalness: 0.04,
         clearcoat: 0.52,
-        transparent: true,
+        transparent: false,
       });
     case 'bladder':
       return new THREE.MeshPhysicalMaterial({
@@ -353,7 +375,7 @@ export function createTissueMaterial(
         roughness: 0.42,
         metalness: 0.02,
         clearcoat: 0.3,
-        transparent: true,
+        transparent: false,
       });
     case 'repro':
       return new THREE.MeshPhysicalMaterial({
@@ -361,7 +383,7 @@ export function createTissueMaterial(
         roughness: 0.44,
         metalness: 0.02,
         clearcoat: 0.28,
-        transparent: true,
+        transparent: false,
       });
     case 'endocrine':
       return new THREE.MeshPhysicalMaterial({
@@ -369,7 +391,7 @@ export function createTissueMaterial(
         roughness: 0.35,
         metalness: 0.05,
         clearcoat: 0.4,
-        transparent: true,
+        transparent: false,
       });
     case 'eye':
       return new THREE.MeshPhysicalMaterial({
@@ -379,7 +401,7 @@ export function createTissueMaterial(
         metalness: 0.04,
         clearcoat: 1.0,
         clearcoatRoughness: 0.03,
-        transparent: true,
+        transparent: false,
       });
     case 'cavity':
       return new THREE.MeshPhysicalMaterial({

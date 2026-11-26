@@ -961,18 +961,251 @@ export function createAnatomicalExtrudedPlate(
   return mesh;
 }
 
+export interface MusclePathWaypoint {
+  pos: THREE.Vector3;
+  /** Lateral/thickness semi-axis (m) */
+  rx: number;
+  /** Width/depth semi-axis (m) */
+  ry: number;
+}
+
+export interface BiospheraMuscleOptions {
+  originTendonFrac?: number;
+  insertionTendonFrac?: number;
+  isDeep?: boolean;
+  radialSegs?: number;
+  subdivsPerSpan?: number;
+  /** Darken medial/edge border subtly to carve intermuscular grooves */
+  grooveAO?: number;
+}
+
 /**
- * Builds a curved anatomical muscle or aponeurosis sheet wrapping smoothly
- * over the equine thorax, flank, or pelvis wall.
+ * Builds a Biosphera-style curved, sculpted écorché muscle belly along a 3D anatomical path
+ * with fiber-aligned UVs, gradual silvery myotendinous origin/insertion transitions,
+ * and subtle intermuscular crease shading.
  */
-export function createCurvedMuscleSheetMesh(
-  stations: SheetStation[],
+export function createBiospheraMuscleMesh(
+  rawWaypoints: MusclePathWaypoint[],
+  mat: THREE.Material,
+  opts: BiospheraMuscleOptions = {},
+): THREE.Mesh {
+  const originTendonFrac = opts.originTendonFrac ?? 0.14;
+  const insertionTendonFrac = opts.insertionTendonFrac ?? 0.18;
+  const matColorR = (mat as THREE.MeshStandardMaterial).color?.r ?? 0.6;
+  const isDeep = opts.isDeep ?? matColorR < 0.45;
+  const radialSegs = opts.radialSegs ?? 16;
+  const subdivsPerSpan = opts.subdivsPerSpan ?? 3;
+  const grooveAO = opts.grooveAO ?? 0.22;
+
+  const curve = new THREE.CatmullRomCurve3(
+    rawWaypoints.map((w) => w.pos),
+    false,
+    'centripetal',
+    0.45,
+  );
+
+  const wps: MusclePathWaypoint[] = [];
+  const innerCount = Math.max(rawWaypoints.length - 1, 1) * subdivsPerSpan + 1;
+  const lerp = (a: number, b: number, f: number) => a + (b - a) * f;
+
+  // Tapered tip end-caps for watertight organic termination
+  const p0 = curve.getPointAt(0);
+  const t0 = curve.getTangentAt(0);
+  wps.push({ pos: p0.clone().addScaledVector(t0, -0.004), rx: 0.0015, ry: 0.0015 });
+
+  for (let i = 0; i < innerCount; i++) {
+    const u = i / (innerCount - 1);
+    const fIdx = u * (rawWaypoints.length - 1);
+    const i0 = Math.min(Math.floor(fIdx), rawWaypoints.length - 2);
+    const f = fIdx - i0;
+    const sf = f * f * (3 - 2 * f);
+    const w0 = rawWaypoints[i0];
+    const w1 = rawWaypoints[i0 + 1];
+
+    // Smooth end taper right near origin & insertion
+    const endEnvelope =
+      Math.min(1, Math.pow(u / 0.09, 0.65)) * Math.min(1, Math.pow((1 - u) / 0.09, 0.65));
+    const scaleEnv = i === 0 || i === innerCount - 1 ? 0.22 : 0.22 + 0.78 * endEnvelope;
+
+    wps.push({
+      pos: curve.getPointAt(u),
+      rx: lerp(w0.rx, w1.rx, sf) * scaleEnv,
+      ry: lerp(w0.ry, w1.ry, sf) * scaleEnv,
+    });
+  }
+
+  const pEnd = curve.getPointAt(1);
+  const tEnd = curve.getTangentAt(1);
+  wps.push({ pos: pEnd.clone().addScaledVector(tEnd, 0.004), rx: 0.0015, ry: 0.0015 });
+
+  const rows = wps.length;
+  const cols = radialSegs + 1;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const colors: number[] = [];
+  const indices: number[] = [];
+
+  const tangent = new THREE.Vector3();
+  const upRef = new THREE.Vector3(0, 1, 0);
+  const sideRef = new THREE.Vector3(0, 0, 1);
+  const binormal = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+  const tmpColor = new THREE.Color();
+
+  // Base Biosphera écorché linear RGBs (multiplied against neutral-bright muscleColor texture)
+  const bellyR = isDeep ? 0.52 : 0.78;
+  const bellyG = isDeep ? 0.08 : 0.14;
+  const bellyB = isDeep ? 0.07 : 0.11;
+
+  for (let r = 0; r < rows; r++) {
+    const wp = wps[r];
+    if (r === 0) tangent.subVectors(wps[1].pos, wp.pos).normalize();
+    else if (r === rows - 1) tangent.subVectors(wp.pos, wps[r - 1].pos).normalize();
+    else tangent.subVectors(wps[r + 1].pos, wps[r - 1].pos).normalize();
+
+    const ref = Math.abs(tangent.dot(sideRef)) > 0.9 ? upRef : sideRef;
+    binormal.crossVectors(tangent, ref).normalize();
+    normal.crossVectors(binormal, tangent).normalize();
+
+    const vCoord = r / Math.max(rows - 1, 1);
+    const origTendon =
+      originTendonFrac > 0.01 ? 1 - THREE.MathUtils.smoothstep(vCoord, 0.02, originTendonFrac + 0.08) : 0;
+    const insTendon =
+      insertionTendonFrac > 0.01
+        ? THREE.MathUtils.smoothstep(vCoord, 1 - insertionTendonFrac - 0.08, 0.98)
+        : 0;
+    const tendonBlend = Math.max(origTendon, insTendon);
+
+    for (let c = 0; c <= radialSegs; c++) {
+      const uCoord = c / radialSegs;
+      const phi = uCoord * Math.PI * 2;
+      const cosP = Math.cos(phi);
+      const sinP = Math.sin(phi);
+
+      // Gentle fascicle flute relief around the muscle belly
+      const fascicleMod = 1 + 0.035 * Math.sin(phi * 5);
+      const cx = cosP * wp.rx * fascicleMod;
+      const cy = sinP * wp.ry * fascicleMod;
+
+      positions.push(
+        wp.pos.x + binormal.x * cx + normal.x * cy,
+        wp.pos.y + binormal.y * cx + normal.y * cy,
+        wp.pos.z + binormal.z * cx + normal.z * cy,
+      );
+      uvs.push(uCoord * 1.4, vCoord * 2.2);
+
+      // Edge AO around minor/major flanks + pearly white-silver myotendinous gradient
+      const flankDark = Math.pow(Math.abs(sinP), 1.8) * grooveAO * (1 - tendonBlend);
+      const mr = THREE.MathUtils.lerp(bellyR * (1 - flankDark), 0.96, tendonBlend);
+      const mg = THREE.MathUtils.lerp(bellyG * (1 - flankDark), 0.93, tendonBlend);
+      const mb = THREE.MathUtils.lerp(bellyB * (1 - flankDark), 0.89, tendonBlend);
+      tmpColor.setRGB(mr, mg, mb);
+      colors.push(tmpColor.r, tmpColor.g, tmpColor.b);
+    }
+  }
+
+  for (let r = 0; r < rows - 1; r++) {
+    for (let c = 0; c < radialSegs; c++) {
+      const a = r * cols + c;
+      const b = a + 1;
+      const d = (r + 1) * cols + c;
+      const e = d + 1;
+      indices.push(a, d, b, b, d, e);
+    }
+  }
+
+  const sheetMat = mat.clone();
+  if ('vertexColors' in sheetMat) {
+    (sheetMat as THREE.MeshStandardMaterial).vertexColors = true;
+    (sheetMat as THREE.MeshStandardMaterial).color.setHex(0xffffff);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, sheetMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+export interface SculptedSheetOptions {
+  verticalSegs?: number;
+  longSubdivs?: number;
+  horizontalFibers?: boolean;
+  aponeuroticEdgeFade?: boolean;
+  /** 0..0.5 fraction of dorsal edge fading to glistening silver aponeurosis */
+  dorsalAponeurosis?: number;
+  /** 0..0.5 fraction of ventral edge fading to glistening silver aponeurosis */
+  ventralAponeurosis?: number;
+  /** Optional number of serrated costal digitations along ventral edge */
+  costalDigitations?: number;
+  /** Real volumetric slab thickness in meters (0 = double-sided sheet, >0 = closed solid slab) */
+  thickness?: number;
+  isDeep?: boolean;
+}
+
+/**
+ * Builds a Catmull-Rom smoothed, volumetric Biosphera anatomical sheet muscle or aponeurosis
+ * with optional costal digitations and realistic myo-aponeurotic transitions.
+ */
+export function createSculptedMuscleSheetMesh(
+  rawStations: SheetStation[],
   sd: -1 | 1,
   mat: THREE.Material,
-  verticalSegs = 12,
-  horizontalFibers = true,
-  aponeuroticEdgeFade = false,
+  opts: SculptedSheetOptions = {},
 ): THREE.Mesh {
+  const verticalSegs = opts.verticalSegs ?? 14;
+  const longSubdivs = opts.longSubdivs ?? 3;
+  const horizontalFibers = opts.horizontalFibers ?? true;
+  const aponeuroticEdgeFade = opts.aponeuroticEdgeFade ?? true;
+  const dorsalApo = opts.dorsalAponeurosis ?? 0.2;
+  const ventralApo = opts.ventralAponeurosis ?? 0.22;
+  const digitations = opts.costalDigitations ?? 0;
+  const thickness = opts.thickness ?? 0.012;
+  const matColorR = (mat as THREE.MeshStandardMaterial).color?.r ?? 0.6;
+  const isDeep = opts.isDeep ?? matColorR < 0.45;
+
+  // Smooth stations longitudinally via Catmull-Rom interpolation
+  const stations: SheetStation[] = [];
+  if (rawStations.length >= 2 && longSubdivs > 1) {
+    const total = (rawStations.length - 1) * longSubdivs + 1;
+    const cTop = new THREE.CatmullRomCurve3(
+      rawStations.map((s) => new THREE.Vector3(s.x, s.yTop, s.zMid)),
+      false,
+      'centripetal',
+      0.45,
+    );
+    const cBot = new THREE.CatmullRomCurve3(
+      rawStations.map((s) => new THREE.Vector3(s.x, s.yBot, s.zMid)),
+      false,
+      'centripetal',
+      0.45,
+    );
+    for (let i = 0; i < total; i++) {
+      const u = i / (total - 1);
+      const fIdx = u * (rawStations.length - 1);
+      const i0 = Math.min(Math.floor(fIdx), rawStations.length - 2);
+      const f = fIdx - i0;
+      const sf = f * f * (3 - 2 * f);
+      const pTop = cTop.getPointAt(u);
+      const pBot = cBot.getPointAt(u);
+      stations.push({
+        x: (pTop.x + pBot.x) * 0.5,
+        yTop: pTop.y,
+        yBot: pBot.y,
+        zMid: (pTop.z + pBot.z) * 0.5,
+        zBow: rawStations[i0].zBow + (rawStations[i0 + 1].zBow - rawStations[i0].zBow) * sf,
+      });
+    }
+  } else {
+    stations.push(...rawStations);
+  }
+
   const rows = stations.length;
   const cols = verticalSegs + 1;
   const positions: number[] = [];
@@ -981,49 +1214,89 @@ export function createCurvedMuscleSheetMesh(
   const indices: number[] = [];
   const tmpColor = new THREE.Color();
 
-  for (let r = 0; r < rows; r++) {
-    const st = stations[r];
-    const uCoord = r / Math.max(rows - 1, 1);
-    for (let c = 0; c <= verticalSegs; c++) {
-      const vCoord = c / verticalSegs;
-      const y = THREE.MathUtils.lerp(st.yTop, st.yBot, vCoord);
-      const bow = st.zBow * Math.sin(vCoord * Math.PI);
-      const z = (st.zMid + bow) * sd;
-      positions.push(st.x, y, z);
-      uvs.push(horizontalFibers ? vCoord : uCoord, horizontalFibers ? uCoord : vCoord);
+  const bellyR = isDeep ? 0.52 : 0.78;
+  const bellyG = isDeep ? 0.08 : 0.14;
+  const bellyB = isDeep ? 0.07 : 0.11;
 
-      if (aponeuroticEdgeFade) {
-        // Slightly paler glistening aponeurosis along ventral/dorsal insertion borders
-        const bellyness = Math.sin(vCoord * Math.PI);
-        const pale = 1 - Math.pow(bellyness, 0.75);
-        tmpColor.setRGB(
-          THREE.MathUtils.lerp(0.84, 0.96, pale),
-          THREE.MathUtils.lerp(0.32, 0.78, pale),
-          THREE.MathUtils.lerp(0.28, 0.74, pale),
-        );
-        colors.push(tmpColor.r, tmpColor.g, tmpColor.b);
+  const layersCount = thickness > 0.001 ? 2 : 1; // outer face (layer 0), inner face (layer 1)
+  const layerVertCount = rows * cols;
+
+  for (let layer = 0; layer < layersCount; layer++) {
+    const isInner = layer === 1;
+    for (let r = 0; r < rows; r++) {
+      const st = stations[r];
+      const uCoord = r / Math.max(rows - 1, 1);
+      const digWave =
+        digitations > 0
+          ? 0.034 * Math.max(0, Math.sin(uCoord * Math.PI * digitations * 2))
+          : 0;
+
+      for (let c = 0; c <= verticalSegs; c++) {
+        const vCoord = c / verticalSegs;
+        const yBotMod = st.yBot - digWave * Math.pow(vCoord, 2.2);
+        const y = THREE.MathUtils.lerp(st.yTop, yBotMod, vCoord);
+        const bow = st.zBow * Math.sin(vCoord * Math.PI);
+
+        // Taper thickness smoothly to 0 along perimeter edges for clean anatomical bevel
+        const edgeEnv = Math.sin(vCoord * Math.PI) * Math.sin(uCoord * Math.PI);
+        const thickOffset = isInner ? -thickness * Math.pow(Math.max(0, edgeEnv), 0.45) : 0;
+        const z = (st.zMid + bow + thickOffset) * sd;
+
+        positions.push(st.x, y, z);
+        uvs.push(horizontalFibers ? vCoord * 1.5 : uCoord * 1.5, horizontalFibers ? uCoord * 2.0 : vCoord * 2.0);
+
+        if (aponeuroticEdgeFade) {
+          const dFade = dorsalApo > 0 ? 1 - THREE.MathUtils.smoothstep(vCoord, 0.0, dorsalApo) : 0;
+          const vFade = ventralApo > 0 ? THREE.MathUtils.smoothstep(vCoord, 1.0 - ventralApo, 1.0) : 0;
+          const apo = Math.max(dFade, vFade);
+          const edgeShadow = (1 - Math.sin(uCoord * Math.PI) * 0.25) * 0.16;
+          tmpColor.setRGB(
+            THREE.MathUtils.lerp(bellyR * (1 - edgeShadow), 0.96, apo),
+            THREE.MathUtils.lerp(bellyG * (1 - edgeShadow), 0.94, apo),
+            THREE.MathUtils.lerp(bellyB * (1 - edgeShadow), 0.91, apo),
+          );
+          colors.push(tmpColor.r, tmpColor.g, tmpColor.b);
+        }
       }
     }
   }
 
+  // Outward normal direction depends on sd and whether stations advance +X or -X
+  const forwardX = stations[stations.length - 1].x >= stations[0].x ? 1 : -1;
+  const flipSide = sd * forwardX;
+
+  // Outer surface triangles (outward CCW normal points toward +Z*sd)
   for (let r = 0; r < rows - 1; r++) {
     for (let c = 0; c < verticalSegs; c++) {
       const a = r * cols + c;
       const b = a + 1;
       const d = (r + 1) * cols + c;
       const e = d + 1;
-      if (sd === 1) {
-        indices.push(a, d, b, b, d, e);
-      } else {
-        indices.push(a, b, d, b, e, d);
+      if (flipSide >= 0) indices.push(a, b, d, b, e, d);
+      else indices.push(a, d, b, b, d, e);
+    }
+  }
+
+  // Inner surface triangles (opposite winding) if volumetric slab
+  if (layersCount === 2) {
+    const off = layerVertCount;
+    for (let r = 0; r < rows - 1; r++) {
+      for (let c = 0; c < verticalSegs; c++) {
+        const a = off + r * cols + c;
+        const b = a + 1;
+        const d = off + (r + 1) * cols + c;
+        const e = d + 1;
+        if (flipSide >= 0) indices.push(a, d, b, b, d, e);
+        else indices.push(a, b, d, b, e, d);
       }
     }
   }
 
   const sheetMat = mat.clone();
-  sheetMat.side = THREE.DoubleSide;
+  sheetMat.side = layersCount === 2 ? THREE.FrontSide : THREE.DoubleSide;
   if (aponeuroticEdgeFade && 'vertexColors' in sheetMat) {
     (sheetMat as THREE.MeshStandardMaterial).vertexColors = true;
+    (sheetMat as THREE.MeshStandardMaterial).color.setHex(0xffffff);
   }
 
   const geo = new THREE.BufferGeometry();
@@ -1042,9 +1315,32 @@ export function createCurvedMuscleSheetMesh(
 }
 
 /**
- * Builds a composite anatomical muscle unit (`THREE.Group`) combining the
- * striated red muscular belly in the center with pearly aponeurotic/tendon
- * origin & insertion cuffs at both ends.
+ * Builds a curved anatomical muscle or aponeurosis sheet wrapping smoothly
+ * over the equine thorax, flank, or pelvis wall.
+ */
+export function createCurvedMuscleSheetMesh(
+  stations: SheetStation[],
+  sd: -1 | 1,
+  mat: THREE.Material,
+  verticalSegs = 12,
+  horizontalFibers = true,
+  aponeuroticEdgeFade = false,
+): THREE.Mesh {
+  return createSculptedMuscleSheetMesh(stations, sd, mat, {
+    verticalSegs,
+    longSubdivs: 2,
+    horizontalFibers,
+    aponeuroticEdgeFade,
+    dorsalAponeurosis: aponeuroticEdgeFade ? 0.18 : 0,
+    ventralAponeurosis: aponeuroticEdgeFade ? 0.22 : 0,
+    thickness: 0.01,
+  });
+}
+
+/**
+ * Builds a composite anatomical muscle unit (`THREE.Group`) combining a
+ * sculpted Biosphera striated red muscular belly with pearly aponeurotic/tendon
+ * origin & insertion transitions.
  */
 export function createMuscleUnitWithTendonCaps(
   a: THREE.Vector3,
@@ -1052,27 +1348,34 @@ export function createMuscleUnitWithTendonCaps(
   radius: number,
   flattenZ: number,
   bellyMat: THREE.Material,
-  tendonMat: THREE.Material,
+  _tendonMat: THREE.Material,
   bellyOffset = 0.48,
   originTendonFrac = 0.14,
   insertionTendonFrac = 0.18,
 ): THREE.Group {
   const g = new THREE.Group();
-  const dir = new THREE.Vector3().subVectors(b, a);
-  const len = Math.max(dir.length(), 0.03);
+  const mid = a.clone().lerp(b, bellyOffset);
+  const p2 = a.clone().lerp(b, bellyOffset * 0.5);
+  const p4 = a.clone().lerp(b, bellyOffset + (1 - bellyOffset) * 0.5);
 
-  const bellyStart = a.clone().lerp(b, originTendonFrac * 0.55);
-  const bellyEnd = a.clone().lerp(b, 1 - insertionTendonFrac * 0.55);
-  g.add(createMuscleBellyMesh(bellyStart, bellyEnd, radius, flattenZ, bellyMat, bellyOffset));
-
-  if (originTendonFrac > 0.02 && len > 0.05) {
-    const oEnd = a.clone().lerp(b, originTendonFrac + 0.06);
-    g.add(createMuscleBellyMesh(a, oEnd, radius * 0.46, flattenZ * 0.9, tendonMat, 0.72));
-  }
-  if (insertionTendonFrac > 0.02 && len > 0.05) {
-    const iStart = a.clone().lerp(b, 1 - insertionTendonFrac - 0.06);
-    g.add(createMuscleBellyMesh(iStart, b, radius * 0.42, flattenZ * 0.9, tendonMat, 0.28));
-  }
+  g.add(
+    createBiospheraMuscleMesh(
+      [
+        { pos: a, rx: radius * 0.36, ry: radius * 0.36 * flattenZ },
+        { pos: p2, rx: radius * 0.86, ry: radius * 0.86 * flattenZ },
+        { pos: mid, rx: radius, ry: radius * flattenZ },
+        { pos: p4, rx: radius * 0.82, ry: radius * 0.82 * flattenZ },
+        { pos: b, rx: radius * 0.32, ry: radius * 0.32 * flattenZ },
+      ],
+      bellyMat,
+      {
+        originTendonFrac,
+        insertionTendonFrac,
+        radialSegs: 14,
+        subdivsPerSpan: 2,
+      },
+    ),
+  );
   return g;
 }
 
@@ -1320,4 +1623,112 @@ export function createCoffinBoneMesh(
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+export interface EquineVertebraSpec {
+  pos: THREE.Vector3;
+  /** Orientation tangent vector from caudal -> cranial (+X roughly) */
+  forwardDir: THREE.Vector3;
+  bodyLength: number;
+  bodyRadius: number;
+  spineHeight: number;
+  spineTiltX: number;
+  spineThick?: number;
+  transverseSpan: number;
+  transverseWidth?: number;
+  isCervical?: boolean;
+  isLumbar?: boolean;
+}
+
+/**
+ * Builds a Biosphera-grade anatomical equine vertebra (`THREE.Group`) featuring:
+ * - Hourglass vertebral centrum with flared cranial/caudal articular epiphyses
+ * - Dorsal neural arch lamina & pedicles enclosing a real vertebral canal
+ * - Bilateral transverse process blades (wide alar wings for cervical/lumbar)
+ * - Sculpted beveled dorsal spinous process blade
+ */
+export function createEquineVertebraMesh(
+  spec: EquineVertebraSpec,
+  boneMat: THREE.Material,
+  darkBoneMat: THREE.Material,
+): THREE.Group {
+  const g = new THREE.Group();
+  const fwd = spec.forwardDir.clone().normalize();
+
+  // 1. Hourglass vertebral centrum oriented along forwardDir
+  const halfLen = spec.bodyLength * 0.5;
+  const rMid = spec.bodyRadius * 0.78;
+  const rEnd = spec.bodyRadius * 1.12;
+  const centrumPts: THREE.Vector2[] = [];
+  const steps = 10;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    if (i === 0 || i === steps) {
+      centrumPts.push(new THREE.Vector2(0, (t - 0.5) * spec.bodyLength));
+    } else {
+      const flare = Math.pow(Math.abs(t - 0.5) * 2, 1.85);
+      centrumPts.push(new THREE.Vector2(THREE.MathUtils.lerp(rMid, rEnd, flare), (t - 0.5) * spec.bodyLength));
+    }
+  }
+  const cGeo = new THREE.LatheGeometry(centrumPts, 14);
+  cGeo.scale(1, 1, 0.94);
+  cGeo.computeVertexNormals();
+  const centrum = new THREE.Mesh(cGeo, boneMat);
+  centrum.position.copy(spec.pos);
+  centrum.quaternion.setFromUnitVectors(UP, fwd);
+  centrum.castShadow = true;
+  centrum.receiveShadow = true;
+  g.add(centrum);
+
+  // 2. Dorsal neural arch lamina (encloses vertebral foramen above centrum)
+  const archR = spec.bodyRadius * 0.86;
+  const archGeo = new THREE.TorusGeometry(archR, spec.bodyRadius * 0.3, 8, 12, Math.PI * 1.18);
+  const arch = new THREE.Mesh(archGeo, darkBoneMat);
+  arch.position.copy(spec.pos).add(new THREE.Vector3(0, spec.bodyRadius * 0.75, 0));
+  arch.rotation.y = Math.PI / 2;
+  arch.rotation.z = -Math.PI * 0.09;
+  arch.castShadow = true;
+  arch.receiveShadow = true;
+  g.add(arch);
+
+  // 3. Bilateral transverse processes (broad flat wings on lumbar, robust costal processes on thoracic/cervical)
+  const tW = spec.transverseWidth ?? (spec.isLumbar ? 0.022 : spec.isCervical ? 0.028 : 0.015);
+  const tThick = spec.isLumbar ? 0.008 : 0.011;
+  const transPlate = createAnatomicalExtrudedPlate(
+    [
+      [-tW * 0.9, -spec.transverseSpan],
+      [tW * 0.85, -spec.transverseSpan * 0.88],
+      [tW * 1.0, spec.transverseSpan * 0.88],
+      [-tW * 0.9, spec.transverseSpan],
+    ],
+    tThick,
+    0.003,
+    darkBoneMat,
+  );
+  transPlate.rotation.x = Math.PI / 2;
+  transPlate.position.copy(spec.pos).add(new THREE.Vector3(0, spec.isLumbar ? 0.01 : -0.004, 0));
+  g.add(transPlate);
+
+  // 4. Sculpted dorsal spinous process blade
+  if (spec.spineHeight > 0.015) {
+    const sChord = spec.isCervical ? 0.032 : spec.isLumbar ? 0.034 : 0.026;
+    const sThick = spec.spineThick ?? 0.011;
+    const spBlade = createAnatomicalExtrudedPlate(
+      [
+        [-sChord * 0.55, 0],
+        [sChord * 0.55, 0],
+        [spec.spineTiltX + sChord * 0.35, spec.spineHeight],
+        [spec.spineTiltX - sChord * 0.45, spec.spineHeight * 0.97],
+      ],
+      sThick,
+      0.0035,
+      boneMat,
+    );
+    spBlade.position.copy(spec.pos).add(new THREE.Vector3(0, spec.bodyRadius * 1.15, 0));
+    g.add(spBlade);
+  }
+
+  // Keep reference to halfLen unused warning clean
+  void halfLen;
+  return g;
 }

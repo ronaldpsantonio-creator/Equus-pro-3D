@@ -177,50 +177,72 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
 
   const coatNormal = bumpCanvasToNormalTexture(coatBC, 1.15, [3.2, 3.2], false, aniso);
 
-  // 2. Longitudinal striated skeletal muscle fascicles (512x512 color + bump + crisp normal along UV.y)
+  // 2. Longitudinal striated skeletal muscle fascicles (512x512 neutral-bright striation + bump + crisp normal along UV.y)
   const [musC, musCtx] = makeCanvas(512, 512);
-  musCtx.fillStyle = '#a83c33';
+  musCtx.fillStyle = '#ece7e4';
   musCtx.fillRect(0, 0, 512, 512);
   const [musBC, musBCtx] = makeCanvas(512, 512);
   musBCtx.fillStyle = '#808080';
   musBCtx.fillRect(0, 0, 512, 512);
 
+  // Subtle anatomical fascicle bundles running vertically (UV.y = fiber direction)
   for (let x = 0; x < 512; x += 2) {
-    const band =
-      Math.sin((x / 512) * Math.PI * 64) * 0.34 +
-      Math.sin((x / 512) * Math.PI * 20) * 0.25 +
-      0.5;
-    musCtx.fillStyle =
-      band > 0.52 ? 'rgba(232, 130, 114, 0.26)' : 'rgba(84, 18, 14, 0.32)';
+    const primary = Math.sin((x / 512) * Math.PI * 56);
+    const bundle = Math.sin((x / 512) * Math.PI * 16 + 0.6);
+    const fine = Math.sin((x / 512) * Math.PI * 128);
+    const band = primary * 0.32 + bundle * 0.28 + fine * 0.14 + 0.5;
+    const clamped = Math.max(0, Math.min(1, band));
+
+    if (clamped > 0.6) {
+      musCtx.fillStyle = `rgba(255, 252, 250, ${(clamped - 0.55) * 0.62})`;
+    } else {
+      musCtx.fillStyle = `rgba(148, 124, 118, ${(0.62 - clamped) * 0.56})`;
+    }
     musCtx.fillRect(x, 0, 2, 512);
-    const v = Math.round(68 + Math.max(0, Math.min(1, band)) * 164);
+
+    const v = Math.round(58 + clamped * 176);
     musBCtx.fillStyle = `rgb(${v},${v},${v})`;
     musBCtx.fillRect(x, 0, 2, 512);
   }
-  // Subtle pearly perimysium connective septa lines
-  for (let i = 0; i < 1600; i++) {
+  // Delicate organic myofibril curvature & pearly perimysium connective septa lines
+  for (let i = 0; i < 2400; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    musCtx.fillStyle = 'rgba(250, 232, 226, 0.15)';
-    musCtx.fillRect(x, y, 1, 28 + rand() * 52);
-    musBCtx.fillStyle = 'rgba(210, 210, 210, 0.18)';
-    musBCtx.fillRect(x, y, 1, 24 + rand() * 44);
+    const len = 34 + rand() * 88;
+    const drift = (rand() - 0.5) * 3.0;
+    const isSeptum = i % 5 === 0;
+
+    musCtx.strokeStyle = isSeptum
+      ? 'rgba(255, 255, 255, 0.44)'
+      : 'rgba(136, 110, 106, 0.28)';
+    musCtx.lineWidth = isSeptum ? 1.05 : 0.85;
+    musCtx.beginPath();
+    musCtx.moveTo(x, y);
+    musCtx.quadraticCurveTo(x + drift, y + len * 0.5, x, y + len);
+    musCtx.stroke();
+
+    musBCtx.strokeStyle = isSeptum ? 'rgba(224,224,224,0.22)' : 'rgba(92,92,92,0.18)';
+    musBCtx.lineWidth = isSeptum ? 1.1 : 0.9;
+    musBCtx.beginPath();
+    musBCtx.moveTo(x, y);
+    musBCtx.quadraticCurveTo(x + drift, y + len * 0.5, x, y + len);
+    musBCtx.stroke();
   }
 
   const muscleColor = new THREE.CanvasTexture(musC);
   muscleColor.colorSpace = THREE.SRGBColorSpace;
   muscleColor.wrapS = THREE.RepeatWrapping;
   muscleColor.wrapT = THREE.RepeatWrapping;
-  muscleColor.repeat.set(2, 2);
+  muscleColor.repeat.set(2.4, 1.8);
   muscleColor.anisotropy = aniso;
 
   const muscleBump = new THREE.CanvasTexture(musBC);
   muscleBump.wrapS = THREE.RepeatWrapping;
   muscleBump.wrapT = THREE.RepeatWrapping;
-  muscleBump.repeat.set(2, 2);
+  muscleBump.repeat.set(2.4, 1.8);
   muscleBump.anisotropy = aniso;
 
-  const muscleNormal = bumpCanvasToNormalTexture(musBC, 1.85, [2, 2], false, aniso);
+  const muscleNormal = bumpCanvasToNormalTexture(musBC, 2.25, [2.4, 1.8], false, aniso);
 
   // 3. Cortical periosteum bone texture (512x512 color + micro-pore bump + normal)
   const [boneC, boneCtx] = makeCanvas(512, 512);

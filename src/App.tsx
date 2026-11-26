@@ -82,9 +82,10 @@ function createInitialLayers(): Record<LayerCode, LayerState> {
 }
 
 function createInitialSystems(): Record<SystemCode, boolean> {
+  const defaultPreset = STUDY_PRESETS[0];
   const out = {} as Record<SystemCode, boolean>;
   for (const s of SYSTEMS) {
-    out[s.code] = true;
+    out[s.code] = defaultPreset.systems.includes(s.code);
   }
   return out;
 }
@@ -129,7 +130,7 @@ export default function App() {
   const [xrayExposure, setXrayExposure] = useState<number>(1.0);
   const [xrayInverted, setXrayInverted] = useState<boolean>(false);
   const [sceneTheme, setSceneTheme] = useState<SceneTheme>(() =>
-    loadJson<SceneTheme>('va_theme', 'oscuro'),
+    loadJson<SceneTheme>('va_theme', 'atlas'),
   );
   const [dissectMode, setDissectMode] = useState(false);
   const dissectModeRef = useRef(false);

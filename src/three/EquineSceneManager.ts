@@ -51,6 +51,7 @@ export interface SceneItemRuntime {
   materials: THREE.MeshStandardMaterial[];
   baseColorHex: number[];
   baseSides: THREE.Side[];
+  baseTransparent: boolean[];
   meshBackups: MeshMaterialBackup[];
   xrayMaterials: THREE.ShaderMaterial[];
 }
@@ -244,10 +245,11 @@ export class EquineSceneManager {
   private gridLight: THREE.GridHelper | null = null;
   private hemiLight: THREE.HemisphereLight;
   private keyLight: THREE.DirectionalLight;
+  private fillLight: THREE.DirectionalLight;
   private rimLight: THREE.DirectionalLight;
 
   private bgStandard = new THREE.Color(0x0c1118);
-  private bgAtlas = new THREE.Color(0xe8edf3);
+  private bgAtlas = new THREE.Color(0xf1f4f8);
   private bgXray = new THREE.Color(0x04070c);
   private bgXrayInverted = new THREE.Color(0xf1f5f9);
   private bgCt = new THREE.Color(0x070b11);
@@ -383,11 +385,11 @@ export class EquineSceneManager {
     this.scene.environment = this.envRT.texture;
     pmrem.dispose();
 
-    // 3-Point Warm/Cool Studio Lighting
-    this.hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.76);
+    // 4-Point Biosphera Clinical Studio Lighting
+    this.hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.72);
     this.scene.add(this.hemiLight);
 
-    this.keyLight = new THREE.DirectionalLight(0xfff4e0, 1.55);
+    this.keyLight = new THREE.DirectionalLight(0xfff5e4, 1.65);
     this.keyLight.position.set(3.2, 4.8, -3.5);
     this.keyLight.castShadow = !this.isSoftwareGl;
     const shadowRes = this.isSoftwareGl ? 1024 : 2048;
@@ -403,7 +405,12 @@ export class EquineSceneManager {
     this.keyLight.shadow.normalBias = 0.02;
     this.scene.add(this.keyLight);
 
-    this.rimLight = new THREE.DirectionalLight(0x93c5fd, 0.68);
+    // Gentle low-angle cool-neutral bounce fill light to sculpt ventral & medial muscle planes
+    this.fillLight = new THREE.DirectionalLight(0xe0ecff, 0.52);
+    this.fillLight.position.set(-2.4, 1.0, -3.2);
+    this.scene.add(this.fillLight);
+
+    this.rimLight = new THREE.DirectionalLight(0x93c5fd, 0.78);
     this.rimLight.position.set(-3.5, 2.8, 3.2);
     this.scene.add(this.rimLight);
 
@@ -554,14 +561,17 @@ export class EquineSceneManager {
     mats: THREE.MeshStandardMaterial[];
     baseColorHex: number[];
     baseSides: THREE.Side[];
+    baseTransparent: boolean[];
     meshBackups: MeshMaterialBackup[];
     xrayMaterials: THREE.ShaderMaterial[];
   } {
     const mats: THREE.MeshStandardMaterial[] = [];
     const baseColorHex: number[] = [];
     const baseSides: THREE.Side[] = [];
+    const baseTransparent: boolean[] = [];
     const meshBackups: MeshMaterialBackup[] = [];
     const xrayMaterials: THREE.ShaderMaterial[] = [];
+    const isCavity = layer === 'cav';
 
     group.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
@@ -569,11 +579,13 @@ export class EquineSceneManager {
         if (Array.isArray(m.material)) {
           m.material = m.material.map((mm) => {
             const mat = cloneStandardMaterials ? mm.clone() : mm;
-            mat.transparent = true;
+            const origTrans = isCavity || mat.transparent;
+            mat.transparent = origTrans;
             if (mat instanceof THREE.MeshStandardMaterial) {
               mats.push(mat);
               baseColorHex.push(mat.color.getHex());
               baseSides.push(mat.side);
+              baseTransparent.push(origTrans);
             }
             return mat;
           });
@@ -581,21 +593,24 @@ export class EquineSceneManager {
           const mat = cloneStandardMaterials
             ? (m.material.clone() as THREE.MeshStandardMaterial)
             : m.material;
-          mat.transparent = true;
+          const origTrans = isCavity || mat.transparent;
+          mat.transparent = origTrans;
           m.material = mat;
           mats.push(mat);
           baseColorHex.push(mat.color.getHex());
           baseSides.push(mat.side);
+          baseTransparent.push(origTrans);
         } else {
           const fallbackMat = new THREE.MeshStandardMaterial({
             color: 0xe2dcd0,
             roughness: 0.55,
-            transparent: true,
+            transparent: isCavity,
           });
           m.material = fallbackMat;
           mats.push(fallbackMat);
           baseColorHex.push(fallbackMat.color.getHex());
           baseSides.push(fallbackMat.side);
+          baseTransparent.push(isCavity);
         }
 
         meshBackups.push({ mesh: m, original: m.material });
@@ -609,7 +624,7 @@ export class EquineSceneManager {
       }
     });
 
-    return { mats, baseColorHex, baseSides, meshBackups, xrayMaterials };
+    return { mats, baseColorHex, baseSides, baseTransparent, meshBackups, xrayMaterials };
   }
 
   public populateCatalog(structures: StructureRecord[]): {
@@ -666,12 +681,8 @@ export class EquineSceneManager {
         matchedIds.add(s.id);
       }
 
-      const { mats, baseColorHex, baseSides, meshBackups, xrayMaterials } = this.captureMeshMaterialsForItem(
-        group,
-        s.id,
-        s.layer,
-        true,
-      );
+      const { mats, baseColorHex, baseSides, baseTransparent, meshBackups, xrayMaterials } =
+        this.captureMeshMaterialsForItem(group, s.id, s.layer, true);
 
       const explodeDir = center.clone().sub(_v3.set(0.05, 1.05, 0));
       if (explodeDir.lengthSq() < 0.001) explodeDir.set(0, 0.2, 0);
@@ -690,6 +701,7 @@ export class EquineSceneManager {
         materials: mats,
         baseColorHex,
         baseSides,
+        baseTransparent,
         meshBackups,
         xrayMaterials,
       };
@@ -1025,6 +1037,7 @@ export class EquineSceneManager {
     it.materials = captured.mats;
     it.baseColorHex = captured.baseColorHex;
     it.baseSides = captured.baseSides;
+    it.baseTransparent = captured.baseTransparent;
     it.meshBackups = captured.meshBackups;
     it.xrayMaterials = captured.xrayMaterials;
 
@@ -1232,45 +1245,48 @@ export class EquineSceneManager {
       if (this.floorShadowMat) this.floorShadowMat.opacity = 0.78;
       if (this.gridDark) this.gridDark.visible = true;
       if (this.gridLight) this.gridLight.visible = false;
-      this.hemiLight.intensity = 0.76;
+      this.hemiLight.intensity = 0.72;
       this.hemiLight.color.setHex(0xdbeafe);
       this.hemiLight.groundColor.setHex(0x1e293b);
-      this.keyLight.intensity = 1.55;
-      this.rimLight.intensity = 0.68;
+      this.keyLight.intensity = 1.65;
+      this.fillLight.intensity = 0.52;
+      this.rimLight.intensity = 0.78;
       this.renderer.toneMappingExposure = 1.12;
     } else if (sceneTheme === 'atlas') {
       this.scene.background = this.bgAtlas;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(this.bgAtlas);
-        this.scene.fog.density = 0.022 * fogMult;
+        this.scene.fog.density = 0.016 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
-      if (this.floorMat) this.floorMat.color.setHex(0xdfe5ee);
-      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.36;
+      if (this.floorMat) this.floorMat.color.setHex(0xe8edf3);
+      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.28;
       if (this.gridDark) this.gridDark.visible = false;
       if (this.gridLight) this.gridLight.visible = true;
-      this.hemiLight.intensity = 0.92;
+      this.hemiLight.intensity = 0.88;
       this.hemiLight.color.setHex(0xffffff);
-      this.hemiLight.groundColor.setHex(0xcbd5e1);
-      this.keyLight.intensity = 1.42;
-      this.rimLight.intensity = 0.72;
-      this.renderer.toneMappingExposure = 1.05;
+      this.hemiLight.groundColor.setHex(0xd6dee8);
+      this.keyLight.intensity = 1.48;
+      this.fillLight.intensity = 0.48;
+      this.rimLight.intensity = 0.76;
+      this.renderer.toneMappingExposure = 1.04;
     } else {
       this.scene.background = this.bgStandard;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(this.bgStandard);
-        this.scene.fog.density = 0.055 * fogMult;
+        this.scene.fog.density = 0.052 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
       if (this.floorMat) this.floorMat.color.setHex(0x0f1621);
       if (this.floorShadowMat) this.floorShadowMat.opacity = 0.78;
       if (this.gridDark) this.gridDark.visible = true;
       if (this.gridLight) this.gridLight.visible = false;
-      this.hemiLight.intensity = 0.76;
+      this.hemiLight.intensity = 0.72;
       this.hemiLight.color.setHex(0xdbeafe);
       this.hemiLight.groundColor.setHex(0x1e293b);
-      this.keyLight.intensity = 1.55;
-      this.rimLight.intensity = 0.68;
+      this.keyLight.intensity = 1.65;
+      this.fillLight.intensity = 0.52;
+      this.rimLight.intensity = 0.78;
       this.renderer.toneMappingExposure = 1.12;
     }
     void themeChanged;
@@ -1402,25 +1418,36 @@ export class EquineSceneManager {
           } else {
             m.color.setHex(baseHex);
           }
-          m.opacity = isSel ? Math.max(op, 0.88) : op;
-          m.depthWrite = op > 0.85;
+          const effOp = isSel ? Math.max(op, 0.9) : op;
+          const isAlwaysTrans = it.baseTransparent[idx] ?? false;
+          const nextTransparent = isAlwaysTrans || effOp < 0.99;
+          let needsShaderRecompile = clipCountChanged || modeChanged;
+
+          if (m.transparent !== nextTransparent) {
+            m.transparent = nextTransparent;
+            needsShaderRecompile = true;
+          }
+
+          m.opacity = effOp;
+          m.depthWrite = isAlwaysTrans ? false : !nextTransparent || effOp > 0.85;
           m.clippingPlanes = clipPlanesForMat;
           m.clipShadows = true;
           const desiredSide =
             clipPlanesForMat !== null ? THREE.DoubleSide : (it.baseSides[idx] ?? THREE.FrontSide);
           if (m.side !== desiredSide) {
             m.side = desiredSide;
-            m.needsUpdate = true;
-          } else if (clipCountChanged || modeChanged) {
+            needsShaderRecompile = true;
+          }
+          if (needsShaderRecompile) {
             m.needsUpdate = true;
           }
 
           if (isSel) {
             m.emissive.setHex(0x14b8a6);
-            m.emissiveIntensity = 0.65;
+            m.emissiveIntensity = 0.58;
           } else if (isHov) {
             m.emissive.setHex(0xf59e0b);
-            m.emissiveIntensity = 0.35;
+            m.emissiveIntensity = 0.32;
           } else {
             m.emissive.setHex(s.layer === 'ner' ? 0x3a2800 : 0x000000);
             m.emissiveIntensity = s.layer === 'ner' ? 0.22 : 0;

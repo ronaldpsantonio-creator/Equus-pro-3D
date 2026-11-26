@@ -17,6 +17,7 @@ import {
   createAnatomicalExtrudedPlate,
   createAnatomicalLongBoneMesh,
   createCoffinBoneMesh,
+  createEquineVertebraMesh,
   createFacetedTarsalOrCarpalBlock,
   createFlatRibMesh,
   createLongBoneMesh,
@@ -205,12 +206,32 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       side,
     );
 
-    // Incisivo (premaxila + incisivos I1-I3)
+    // Incisivo (sculpted premaxilla nasal process + alveolar arch + incisivos I1-I3)
     push(
       `equ.ske.cra.013-${tag}`,
       (() => {
         const g = new THREE.Group();
-        g.add(createOrganMesh(V3(1.51, 1.38, 0.022 * sd), [0.048, 0.025, 0.021], boneMat(), [0, 0, -0.45]));
+        g.add(
+          createMultiStationLoftTube(
+            [
+              { pos: V3(1.445, 1.425, 0.022 * sd), rx: 0.015, ry: 0.018 },
+              { pos: V3(1.495, 1.392, 0.021 * sd), rx: 0.018, ry: 0.021 },
+              { pos: V3(1.545, 1.366, 0.014 * sd), rx: 0.016, ry: 0.018 },
+            ],
+            boneMat(),
+            12,
+          ),
+        );
+        // Nasal process of incisive bone bordering nasoincisive notch
+        g.add(
+          createTubeCurveMesh(
+            [V3(1.535, 1.39, 0.018 * sd), V3(1.47, 1.442, 0.02 * sd), V3(1.41, 1.472, 0.024 * sd)],
+            0.008,
+            boneMat(),
+            8,
+            7,
+          ),
+        );
         for (let inc = 0; inc < 3; inc++) {
           g.add(
             createOrganMesh(
@@ -375,61 +396,80 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       crest.rotation.z = -0.42;
       g.add(crest);
     } else {
-      // C3-C7: body + neural arch + cranial/caudal articular processes + ventral crest
-      g.add(createLongBoneMesh(V3(x - 0.036, y - 0.012, 0), V3(x + 0.036, y + 0.012, 0), 0.027, 0.035, boneMat(), 0.85));
-      g.add(createOrganMesh(V3(x, y + 0.026, 0), [0.032, 0.016, 0.038], darkBoneMat(), [0, 0, -0.35], 12));
-      g.add(createLongBoneMesh(V3(x, y - 0.01, -0.052), V3(x, y - 0.01, 0.052), 0.009, 0.012, darkBoneMat()));
+      // C3-C7: sculpted equine cervical vertebra with hourglass centrum, neural arch & transverse wings
+      const [nx, ny] = cervicalPos(Math.max(1, c - 1));
+      const [px, py] = cervicalPos(Math.min(7, c + 1));
+      g.add(
+        createEquineVertebraMesh(
+          {
+            pos: V3(x, y, 0),
+            forwardDir: V3(nx - px, ny - py, 0),
+            bodyLength: 0.072,
+            bodyRadius: 0.025,
+            spineHeight: c === 7 ? 0.048 : 0.022,
+            spineTiltX: -0.012,
+            spineThick: 0.012,
+            transverseSpan: 0.052,
+            transverseWidth: 0.032,
+            isCervical: true,
+          },
+          boneMat(),
+          darkBoneMat(),
+        ),
+      );
     }
     push(id, g, 'center', V3(x, y, 0));
   }
 
   for (let t = 1; t <= 18; t++) {
     const [x, y] = thoracicPos(t);
+    const [nx, ny] = thoracicPos(Math.max(1, t - 1));
+    const [px, py] = thoracicPos(Math.min(18, t + 1));
     const id = `equ.ske.tor.${String(t).padStart(3, '0')}`;
-    const g = new THREE.Group();
-    g.add(createOrganMesh(V3(x, y, 0), [0.028, 0.028, 0.032], boneMat(), undefined, 12));
-    // Neural arch + costal transverse facets
-    g.add(createOrganMesh(V3(x, y + 0.025, 0), [0.022, 0.018, 0.042], darkBoneMat(), undefined, 10));
-    // Tall equine withers spinous processes peaking T4-T7
     const witherFactor = Math.exp(-Math.pow((t - 5.2) / 4.0, 2));
-    const spineH = 0.07 + 0.175 * witherFactor;
+    const spineH = 0.066 + 0.168 * witherFactor;
     const tiltX = t <= 14 ? -0.038 : 0.01; // anticlinal around T15-T16
-    const sp = createLongBoneMesh(
-      V3(x, y + 0.02, 0),
-      V3(x + tiltX, y + 0.02 + spineH, 0),
-      0.01,
-      0.015,
+    const vMesh = createEquineVertebraMesh(
+      {
+        pos: V3(x, y, 0),
+        forwardDir: V3(nx - px, ny - py, 0),
+        bodyLength: 0.046,
+        bodyRadius: 0.023,
+        spineHeight: spineH,
+        spineTiltX: tiltX,
+        spineThick: 0.011,
+        transverseSpan: 0.042,
+        transverseWidth: 0.016,
+      },
       boneMat(),
-      0.5,
+      darkBoneMat(),
     );
-    g.add(sp);
-    push(id, g, 'center', V3(x, y + spineH * 0.35, 0));
+    push(id, vMesh, 'center', V3(x, y + spineH * 0.35, 0));
   }
 
   for (let l = 1; l <= 6; l++) {
     const [x, y] = lumbarPos(l);
+    const [nx, ny] = lumbarPos(Math.max(1, l - 1));
+    const [px, py] = lumbarPos(Math.min(6, l + 1));
     const id = `equ.ske.lum.${String(l).padStart(3, '0')}`;
-    const g = new THREE.Group();
-    g.add(createOrganMesh(V3(x, y, 0), [0.03, 0.029, 0.036], boneMat(), undefined, 12));
-    g.add(createOrganMesh(V3(x, y + 0.024, 0), [0.022, 0.018, 0.036], darkBoneMat(), undefined, 10));
-    // Characteristic flat broad equine lumbar transverse processes
-    const transSpan = 0.09 + (l <= 4 ? 0.025 : 0.01);
-    const transPlate = createAnatomicalExtrudedPlate(
-      [
-        [-0.018, -transSpan],
-        [0.018, -transSpan * 0.92],
-        [0.022, transSpan * 0.92],
-        [-0.018, transSpan],
-      ],
-      0.008,
-      0.003,
+    const transSpan = 0.092 + (l <= 4 ? 0.026 : 0.012);
+    const vMesh = createEquineVertebraMesh(
+      {
+        pos: V3(x, y, 0),
+        forwardDir: V3(nx - px, ny - py, 0),
+        bodyLength: 0.052,
+        bodyRadius: 0.025,
+        spineHeight: 0.072,
+        spineTiltX: 0.012,
+        spineThick: 0.013,
+        transverseSpan: transSpan,
+        transverseWidth: 0.023,
+        isLumbar: true,
+      },
       boneMat(),
+      darkBoneMat(),
     );
-    transPlate.rotation.x = Math.PI / 2;
-    transPlate.position.set(x, y + 0.012, 0);
-    g.add(transPlate);
-    g.add(createLongBoneMesh(V3(x, y + 0.02, 0), V3(x + 0.012, y + 0.095, 0), 0.011, 0.015, boneMat(), 0.45));
-    push(id, g, 'center', V3(x, y, 0));
+    push(id, vMesh, 'center', V3(x, y, 0));
   }
 
   for (let s = 1; s <= 5; s++) {
