@@ -83,6 +83,7 @@ interface BottomDockProps {
   report: InventoryReport | null;
   systems: Record<SystemCode, boolean>;
   onToggleSystem: (code: SystemCode) => void;
+  activePresetId: string | null;
   onApplyStudyPreset: (preset: StudyPreset) => void;
   layers: Record<LayerCode, LayerState>;
   onToggleLayer: (code: LayerCode) => void;
@@ -197,6 +198,7 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
     report,
     systems,
     onToggleSystem,
+    activePresetId,
     onApplyStudyPreset,
     layers,
     onToggleLayer,
@@ -400,6 +402,31 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
               </div>
             )}
 
+            {/* 5-Stage Biosphera Equine Anatomy Scheme Quick Switcher */}
+            <div className="mb-2 flex items-center gap-1.5 overflow-x-auto anatomy-scroll border-b border-slate-800/80 pb-2">
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-slate-400 pr-1">
+                Esquema 5 fases
+              </span>
+              {STUDY_PRESETS.filter((p) => p.stageNumber !== undefined).map((stage) => {
+                const isActive = activePresetId === stage.id;
+                return (
+                  <button
+                    key={stage.id}
+                    type="button"
+                    onClick={() => onApplyStudyPreset(stage)}
+                    title={stage.description}
+                    className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? 'border-amber-400/80 bg-amber-500/20 text-amber-200'
+                        : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-600 hover:text-white'
+                    }`}
+                  >
+                    {stage.shortLabel || stage.label}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Tab bar */}
             <div className="mb-2 flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
               <div className="anatomy-scroll flex flex-1 items-center gap-1 overflow-x-auto">
@@ -453,17 +480,24 @@ export const BottomDock: React.FC<BottomDockProps> = (props) => {
                     Modos de estudio por planos anatómicos
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {STUDY_PRESETS.map((preset) => (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() => onApplyStudyPreset(preset)}
-                        title={preset.description}
-                        className="rounded-lg border border-slate-700/80 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-amber-500/70 hover:text-white whitespace-nowrap"
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
+                    {STUDY_PRESETS.map((preset) => {
+                      const isActive = activePresetId === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => onApplyStudyPreset(preset)}
+                          title={preset.description}
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                            isActive
+                              ? 'border-amber-400/80 bg-amber-500/20 text-amber-200'
+                              : 'border-slate-700/80 bg-slate-900/70 text-slate-200 hover:border-amber-500/70 hover:text-white'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

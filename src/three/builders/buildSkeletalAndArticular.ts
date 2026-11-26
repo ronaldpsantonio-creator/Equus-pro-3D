@@ -967,22 +967,56 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
   }
 
   // --- 5. ARTICULAR & LIGAMENTOUS STRUCTURES (layer = "art", sistema_articular.json) ---
-  // Funículo nucal (equ.ske.lax.001) & Lámina nucal (equ.ske.lax.002)
-  push(
-    'equ.ske.lax.001',
-    createTubeCurveMesh([HEAD.poll, V3(0.84, 1.69, 0), V3(0.64, 1.56, 0), V3(0.38, 1.51, 0)], 0.016, ligMat(), 20, 8),
-    'center',
-  );
+  // Funículo nucal (equ.ske.lax.001 — paired dorsal cord from external occipital protuberance to T3–T5 withers cap)
+  const funiculoGrp = new THREE.Group();
+  for (const sd of [-1, 1] as const) {
+    funiculoGrp.add(
+      createTubeCurveMesh(
+        [
+          HEAD.poll.clone().add(V3(-0.01, -0.01, 0.008 * sd)),
+          V3(0.86, 1.725, 0.009 * sd),
+          V3(0.68, 1.62, 0.009 * sd),
+          V3(0.50, 1.545, 0.01 * sd),
+          V3(0.32, 1.54, 0.011 * sd),
+        ],
+        0.013,
+        ligMat(),
+        24,
+        8,
+      ),
+    );
+  }
+  push('equ.ske.lax.001', funiculoGrp, 'center');
+
+  // Lámina nucal (equ.ske.lax.002 — broad bilateral elastic laminar fan from funicular cord/T2-T3 to C2-C6 spinous crests)
   push(
     'equ.ske.lax.002',
-    (() => {
+    buildBilateralArticular((sd) => {
       const g = new THREE.Group();
-      for (let c = 2; c <= 6; c++) {
+      const topRail: THREE.Vector3[] = [
+        V3(0.86, 1.715, 0.009 * sd),
+        V3(0.73, 1.645, 0.009 * sd),
+        V3(0.58, 1.575, 0.009 * sd),
+        V3(0.42, 1.535, 0.01 * sd),
+      ];
+      const [c2x, c2y] = cervicalPos(2);
+      const [c3x, c3y] = cervicalPos(3);
+      const [c5x, c5y] = cervicalPos(5);
+      const [c6x, c6y] = cervicalPos(6);
+      const botRail: THREE.Vector3[] = [
+        V3(c2x, c2y + 0.025, 0.01 * sd),
+        V3(c3x, c3y + 0.025, 0.01 * sd),
+        V3(c5x, c5y + 0.025, 0.01 * sd),
+        V3(c6x, c6y + 0.03, 0.01 * sd),
+      ];
+      g.add(createCurvedLigamentSheetMesh(topRail, botRail, sd, ligMat(), 0.004, 0.0025, 16, 8));
+      // Caudal fibrous digitations toward T1–T3 cranial border
+      for (const c of [3, 4, 5, 6]) {
         const [cx, cy] = cervicalPos(c);
-        g.add(createLongBoneMesh(V3(cx, cy + 0.02, 0), V3(0.45, 1.48, 0), 0.008, 0.01, ligMat(), 0.35));
+        g.add(createTubeCurveMesh([V3(cx, cy + 0.025, 0.011 * sd), V3(0.39, 1.53, 0.011 * sd)], 0.0055, ligMat(), 8, 6));
       }
       return g;
-    })(),
+    }),
     'center',
   );
   // Ligamento supraespinoso (equ.ske.lax.003) along spinous tips from T3 to S3

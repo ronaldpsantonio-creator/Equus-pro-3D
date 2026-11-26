@@ -21,11 +21,13 @@ export type TissueKind =
   | 'ligament'
   | 'artery'
   | 'vein'
+  | 'lymph'
   | 'heart'
   | 'nerve'
   | 'brain'
   | 'lung'
   | 'trachea'
+  | 'salivary'
   | 'liver'
   | 'stomach'
   | 'intestine'
@@ -242,17 +244,24 @@ export function createTissueMaterial(
       });
     case 'cartilage':
       return new THREE.MeshPhysicalMaterial({
-        color: 0xbfe3ec,
-        roughness: 0.24,
-        metalness: 0.02,
-        clearcoat: 0.52,
+        color: 0xcbd8e3,
+        roughness: 0.28,
+        metalness: 0.03,
+        clearcoat: 0.44,
+        clearcoatRoughness: 0.24,
         transparent: false,
       });
     case 'ligament':
-      return new THREE.MeshStandardMaterial({
-        color: 0xa3e0b2,
-        roughness: 0.42,
+      return new THREE.MeshPhysicalMaterial({
+        normalMap: tex.tendonNormal,
+        normalScale: new THREE.Vector2(0.45, 0.45),
+        color: 0xd8ded6,
+        roughness: 0.36,
         metalness: 0.04,
+        sheen: 0.38,
+        sheenColor: new THREE.Color(0xf2f5f0),
+        clearcoat: 0.24,
+        clearcoatRoughness: 0.32,
         transparent: false,
       });
     case 'artery':
@@ -269,6 +278,17 @@ export function createTissueMaterial(
         roughness: 0.36,
         metalness: 0.05,
         clearcoat: 0.35,
+        transparent: false,
+      });
+    case 'lymph':
+      return new THREE.MeshPhysicalMaterial({
+        color: 0x24b659,
+        roughness: 0.32,
+        metalness: 0.04,
+        clearcoat: 0.38,
+        clearcoatRoughness: 0.24,
+        emissive: new THREE.Color(0x082e16),
+        emissiveIntensity: 0.18,
         transparent: false,
       });
     case 'heart':
@@ -318,6 +338,15 @@ export function createTissueMaterial(
         color: 0xcbe4eb,
         roughness: 0.42,
         metalness: 0.04,
+        transparent: false,
+      });
+    case 'salivary':
+      return new THREE.MeshPhysicalMaterial({
+        color: 0xe8d089,
+        roughness: 0.44,
+        metalness: 0.02,
+        clearcoat: 0.34,
+        clearcoatRoughness: 0.28,
         transparent: false,
       });
     case 'liver':

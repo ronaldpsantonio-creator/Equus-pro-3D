@@ -1736,8 +1736,44 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
   // Línea alba (equ.mus.abd.008)
   push('equ.mus.abd.008', createTubeCurveMesh([V3(0.10, 0.80, 0), V3(-0.22, 0.74, 0), V3(-0.68, 0.94, 0)], 0.01, fasMat(), 16, 6), 'center');
 
-  // Diafragma (equ.mus.tor.009)
-  push('equ.mus.tor.009', createOrganMesh(V3(-0.08, 1.05, 0), [0.09, 0.24, 0.22], mprMat(), [0, 0, -0.45], 18), 'center');
+  // Diafragma (equ.mus.tor.009 — concave-caudal muscular-tendinous dome separating thorax & abdomen)
+  const diaphGrp = new THREE.Group();
+  // Build convex-cranial / concave-caudal dome shell from radial sectors
+  const domeGeo = new THREE.SphereGeometry(1, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.56);
+  const posAttr = domeGeo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < posAttr.count; i++) {
+    const vx = posAttr.getX(i);
+    const vy = posAttr.getY(i);
+    const vz = posAttr.getZ(i);
+    // Rotate sphere cap so apex (+Y -> +X cranial dome bulging into thorax)
+    const domeDepth = vy * 0.175;
+    const radY = vx * 0.255;
+    const radZ = vz * 0.218;
+    // Skew dorsal attachment more caudal (lumbar crura) and ventral attachment cranial (xiphoid)
+    const tiltX = -radY * 0.42;
+    posAttr.setXYZ(i, -0.09 + domeDepth + tiltX, 1.07 + radY, radZ);
+  }
+  domeGeo.computeVertexNormals();
+  const diaphMuscleMat = mprMat();
+  diaphMuscleMat.side = THREE.DoubleSide;
+  const diaphTendonMat = tenMat();
+  diaphTendonMat.side = THREE.DoubleSide;
+  diaphGrp.add(new THREE.Mesh(domeGeo, diaphMuscleMat));
+  // Central tendinous mirror (centrum tendineum)
+  const mirrorGeo = new THREE.SphereGeometry(1, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.30);
+  const mPos = mirrorGeo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < mPos.count; i++) {
+    const vx = mPos.getX(i);
+    const vy = mPos.getY(i);
+    const vz = mPos.getZ(i);
+    const domeDepth = vy * 0.178;
+    const radY = vx * 0.252;
+    const radZ = vz * 0.215;
+    mPos.setXYZ(i, -0.088 + domeDepth - radY * 0.42, 1.07 + radY, radZ);
+  }
+  mirrorGeo.computeVertexNormals();
+  diaphGrp.add(new THREE.Mesh(mirrorGeo, diaphTendonMat));
+  push('equ.mus.tor.009', diaphGrp, 'center', V3(-0.04, 1.07, 0));
 
   return parts;
 }

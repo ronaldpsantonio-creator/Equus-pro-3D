@@ -73,6 +73,7 @@ export interface SceneVisualConfig {
   xrayInverted: boolean;
   sceneTheme: SceneTheme;
   mpr: MprSliceState;
+  extraVisibleIds?: string[];
 }
 
 export interface SceneCallbacks {
@@ -249,7 +250,7 @@ export class EquineSceneManager {
   private rimLight: THREE.DirectionalLight;
 
   private bgStandard = new THREE.Color(0x0c1118);
-  private bgAtlas = new THREE.Color(0xf1f4f8);
+  private bgAtlas = new THREE.Color(0xd8dde3);
   private bgXray = new THREE.Color(0x04070c);
   private bgXrayInverted = new THREE.Color(0xf1f5f9);
   private bgCt = new THREE.Color(0x070b11);
@@ -522,7 +523,7 @@ export class EquineSceneManager {
     const gridLight = new THREE.GridHelper(8, 16, 0x94a3b8, 0xcbd5e1);
     gridLight.position.y = 0.001;
     (gridLight.material as THREE.Material).transparent = true;
-    (gridLight.material as THREE.Material).opacity = 0.42;
+    (gridLight.material as THREE.Material).opacity = 0.14;
     gridLight.visible = false;
     this.gridLight = gridLight;
     fg.add(gridLight);
@@ -1259,16 +1260,16 @@ export class EquineSceneManager {
         this.scene.fog.density = 0.016 * fogMult;
       }
       if (this.floorGroup) this.floorGroup.visible = true;
-      if (this.floorMat) this.floorMat.color.setHex(0xe8edf3);
-      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.28;
+      if (this.floorMat) this.floorMat.color.setHex(0xd2d7de);
+      if (this.floorShadowMat) this.floorShadowMat.opacity = 0.42;
       if (this.gridDark) this.gridDark.visible = false;
       if (this.gridLight) this.gridLight.visible = true;
-      this.hemiLight.intensity = 0.88;
+      this.hemiLight.intensity = 0.86;
       this.hemiLight.color.setHex(0xffffff);
-      this.hemiLight.groundColor.setHex(0xd6dee8);
-      this.keyLight.intensity = 1.48;
-      this.fillLight.intensity = 0.48;
-      this.rimLight.intensity = 0.76;
+      this.hemiLight.groundColor.setHex(0xcbd2db);
+      this.keyLight.intensity = 1.56;
+      this.fillLight.intensity = 0.50;
+      this.rimLight.intensity = 0.72;
       this.renderer.toneMappingExposure = 1.04;
     } else {
       this.scene.background = this.bgStandard;
@@ -1356,8 +1357,11 @@ export class EquineSceneManager {
       const sysKey = getCatalogSystem(s);
       const layerState = layers[s.layer];
       const sexOk = !s.sex || sex === 'all' || s.sex === sex;
+      const forcedByPreset = nextConfig.extraVisibleIds?.includes(s.id) ?? false;
       const baseVis =
-        layerState.on && systems[sysKey] !== false && sexOk && it.visibleOverride;
+        ((layerState.on && systems[sysKey] !== false) || forcedByPreset) &&
+        sexOk &&
+        it.visibleOverride;
 
       const hidePartByCutaway =
         (cutaway === 'left' &&
@@ -1418,7 +1422,7 @@ export class EquineSceneManager {
           } else {
             m.color.setHex(baseHex);
           }
-          const effOp = isSel ? Math.max(op, 0.9) : op;
+          const effOp = isSel ? Math.max(op, 0.9) : forcedByPreset ? 1.0 : op;
           const isAlwaysTrans = it.baseTransparent[idx] ?? false;
           const nextTransparent = isAlwaysTrans || effOp < 0.99;
           let needsShaderRecompile = clipCountChanged || modeChanged;

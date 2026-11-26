@@ -71,21 +71,21 @@ function loadJson<T>(key: string, fallback: T): T {
   }
 }
 
+const DEFAULT_PRESET = STUDY_PRESETS.find((p) => p.id === 'miologia') ?? STUDY_PRESETS[0];
+
 function createInitialLayers(): Record<LayerCode, LayerState> {
-  const defaultPreset = STUDY_PRESETS[0];
   const out = {} as Record<LayerCode, LayerState>;
   for (const l of LAYERS) {
-    const p = defaultPreset.layers[l.code];
+    const p = DEFAULT_PRESET.layers[l.code];
     out[l.code] = p ? { ...p } : { on: true, op: 100 };
   }
   return out;
 }
 
 function createInitialSystems(): Record<SystemCode, boolean> {
-  const defaultPreset = STUDY_PRESETS[0];
   const out = {} as Record<SystemCode, boolean>;
   for (const s of SYSTEMS) {
-    out[s.code] = defaultPreset.systems.includes(s.code);
+    out[s.code] = DEFAULT_PRESET.systems.includes(s.code);
   }
   return out;
 }
@@ -109,6 +109,7 @@ export default function App() {
   const [contextLost, setContextLost] = useState(false);
 
   // Visual state
+  const [activePresetId, setActivePresetId] = useState<string | null>(DEFAULT_PRESET.id);
   const [layers, setLayers] = useState<Record<LayerCode, LayerState>>(createInitialLayers);
   const [systems, setSystems] = useState<Record<SystemCode, boolean>>(createInitialSystems);
   const [sex, setSex] = useState<SexFilter>('all');
@@ -185,6 +186,11 @@ export default function App() {
   const [modelBump, setModelBump] = useState(0);
   const isOnline = useOnlineStatus();
 
+  const activePreset = useMemo(
+    () => (activePresetId ? STUDY_PRESETS.find((p) => p.id === activePresetId) ?? null : null),
+    [activePresetId],
+  );
+
   const visualConfig: SceneVisualConfig = useMemo(
     () => ({
       layers,
@@ -203,6 +209,7 @@ export default function App() {
       xrayInverted,
       sceneTheme,
       mpr,
+      extraVisibleIds: activePreset?.extraVisibleIds,
     }),
     [
       layers,
@@ -221,6 +228,7 @@ export default function App() {
       xrayInverted,
       sceneTheme,
       mpr,
+      activePreset,
     ],
   );
 
@@ -506,6 +514,7 @@ export default function App() {
 
   const handleGoHome = useCallback(() => {
     setNavHistory([]);
+    setActivePresetId(DEFAULT_PRESET.id);
     setSystems(createInitialSystems());
     setLayers(createInitialLayers());
     setCutaway('none');
@@ -572,10 +581,12 @@ export default function App() {
   }, []);
 
   const handleToggleSystem = useCallback((code: SystemCode) => {
+    setActivePresetId(null);
     setSystems((prev) => ({ ...prev, [code]: prev[code] === false }));
   }, []);
 
   const handleToggleLayer = useCallback((code: LayerCode) => {
+    setActivePresetId(null);
     setLayers((prev) => ({
       ...prev,
       [code]: { ...prev[code], on: !prev[code].on },
@@ -583,6 +594,7 @@ export default function App() {
   }, []);
 
   const handleLayerOpacity = useCallback((code: LayerCode, op: number) => {
+    setActivePresetId(null);
     setLayers((prev) => ({
       ...prev,
       [code]: { ...prev[code], op },
@@ -641,6 +653,7 @@ export default function App() {
   const handleApplyStudyPreset = useCallback(
     (preset: StudyPreset) => {
       pushHistory('Modo de estudio anterior');
+      setActivePresetId(preset.id);
       const nextSys = {} as Record<SystemCode, boolean>;
       for (const s of SYSTEMS) {
         nextSys[s.code] = preset.systems.includes(s.code);
@@ -666,6 +679,7 @@ export default function App() {
   );
 
   const handleShowAll = useCallback(() => {
+    setActivePresetId(null);
     const allSys = {} as Record<SystemCode, boolean>;
     SYSTEMS.forEach((s) => {
       allSys[s.code] = true;
@@ -1118,7 +1132,7 @@ export default function App() {
       className={`relative h-screen w-screen overflow-hidden text-slate-100 select-none transition-colors ${
         (sceneTheme === 'atlas' && renderMode === 'anatomico') ||
         (renderMode === 'radiografia' && xrayInverted)
-          ? 'bg-[#e8edf3]'
+          ? 'bg-[#d8dde3]'
           : 'bg-[#0c1118]'
       }`}
     >
@@ -1274,6 +1288,7 @@ export default function App() {
         report={report}
         systems={systems}
         onToggleSystem={handleToggleSystem}
+        activePresetId={activePresetId}
         onApplyStudyPreset={handleApplyStudyPreset}
         layers={layers}
         onToggleLayer={handleToggleLayer}

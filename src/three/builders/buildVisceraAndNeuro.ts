@@ -6,6 +6,7 @@ import {
   HEAD,
   hindlimbLandmarks,
   lumbarPos,
+  ribArcPoints,
   sacralPos,
   thoracicPos,
   V3,
@@ -79,21 +80,34 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     );
 
     const lungGrp = new THREE.Group();
-    const cardiacNotchInset = sd === -1 ? 0.024 : 0.01;
-    // Main diaphragmatic / caudal lung lobe lofted cranio-caudally
+    const cardiacNotchInset = sd === -1 ? 0.022 : 0.01;
+    // Cranial (apical) lobe tucked cranial to heart base
     lungGrp.add(
       createMultiStationLoftTube(
         [
-          { pos: V3(0.45, 1.06, (0.065 + cardiacNotchInset * 0.3) * sd), rx: 0.042, ry: 0.065 },
-          { pos: V3(0.34, 1.09, (0.09 + cardiacNotchInset) * sd), rx: 0.056, ry: 0.095 },
-          { pos: V3(0.18, 1.11, 0.112 * sd), rx: 0.074, ry: 0.145 },
-          { pos: V3(0.02, 1.12, 0.118 * sd), rx: 0.076, ry: 0.145 },
-          { pos: V3(-0.11, 1.14, 0.10 * sd), rx: 0.058, ry: 0.11 },
+          { pos: V3(0.50, 1.07, (0.056 + cardiacNotchInset * 0.25) * sd), rx: 0.032, ry: 0.048 },
+          { pos: V3(0.41, 1.08, (0.075 + cardiacNotchInset * 0.6) * sd), rx: 0.048, ry: 0.075 },
+          { pos: V3(0.32, 1.11, (0.092 + cardiacNotchInset * 0.7) * sd), rx: 0.058, ry: 0.095 },
         ],
         lungMat(),
-        18,
+        16,
       ),
     );
+    // Main caudal (diaphragmatic) lobe with rib-arch surface modulation matching thoracic cage
+    const caudalLung = createMultiStationLoftTube(
+      [
+        { pos: V3(0.36, 1.13, (0.088 + cardiacNotchInset) * sd), rx: 0.056, ry: 0.098 },
+        { pos: V3(0.24, 1.13, 0.114 * sd), rx: 0.074, ry: 0.145 },
+        { pos: V3(0.10, 1.13, 0.124 * sd), rx: 0.078, ry: 0.155 },
+        { pos: V3(-0.04, 1.14, 0.118 * sd), rx: 0.072, ry: 0.142 },
+        { pos: V3(-0.15, 1.16, 0.096 * sd), rx: 0.046, ry: 0.092 },
+      ],
+      lungMat(),
+      20,
+      24,
+      0.032,
+    );
+    lungGrp.add(caudalLung);
     push(`equ.res.pul.001-${tag}`, lungGrp, side);
 
     push(
@@ -109,6 +123,7 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const heartMat = () => createTissueMaterial('heart', tex);
   const artMat = () => createTissueMaterial('artery', tex);
   const veinMat = () => createTissueMaterial('vein', tex);
+  const lymphMat = () => createTissueMaterial('lymph', tex);
 
   // Corazón equino (equ.car.cor.001 — conical equine heart between ribs 3–6, tilted left & caudoventrally)
   const heartGrp = new THREE.Group();
@@ -159,12 +174,63 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'center',
   );
 
+  // Arterias y Venas intercostales dorsales (equ.car.tpa.013 & equ.car.vtr.004) + Ganglios intercostales (equ.car.lin.011)
+  const intercostalArtGrp = new THREE.Group();
+  const intercostalVeinGrp = new THREE.Group();
+  const intercostalLymphGrp = new THREE.Group();
+  for (const sd of [-1, 1] as const) {
+    for (let r = 4; r <= 17; r += 2) {
+      const arc = ribArcPoints(r, sd);
+      if (arc.length >= 4) {
+        const artPts = arc.slice(0, 5).map((p, idx) => p.clone().add(V3(-0.009, 0, -0.004 * sd * (idx === 0 ? 0 : 1))));
+        const veinPts = arc.slice(0, 5).map((p, idx) => p.clone().add(V3(-0.014, 0, -0.006 * sd * (idx === 0 ? 0 : 1))));
+        intercostalArtGrp.add(createTubeCurveMesh(artPts, 0.0032, artMat(), 10, 5));
+        intercostalVeinGrp.add(createTubeCurveMesh(veinPts, 0.0032, veinMat(), 10, 5));
+        // Lymphatic vessel & dorsal intercostal node
+        const lymPts = arc.slice(0, 4).map((p) => p.clone().add(V3(-0.004, 0.003, -0.002 * sd)));
+        intercostalLymphGrp.add(createTubeCurveMesh(lymPts, 0.0025, lymphMat(), 8, 5));
+        intercostalLymphGrp.add(createOrganMesh(arc[1].clone().add(V3(-0.005, 0, -0.005 * sd)), [0.007, 0.006, 0.006], lymphMat(), undefined, 6));
+      }
+    }
+  }
+  push('equ.car.tpa.013', intercostalArtGrp, 'center', V3(0.05, 1.15, 0));
+  push('equ.car.vtr.004', intercostalVeinGrp, 'center', V3(0.05, 1.15, 0));
+  push('equ.car.lin.011', intercostalLymphGrp, 'center', V3(0.05, 1.24, 0));
+
+  // Cisterna del quilo (equ.car.lco.002), Conducto torácico (equ.car.lco.001) & Ganglios mesentéricos craneales (equ.car.lin.028)
+  push(
+    'equ.car.lco.002',
+    createOrganMesh(V3(-0.46, 1.27, 0.006), [0.042, 0.015, 0.014], lymphMat(), undefined, 10),
+    'center',
+  );
+  push(
+    'equ.car.lco.001',
+    createTubeCurveMesh(
+      [V3(-0.44, 1.27, 0.006), V3(-0.12, 1.27, 0.008), V3(0.22, 1.24, 0.01), V3(0.46, 1.18, -0.018)],
+      0.005,
+      lymphMat(),
+      18,
+      6,
+    ),
+    'center',
+  );
+  const mesLymphGrp = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const mx = -0.32 - i * 0.065;
+    const my = 1.15 - Math.sin(i * 0.5) * 0.05;
+    const mz = (i % 2 === 0 ? -1 : 1) * 0.045;
+    mesLymphGrp.add(createOrganMesh(V3(mx, my, mz), [0.012, 0.01, 0.009], lymphMat(), undefined, 7));
+    mesLymphGrp.add(createTubeCurveMesh([V3(-0.46, 1.26, 0.006), V3(mx, my, mz), V3(mx - 0.03, my - 0.12, mz * 1.4)], 0.0028, lymphMat(), 8, 5));
+  }
+  push('equ.car.lin.028', mesLymphGrp, 'center', V3(-0.45, 1.10, 0));
+
   for (const sd of [-1, 1] as const) {
     const tag = sd === -1 ? 'i' : 'd';
     const side = sd === -1 ? 'left' : 'right';
     const fl = forelimbLandmarks(sd);
     const hl = hindlimbLandmarks(sd);
 
+    // Carótida común & Yugular externa
     push(
       `equ.car.acc.002-${tag}`,
       createTubeCurveMesh([V3(0.45, 1.16, 0.015 * sd), V3(0.75, 1.40, 0.032 * sd), V3(1.02, 1.63, 0.036 * sd)], 0.0075, artMat(), 16, 7),
@@ -175,16 +241,262 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
       createTubeCurveMesh([V3(1.02, 1.60, 0.048 * sd), V3(0.74, 1.37, 0.048 * sd), V3(0.53, 1.15, 0.028 * sd)], 0.009, veinMat(), 16, 7),
       side,
     );
+    // Arteria y Vena facial (vascular notch over mandible & rostral masseter border — visible in Stages 2, 3, 4)
+    push(
+      `equ.car.acc.011-${tag}`,
+      createTubeCurveMesh(
+        [
+          V3(1.02, 1.61, 0.036 * sd),
+          V3(1.13, 1.47, 0.056 * sd),
+          V3(1.23, 1.52, 0.088 * sd),
+          V3(1.33, 1.56, 0.066 * sd),
+          V3(1.44, 1.53, 0.044 * sd),
+        ],
+        0.0042,
+        artMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+    push(
+      `equ.car.vcc.004-${tag}`,
+      createTubeCurveMesh(
+        [
+          V3(1.02, 1.59, 0.048 * sd),
+          V3(1.14, 1.46, 0.062 * sd),
+          V3(1.24, 1.53, 0.092 * sd),
+          V3(1.31, 1.60, 0.072 * sd),
+          V3(1.42, 1.55, 0.048 * sd),
+        ],
+        0.0048,
+        veinMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+
+    // Forelimb arteries & veins (subclavian -> brachial -> median -> palmar metacarpal -> digital)
     push(
       `equ.car.amt.001-${tag}`,
-      createTubeCurveMesh([V3(0.42, 1.14, 0.03 * sd), fl.shoulder.clone().add(V3(-0.04, 0, -0.03 * sd)), fl.elbow.clone().add(V3(0, 0, -0.02 * sd))], 0.007, artMat(), 12, 7),
+      createTubeCurveMesh(
+        [
+          V3(0.42, 1.14, 0.03 * sd),
+          fl.shoulder.clone().add(V3(-0.04, 0, -0.03 * sd)),
+          fl.elbow.clone().add(V3(0, 0, -0.02 * sd)),
+          fl.carpus.clone().add(V3(-0.006, 0, -0.015 * sd)),
+        ],
+        0.0065,
+        artMat(),
+        16,
+        7,
+      ),
       side,
     );
     push(
-      `equ.car.amp.001-${tag}`,
-      createTubeCurveMesh([V3(-0.76, 1.25, 0.02 * sd), hl.hip.clone().add(V3(0.03, -0.02, -0.02 * sd)), hl.stifle.clone().add(V3(-0.04, 0, -0.02 * sd))], 0.008, artMat(), 14, 7),
+      `equ.car.amt.020-${tag}`,
+      createTubeCurveMesh(
+        [
+          fl.carpus.clone().add(V3(-0.008, 0, -0.012 * sd)),
+          fl.fetlock.clone().add(V3(-0.012, 0, -0.012 * sd)),
+          fl.pasternMid.clone().add(V3(-0.01, 0, -0.012 * sd)),
+          fl.coronet.clone().add(V3(-0.006, -0.01, -0.012 * sd)),
+        ],
+        0.004,
+        artMat(),
+        14,
+        6,
+      ),
       side,
     );
+    push(
+      `equ.car.vmt.004-${tag}`,
+      createTubeCurveMesh(
+        [
+          fl.carpus.clone().add(V3(-0.004, 0, -0.018 * sd)),
+          fl.elbow.clone().add(V3(0.008, 0, -0.024 * sd)),
+          fl.shoulder.clone().add(V3(-0.02, -0.01, -0.032 * sd)),
+          V3(0.50, 1.14, 0.028 * sd),
+        ],
+        0.0065,
+        veinMat(),
+        16,
+        7,
+      ),
+      side,
+    );
+    push(
+      `equ.car.vmt.011-${tag}`,
+      createTubeCurveMesh(
+        [
+          fl.coronet.clone().add(V3(-0.008, -0.01, -0.015 * sd)),
+          fl.pasternMid.clone().add(V3(-0.012, 0, -0.015 * sd)),
+          fl.fetlock.clone().add(V3(-0.014, 0, -0.016 * sd)),
+          fl.carpus.clone().add(V3(-0.004, 0, -0.018 * sd)),
+        ],
+        0.004,
+        veinMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+
+    // Hindlimb arteries & veins (external iliac -> femoral -> popliteal/tibial -> dorsal metatarsal -> digital)
+    push(
+      `equ.car.amp.001-${tag}`,
+      createTubeCurveMesh(
+        [
+          V3(-0.76, 1.25, 0.02 * sd),
+          hl.hip.clone().add(V3(0.03, -0.02, -0.025 * sd)),
+          hl.stifle.clone().add(V3(-0.04, -0.02, -0.018 * sd)),
+          hl.hock.clone().add(V3(0.01, 0, -0.014 * sd)),
+        ],
+        0.0075,
+        artMat(),
+        18,
+        7,
+      ),
+      side,
+    );
+    push(
+      `equ.car.amp.018-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.hock.clone().add(V3(0.012, 0, 0.01 * sd)),
+          hl.fetlock.clone().add(V3(-0.012, 0, 0.012 * sd)),
+          hl.pasternMid.clone().add(V3(-0.01, 0, 0.012 * sd)),
+          hl.coronet.clone().add(V3(-0.006, -0.01, 0.012 * sd)),
+        ],
+        0.0042,
+        artMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+    push(
+      `equ.car.vmp.001-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.stifle.clone().add(V3(-0.03, -0.02, -0.024 * sd)),
+          hl.hip.clone().add(V3(0.04, -0.02, -0.03 * sd)),
+          V3(-0.72, 1.23, 0.025 * sd),
+        ],
+        0.0075,
+        veinMat(),
+        14,
+        7,
+      ),
+      side,
+    );
+    push(
+      `equ.car.vmp.006-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.hock.clone().add(V3(-0.012, 0, -0.016 * sd)),
+          hl.stifle.clone().add(V3(-0.03, -0.05, -0.028 * sd)),
+          hl.hip.clone().add(V3(0.02, -0.04, -0.03 * sd)),
+        ],
+        0.0052,
+        veinMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+    push(
+      `equ.car.vmp.010-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.coronet.clone().add(V3(-0.008, -0.01, -0.014 * sd)),
+          hl.pasternMid.clone().add(V3(-0.012, 0, -0.014 * sd)),
+          hl.fetlock.clone().add(V3(-0.014, 0, -0.015 * sd)),
+          hl.hock.clone().add(V3(-0.012, 0, -0.016 * sd)),
+        ],
+        0.004,
+        veinMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+
+    // Emerald-green Lymphatic Trunks & Lymphocenters (visible in Biosphera Stages 2, 3, 4)
+    push(
+      `equ.car.lco.006-${tag}`,
+      createTubeCurveMesh(
+        [V3(1.01, 1.59, 0.052 * sd), V3(0.75, 1.38, 0.052 * sd), V3(0.50, 1.17, 0.032 * sd)],
+        0.0042,
+        lymphMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+    // Ganglio parotídeo (001) & mandibular (002)
+    push(
+      `equ.car.lin.001-${tag}`,
+      createOrganMesh(V3(1.045, 1.625, 0.082 * sd), [0.014, 0.022, 0.01], lymphMat(), [0, 0, -0.25], 10),
+      side,
+    );
+    push(
+      `equ.car.lin.002-${tag}`,
+      createOrganMesh(V3(1.13, 1.495, 0.048 * sd), [0.022, 0.013, 0.012], lymphMat(), [0, 0, 0.2], 10),
+      side,
+    );
+    // Ganglio cervical superficial / prescapular (005 — prominent emerald cluster cranial to shoulder!)
+    const cervSupGrp = new THREE.Group();
+    cervSupGrp.add(createOrganMesh(V3(0.495, 1.245, 0.168 * sd), [0.018, 0.044, 0.014], lymphMat(), [0, 0, -0.35], 12));
+    cervSupGrp.add(createTubeCurveMesh([V3(0.495, 1.245, 0.168 * sd), V3(0.50, 1.18, 0.04 * sd)], 0.0038, lymphMat(), 8, 5));
+    push(`equ.car.lin.005-${tag}`, cervSupGrp, side);
+
+    // Ganglio axilar (009) + forelimb lymphatic vessels down to cannon/fetlock
+    const axilGrp = new THREE.Group();
+    axilGrp.add(createOrganMesh(fl.shoulder.clone().add(V3(-0.05, -0.04, -0.035 * sd)), [0.016, 0.016, 0.012], lymphMat(), undefined, 10));
+    axilGrp.add(
+      createTubeCurveMesh(
+        [
+          fl.fetlock.clone().add(V3(-0.008, 0, 0.012 * sd)),
+          fl.carpus.clone().add(V3(-0.008, 0, 0.014 * sd)),
+          fl.elbow.clone().add(V3(-0.01, 0, -0.018 * sd)),
+          fl.shoulder.clone().add(V3(-0.05, -0.04, -0.035 * sd)),
+          V3(0.48, 1.17, 0.028 * sd),
+        ],
+        0.0032,
+        lymphMat(),
+        18,
+        6,
+      ),
+    );
+    push(`equ.car.lin.009-${tag}`, axilGrp, side);
+
+    // Ganglio subilíaco / prefemoral (036 — visible green cluster cranial to thigh/tensor fasciae latae!)
+    const subilGrp = new THREE.Group();
+    subilGrp.add(createOrganMesh(V3(-0.625, 1.12, 0.224 * sd), [0.016, 0.038, 0.014], lymphMat(), [0, 0, 0.25], 10));
+    subilGrp.add(createTubeCurveMesh([V3(-0.625, 1.12, 0.224 * sd), V3(-0.68, 1.20, 0.11 * sd), V3(-0.46, 1.27, 0.012 * sd)], 0.0035, lymphMat(), 12, 6));
+    push(`equ.car.lin.036-${tag}`, subilGrp, side);
+
+    // Ganglio poplíteo (039) + hindlimb draining lymphatic vessels
+    const popGrp = new THREE.Group();
+    popGrp.add(createOrganMesh(hl.stifle.clone().add(V3(-0.09, -0.04, 0.006 * sd)), [0.016, 0.018, 0.014], lymphMat(), undefined, 10));
+    popGrp.add(
+      createTubeCurveMesh(
+        [
+          hl.fetlock.clone().add(V3(-0.008, 0, 0.014 * sd)),
+          hl.hock.clone().add(V3(-0.01, 0, 0.015 * sd)),
+          hl.stifle.clone().add(V3(-0.09, -0.04, 0.006 * sd)),
+          hl.hip.clone().add(V3(-0.02, -0.03, -0.02 * sd)),
+          V3(-0.72, 1.24, 0.02 * sd),
+        ],
+        0.0032,
+        lymphMat(),
+        18,
+        6,
+      ),
+    );
+    push(`equ.car.lin.039-${tag}`, popGrp, side);
   }
 
   // Bazo (equ.car.lor.001 — curved scythe-shaped spleen against left costal arch)
@@ -211,6 +523,71 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   const intMat = () => createTissueMaterial('intestine', tex);
   const cecMat = () => createTissueMaterial('cecum', tex);
   const colMat = () => createTissueMaterial('colon', tex);
+  const salMat = () => createTissueMaterial('salivary', tex);
+
+  // Lengua (equ.dig.boc.007) & Faringe (equ.dig.fae.001) — prominent oral/pharyngeal continuity in Stage 5
+  push(
+    'equ.dig.boc.007',
+    createMultiStationLoftTube(
+      [
+        { pos: V3(1.13, 1.565, 0), rx: 0.026, ry: 0.018 },
+        { pos: V3(1.28, 1.525, 0), rx: 0.024, ry: 0.016 },
+        { pos: V3(1.44, 1.485, 0), rx: 0.018, ry: 0.010 },
+        { pos: V3(1.50, 1.472, 0), rx: 0.011, ry: 0.006 },
+      ],
+      stoMat(),
+      14,
+    ),
+    'center',
+  );
+  push(
+    'equ.dig.fae.001',
+    createMultiStationLoftTube(
+      [
+        { pos: V3(1.13, 1.605, 0), rx: 0.032, ry: 0.028 },
+        { pos: V3(1.04, 1.60, 0), rx: 0.036, ry: 0.030 },
+        { pos: V3(0.96, 1.585, 0), rx: 0.028, ry: 0.024 },
+      ],
+      stoMat(),
+      12,
+    ),
+    'center',
+  );
+
+  // Glándula parótida (equ.dig.boc.009-i/d) & Glándula mandibular (equ.dig.boc.010-i/d)
+  for (const sd of [-1, 1] as const) {
+    const tag = sd === -1 ? 'i' : 'd';
+    const side = sd === -1 ? 'left' : 'right';
+    const parotid = createAnatomicalExtrudedPlate(
+      [
+        [-0.024, -0.068], // ventral angle near linguofacial vein
+        [0.018, -0.048],  // rostral border hugging mandibular ramus
+        [0.026, 0.056],   // dorsal notch embracing ear base
+        [-0.016, 0.062],  // caudal border along atlas wing
+        [-0.03, 0.0],
+      ],
+      0.018,
+      0.005,
+      salMat(),
+    );
+    parotid.position.set(1.03, 1.622, 0.068 * sd);
+    parotid.rotation.set(0, 0, -0.22);
+    push(`equ.dig.boc.009-${tag}`, parotid, side);
+
+    push(
+      `equ.dig.boc.010-${tag}`,
+      createMultiStationLoftTube(
+        [
+          { pos: V3(1.04, 1.555, 0.038 * sd), rx: 0.012, ry: 0.015 },
+          { pos: V3(1.10, 1.505, 0.038 * sd), rx: 0.014, ry: 0.017 },
+          { pos: V3(1.16, 1.485, 0.034 * sd), rx: 0.010, ry: 0.012 },
+        ],
+        salMat(),
+        10,
+      ),
+      side,
+    );
+  }
 
   push(
     'equ.dig.eso.001',
@@ -337,14 +714,90 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     const fl = forelimbLandmarks(sd);
     const hl = hindlimbLandmarks(sd);
 
+    // Plexo braquial & Nervio mediano/palmar medial hasta el menudillo
     push(
       `equ.ner.bra.001-${tag}`,
       createTubeCurveMesh([V3(0.56, 1.24, 0.02 * sd), fl.shoulder.clone().add(V3(-0.04, 0.04, -0.02 * sd)), fl.elbow, fl.carpus], 0.0055, nerveMat(), 20, 6),
       side,
     );
     push(
+      `equ.ner.bra.006-${tag}`,
+      createTubeCurveMesh(
+        [
+          fl.shoulder.clone().add(V3(-0.02, -0.04, -0.015 * sd)),
+          fl.elbow.clone().add(V3(-0.006, 0, -0.016 * sd)),
+          fl.carpus.clone().add(V3(-0.01, 0, -0.012 * sd)),
+        ],
+        0.0042,
+        nerveMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+    push(
+      `equ.ner.bra.022-${tag}`,
+      createTubeCurveMesh(
+        [
+          fl.carpus.clone().add(V3(-0.01, 0, -0.01 * sd)),
+          fl.fetlock.clone().add(V3(-0.014, 0, -0.01 * sd)),
+          fl.pasternMid.clone().add(V3(-0.012, 0, -0.01 * sd)),
+          fl.coronet.clone().add(V3(-0.008, -0.008, -0.01 * sd)),
+        ],
+        0.0036,
+        nerveMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+
+    // Nervio ciático, tibial & plantar medial hasta el menudillo
+    push(
       `equ.ner.lum.010-${tag}`,
       createTubeCurveMesh([V3(-0.76, 1.30, 0.02 * sd), hl.hip.clone().add(V3(-0.04, 0.02, -0.02 * sd)), hl.stifle.clone().add(V3(-0.08, -0.04, 0)), hl.hock], 0.0065, nerveMat(), 22, 6),
+      side,
+    );
+    push(
+      `equ.ner.lum.011-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.stifle.clone().add(V3(-0.06, -0.03, -0.01 * sd)),
+          hl.hock.clone().add(V3(-0.014, 0, -0.012 * sd)),
+        ],
+        0.0045,
+        nerveMat(),
+        12,
+        6,
+      ),
+      side,
+    );
+    push(
+      `equ.ner.lum.017-${tag}`,
+      createTubeCurveMesh(
+        [
+          hl.hock.clone().add(V3(-0.014, 0, -0.01 * sd)),
+          hl.fetlock.clone().add(V3(-0.015, 0, -0.01 * sd)),
+          hl.pasternMid.clone().add(V3(-0.012, 0, -0.01 * sd)),
+          hl.coronet.clone().add(V3(-0.008, -0.008, -0.01 * sd)),
+        ],
+        0.0036,
+        nerveMat(),
+        14,
+        6,
+      ),
+      side,
+    );
+
+    // Nervio trigémino (V), facial (VII) y vago (X)
+    const trigGrp = new THREE.Group();
+    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.69, 0.032 * sd), V3(1.22, 1.64, 0.055 * sd), V3(1.38, 1.57, 0.048 * sd), V3(1.50, 1.50, 0.034 * sd)], 0.0036, nerveMat(), 14, 6));
+    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.67, 0.032 * sd), V3(1.18, 1.54, 0.056 * sd), V3(1.38, 1.46, 0.038 * sd)], 0.0034, nerveMat(), 12, 6));
+    push(`equ.ner.cra.007-${tag}`, trigGrp, side);
+
+    push(
+      `equ.ner.cra.048-${tag}`,
+      createTubeCurveMesh([V3(1.06, 1.68, 0.042 * sd), V3(1.12, 1.59, 0.068 * sd), V3(1.25, 1.56, 0.072 * sd), V3(1.41, 1.52, 0.048 * sd)], 0.0038, nerveMat(), 14, 6),
       side,
     );
     push(
