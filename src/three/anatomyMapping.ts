@@ -19,6 +19,11 @@ function getSideFromRecord(record: StructureRecord): SidePreference {
   const lat = (record.lateralidad || '').toLowerCase();
   if (lat.includes('izquierd')) return 'left';
   if (lat.includes('derech')) return 'right';
+  const es = (record.es || '').toLowerCase();
+  const hasLeft = /\bizquierd[oa]s?\b/.test(es);
+  const hasRight = /\bderech[oa]s?\b/.test(es);
+  if (hasLeft && !hasRight) return 'left';
+  if (hasRight && !hasLeft) return 'right';
   return 'center';
 }
 
@@ -85,11 +90,11 @@ const REGION_RULES: Record<
       : ['equ.car.tpa.005', 'equ.car.cor.001'],
   'equ.car.sdu': () => ['equ.ner.enc.001', 'equ.ske.cra.001'],
   'equ.car.tpa': (t) => {
+    if (/tor[aá]c|intercostal|bronco|esof[aá]g|arco|braquiocef/.test(t)) {
+      return ['equ.car.tpa.008', 'equ.car.tpa.005'];
+    }
     if (/abdom|il[ií]ac|renal|mesent[eé]r|cel[ií]ac|lumbar|sacr/.test(t)) {
       return ['equ.car.tpa.009', 'equ.car.tpa.008', 'equ.car.tpa.005'];
-    }
-    if (/tor[aá]c|intercostal|bronco|esof[aá]g/.test(t)) {
-      return ['equ.car.tpa.008', 'equ.car.tpa.005'];
     }
     return ['equ.car.tpa.005', 'equ.car.cor.001'];
   },
@@ -119,7 +124,7 @@ const REGION_RULES: Record<
     return ['equ.car.tpa.009', 'equ.car.tpa.008'];
   },
   'equ.car.vvi': (t) => {
-    if (/espl[eé]nic/.test(t)) return ['equ.car.lor.001', 'equ.car.vtr.002'];
+    if (/espl[eé]nic|gastroepipl/.test(t)) return ['equ.car.lor.001', 'equ.car.vtr.002'];
     if (/g[aá]stric/.test(t)) return ['equ.dig.est.001', 'equ.car.vtr.002'];
     if (/porta|hep[aá]tic/.test(t)) return ['equ.dig.hig.001', 'equ.car.vtr.002'];
     if (/renal/.test(t)) return ['equ.uri.rin.001', 'equ.car.vtr.002'];
@@ -128,6 +133,7 @@ const REGION_RULES: Record<
   },
   'equ.car.lco': (t) => {
     if (/quilo|lumbar|intestinal/.test(t)) return ['equ.car.tpa.009', 'equ.car.vtr.002'];
+    if (/tor[aá]c/.test(t)) return ['equ.car.tpa.008', 'equ.car.vtr.001'];
     return ['equ.car.vtr.001', 'equ.car.tpa.008'];
   },
   'equ.car.lin': (t) => {
@@ -136,7 +142,11 @@ const REGION_RULES: Record<
     if (/axilar|cubital|preescap/.test(t)) return ['equ.car.amt.001'];
     if (/il[ií]ac|inguin|popl[ií]t|femoral|sacr|gl[uú]t|subil/.test(t)) return ['equ.car.amp.001'];
     if (/mediast|traqueobronq|pulmon|tor[aá]c|esternal/.test(t)) return ['equ.res.pul.001', 'equ.car.vtr.001'];
-    if (/mesent|cecal|c[oó]lic|g[aá]str|hep[aá]t|espl[eé]n|quilo/.test(t)) return ['equ.dig.int.002', 'equ.car.lor.001'];
+    if (/lumbar|a[oó]rt|cel[ií]ac/.test(t)) return ['equ.car.tpa.009', 'equ.car.vtr.002'];
+    if (/g[aá]str/.test(t)) return ['equ.dig.est.001'];
+    if (/hep[aá]t/.test(t)) return ['equ.dig.hig.001'];
+    if (/espl[eé]n/.test(t)) return ['equ.car.lor.001'];
+    if (/mesent|cecal|c[oó]lic|quilo/.test(t)) return ['equ.dig.int.002', 'equ.car.lor.001'];
     if (/renal/.test(t)) return ['equ.uri.rin.001'];
     return ['equ.car.vtr.001', 'equ.car.cor.001'];
   },
@@ -214,9 +224,11 @@ const REGION_RULES: Record<
   'equ.mus.sub': () => ['equ.mus.sub.001'],
   'equ.mus.fas': (t) => {
     if (/lata|gl[uú]t|femoral|crural|tars|metatars|popl/.test(t)) return ['equ.mus.fas.017', 'equ.mus.fem.002'];
-    if (/braq|antebra|carp|metacarp|axil|escap/.test(t)) return ['equ.mus.ant.001', 'equ.mus.bra.002'];
+    if (/axil|escap/.test(t)) return ['equ.mus.hom.001', 'equ.mus.bra.002'];
+    if (/braq|antebra|carp|metacarp/.test(t)) return ['equ.mus.ant.001', 'equ.mus.bra.002'];
     if (/tor[aá]c|pector|endotor/.test(t)) return ['equ.mus.tor.001'];
     if (/abdom|alba|transversalis|il[ií]ac/.test(t)) return ['equ.mus.abd.001'];
+    if (/faring|lar[ií]ng/.test(t)) return ['equ.res.lar.002'];
     if (/cuello|cervic|buc|maset|temporal|parot/.test(t)) return ['equ.mus.cab.018', 'equ.mus.cue.002'];
     return ['equ.mus.fas.017', 'equ.mus.tor.001'];
   },
@@ -323,11 +335,20 @@ const REGION_RULES: Record<
     if (/tempor|escamos/.test(t)) return ['equ.ske.cra.008'];
     return ['equ.ske.cra.006', 'equ.ske.cra.007', 'equ.ske.cra.001'];
   },
-  'equ.ske.hyo': () => ['equ.ske.cra.017', 'equ.ske.cra.008'],
+  'equ.ske.oid': () => ['equ.ske.cra.008'],
+  'equ.ske.hyo': (t) => {
+    if (/temporohioid/.test(t)) return ['equ.ske.hyo.006', 'equ.ske.cra.008'];
+    if (/estilohioid|epihioid/.test(t)) return ['equ.ske.hyo.005', 'equ.ske.hyo.006', 'equ.ske.hyo.004'];
+    return ['equ.ske.hyo.006', 'equ.ske.hyo.004', 'equ.ske.cra.008'];
+  },
   'equ.ske.cau': () => ['equ.ske.cau.018', 'equ.ske.cau.015'],
   'equ.ske.aax': (t) => {
     if (/sacroil/.test(t)) return ['equ.ske.aax.010'];
     if (/s[ií]nfisis|pelv/.test(t)) return ['equ.ske.aax.011'];
+    if (/costovertebr/.test(t)) return ['equ.ske.tor.006', 'equ.ske.cos.005'];
+    if (/costocondr|esternocost/.test(t)) return ['equ.ske.cos.005', 'equ.ske.ste.001'];
+    if (/esternal/.test(t)) return ['equ.ske.ste.001'];
+    if (/procesos articulares|cigapofis/.test(t)) return ['equ.ske.tor.008', 'equ.ske.cer.004'];
     return ['equ.ske.aax.002', 'equ.ske.aax.001'];
   },
   'equ.ske.amp': (t) => {
@@ -344,6 +365,8 @@ const REGION_RULES: Record<
     if (/sacrotub/.test(t)) return ['equ.ske.lax.011'];
     if (/sacroil.*ventral/.test(t)) return ['equ.ske.lax.010', 'equ.ske.lax.009'];
     if (/sacroil/.test(t)) return ['equ.ske.lax.009', 'equ.ske.lax.010', 'equ.ske.lax.011'];
+    if (/transverso.*atlas|\batlas\b/.test(t)) return ['equ.ske.cer.001', 'equ.ske.aax.003'];
+    if (/diente|odontoid/.test(t)) return ['equ.ske.cer.002', 'equ.ske.aax.003'];
     if (/nucal/.test(t)) return ['equ.ske.lax.001', 'equ.ske.lax.002'];
     if (/longitudinal/.test(t)) return ['equ.ske.lax.004'];
     return ['equ.ske.lax.003', 'equ.ske.lax.004'];
@@ -355,6 +378,7 @@ const REGION_RULES: Record<
   },
   'equ.ske.lmt': (t) => {
     if (/codo/.test(t)) return ['equ.ske.amt.002'];
+    if (/menudillo|metacarpofal/.test(t)) return ['equ.ske.amt.008', 'equ.ske.lmt.005'];
     if (/carpo/.test(t)) return ['equ.ske.amt.004', 'equ.ske.lmt.005'];
     return ['equ.ske.lmt.005', 'equ.ske.lmt.010'];
   },
@@ -413,12 +437,12 @@ export function resolveSingleStructureAnchor(
   // 2. Same region prefix (`equ.<sys>.<reg>`) mounted items
   const parts = record.id.split('.');
   const regionPrefix = parts.length >= 3 ? parts.slice(0, 3).join('.') : '';
-  const text = `${record.es} ${record.la} ${record.ficha?.ubicacion || ''}`.toLowerCase();
+  const nameText = `${record.es} ${record.la}`.toLowerCase();
 
   // 3. Explicit region anchor rules (respecting laterality & anatomical subregion keywords)
   const regionRule = REGION_RULES[regionPrefix];
   if (regionRule) {
-    const picked = pickFirstMounted(regionRule(text), side, items);
+    const picked = pickFirstMounted(regionRule(nameText), side, items);
     if (picked) {
       return { targetId: picked, isProxy: true };
     }
