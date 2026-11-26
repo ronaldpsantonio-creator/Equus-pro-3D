@@ -53,17 +53,18 @@ export function caudalPos(idx: number): [number, number, number] {
 export function ribArcPoints(idx1to18: number, sd: -1 | 1): THREE.Vector3[] {
   const [vx, vy] = thoracicPos(idx1to18);
   const t = (idx1to18 - 1) / 17;
-  // Barrel widest around T9-T12 (~0.275m half-width) and deepest around T8-T11 (~0.56m)
-  const width = (0.135 + 0.14 * Math.sin(Math.pow(t, 0.8) * Math.PI)) * sd;
-  const depth = 0.36 + 0.22 * Math.sin(Math.pow(t, 0.78) * Math.PI);
+  // Calibrated equine thoracic taper: narrow cranial inlet (R1 ~0.072m, R4 ~0.138m medial to scapula),
+  // widening smoothly to barrel peak around R10-R12 (~0.232m), tapering cleanly at R18 (~0.156m)
+  const width = (0.072 + 0.084 * t + 0.118 * Math.pow(Math.sin(Math.pow(t, 0.92) * Math.PI), 1.05)) * sd;
+  const depth = 0.345 + 0.175 * Math.sin(Math.pow(t, 0.82) * Math.PI);
   const sweep = -0.02 - 0.14 * t; // ribs sweep caudoventrally
 
   return [
-    V3(vx, vy - 0.02, 0.03 * sd),
+    V3(vx, vy - 0.02, 0.028 * sd),
     V3(vx + sweep * 0.25, vy - 0.12 * depth, width * 0.72),
     V3(vx + sweep * 0.55, vy - 0.45 * depth, width),
     V3(vx + sweep * 0.85, vy - 0.82 * depth, width * 0.65),
-    V3(vx + sweep, vy - depth, 0.055 * sd),
+    V3(vx + sweep, vy - depth, 0.052 * sd),
   ];
 }
 
@@ -75,7 +76,7 @@ export function ribArcPoints(idx1to18: number, sd: -1 | 1): THREE.Vector3[] {
 export function forelimbLandmarks(sd: -1 | 1) {
   const z = 0.16 * sd;
   return {
-    scapulaTop: V3(0.30, 1.44, z * 0.90),
+    scapulaTop: V3(0.30, 1.415, 0.106 * sd),
     shoulder: V3(0.535, 1.075, z * 1.04),
     elbow: V3(0.375, 0.845, z * 1.01),
     carpus: V3(0.425, 0.465, z * 0.93),
@@ -94,14 +95,14 @@ export function forelimbLandmarks(sd: -1 | 1) {
 export function hindlimbLandmarks(sd: -1 | 1) {
   const z = 0.175 * sd;
   return {
-    tuberSacrale: V3(-0.77, 1.382, 0.036 * sd),
-    tuberCoxae: V3(-0.715, 1.316, 0.168 * sd),
-    acetabulum: V3(-0.822, 1.152, 0.132 * sd),
-    hip: V3(-0.825, 1.15, 0.162 * sd),
-    tuberIschii: V3(-1.005, 1.132, 0.108 * sd),
+    tuberSacrale: V3(-0.77, 1.380, 0.036 * sd),
+    tuberCoxae: V3(-0.715, 1.308, 0.158 * sd),
+    acetabulum: V3(-0.822, 1.152, 0.128 * sd),
+    hip: V3(-0.825, 1.15, 0.158 * sd),
+    tuberIschii: V3(-0.992, 1.132, 0.098 * sd),
     stifle: V3(-0.67, 0.855, z * 1.04),
     hock: V3(-0.89, 0.51, z * 0.94),
-    calcaneusTip: V3(-0.95, 0.585, z * 0.94),
+    calcaneusTip: V3(-0.945, 0.585, z * 0.94),
     fetlock: V3(-0.845, 0.185, z * 0.91),
     pasternMid: V3(-0.812, 0.105, z * 0.91),
     coronet: V3(-0.79, 0.068, z * 0.91),
@@ -113,10 +114,10 @@ export function hindlimbLandmarks(sd: -1 | 1) {
 export const HEAD = {
   poll: V3(1.02, 1.77, 0),
   cranium: V3(1.13, 1.72, 0),
-  orbitCenter: (sd: -1 | 1) => V3(1.19, 1.69, 0.082 * sd),
-  cheek: (sd: -1 | 1) => V3(1.14, 1.56, 0.075 * sd),
+  orbitCenter: (sd: -1 | 1) => V3(1.19, 1.69, 0.068 * sd),
+  cheek: (sd: -1 | 1) => V3(1.14, 1.56, 0.066 * sd),
   nasalBridge: V3(1.34, 1.56, 0),
   muzzle: V3(1.54, 1.39, 0),
-  jawAngle: (sd: -1 | 1) => V3(1.06, 1.52, 0.068 * sd),
+  jawAngle: (sd: -1 | 1) => V3(1.06, 1.53, 0.058 * sd),
   chin: V3(1.48, 1.31, 0),
 };

@@ -2,6 +2,12 @@ import * as THREE from 'three';
 
 const UP = new THREE.Vector3(0, 1, 0);
 
+function safeComputeTangents(geo: THREE.BufferGeometry): void {
+  if (geo.index && geo.attributes.position && geo.attributes.normal && geo.attributes.uv) {
+    geo.computeTangents();
+  }
+}
+
 export interface AnatomicalStation {
   x: number;
   yCenter: number;
@@ -33,6 +39,16 @@ export interface OrientedCoatStation {
   orbitPocket?: number;
   /** Nostril alar ridge & lip flare (0..1) */
   nostrilFlare?: number;
+  /** Sculpted jugular groove along lower lateral neck (0..1) */
+  jugularGroove?: number;
+  /** Scapular-humeral / triceps muscular contour & girth crease (0..1) */
+  shoulderRelief?: number;
+  /** Crisp equine facial crest ridge & slender naso-maxillary concavity (0..1) */
+  facialCrest?: number;
+  /** Paralumbar fossa hollow & stifle flank fold (0..1) */
+  flankFold?: number;
+  /** Subtle gluteal/biceps femoris groove on croup/hindquarters (0..1) */
+  croupGroove?: number;
 }
 
 export interface SculptedLimbStation {
@@ -124,6 +140,11 @@ function resampleOrientedStations(
       jawBulge: lerpField(s0.jawBulge ?? 0, s1.jawBulge ?? 0, smoothF),
       orbitPocket: lerpField(s0.orbitPocket ?? 0, s1.orbitPocket ?? 0, smoothF),
       nostrilFlare: lerpField(s0.nostrilFlare ?? 0, s1.nostrilFlare ?? 0, smoothF),
+      jugularGroove: lerpField(s0.jugularGroove ?? 0, s1.jugularGroove ?? 0, smoothF),
+      shoulderRelief: lerpField(s0.shoulderRelief ?? 0, s1.shoulderRelief ?? 0, smoothF),
+      facialCrest: lerpField(s0.facialCrest ?? 0, s1.facialCrest ?? 0, smoothF),
+      flankFold: lerpField(s0.flankFold ?? 0, s1.flankFold ?? 0, smoothF),
+      croupGroove: lerpField(s0.croupGroove ?? 0, s1.croupGroove ?? 0, smoothF),
     });
   }
   return out;
@@ -181,6 +202,11 @@ export function createOrientedHalfBodyCoatMesh(
     const jawBulge = st.jawBulge ?? 0;
     const orbitPocket = st.orbitPocket ?? 0;
     const nostrilFlare = st.nostrilFlare ?? 0;
+    const jugularGroove = st.jugularGroove ?? 0;
+    const shoulderRelief = st.shoulderRelief ?? 0;
+    const facialCrest = st.facialCrest ?? 0;
+    const flankFold = st.flankFold ?? 0;
+    const croupGroove = st.croupGroove ?? 0;
 
     for (let c = 0; c <= radialSegs; c++) {
       const uCoord = c / radialSegs;
@@ -196,25 +222,61 @@ export function createOrientedHalfBodyCoatMesh(
 
       // Masseter / cheek jowl bulge around theta = 0.62*PI
       if (jawBulge > 0) {
-        const jowlBell = Math.exp(-Math.pow((uCoord - 0.62) / 0.16, 2));
+        const jowlBell = Math.exp(-Math.pow((uCoord - 0.62) / 0.15, 2));
         zScale += jawBulge * jowlBell;
+      }
+
+      // Crisp equine facial crest ridge (uCoord ~ 0.44) + slender naso-maxillary hollow dorsal to it (uCoord ~ 0.25)
+      if (facialCrest > 0) {
+        const crestBell = Math.exp(-Math.pow((uCoord - 0.44) / 0.07, 2));
+        const hollowBell = Math.exp(-Math.pow((uCoord - 0.25) / 0.085, 2));
+        zScale += facialCrest * (0.14 * crestBell - 0.14 * hollowBell);
       }
 
       // Eye orbital pocket concavity around theta = 0.30*PI + brow ridge at 0.16*PI
       if (orbitPocket > 0) {
-        const orbitBell = Math.exp(-Math.pow((uCoord - 0.30) / 0.085, 2));
+        const orbitBell = Math.exp(-Math.pow((uCoord - 0.30) / 0.08, 2));
         const browBell = Math.exp(-Math.pow((uCoord - 0.15) / 0.075, 2));
-        zScale *= 1 - orbitPocket * 0.25 * orbitBell;
-        zScale += orbitPocket * 0.08 * browBell;
+        zScale *= 1 - orbitPocket * 0.26 * orbitBell;
+        zScale += orbitPocket * 0.09 * browBell;
       }
 
-      // Flared nostril ala & lip contour near muzzle
+      // Sculpted jugular groove furrow along lower lateral neck (uCoord ~ 0.62) + sternocephalicus cord (0.78)
+      if (jugularGroove > 0) {
+        const jugDip = Math.exp(-Math.pow((uCoord - 0.62) / 0.065, 2));
+        const brachioFull = Math.exp(-Math.pow((uCoord - 0.47) / 0.09, 2));
+        const sternoCord = Math.exp(-Math.pow((uCoord - 0.77) / 0.065, 2));
+        zScale += jugularGroove * (-0.11 * jugDip + 0.065 * brachioFull + 0.045 * sternoCord);
+      }
+
+      // Scapular/triceps shoulder muscular contour
+      if (shoulderRelief > 0) {
+        const deltoidBell = Math.exp(-Math.pow((uCoord - 0.50) / 0.14, 2));
+        const girthHollow = Math.exp(-Math.pow((uCoord - 0.70) / 0.08, 2));
+        zScale += shoulderRelief * (0.055 * deltoidBell - 0.045 * girthHollow);
+      }
+
+      // Paralumbar fossa hollow (hunger hollow uCoord ~ 0.33) & lower flank fold (uCoord ~ 0.67)
+      if (flankFold > 0) {
+        const fossaBell = Math.exp(-Math.pow((uCoord - 0.33) / 0.09, 2));
+        const stifleFold = Math.exp(-Math.pow((uCoord - 0.68) / 0.08, 2));
+        zScale += flankFold * (-0.06 * fossaBell + 0.045 * stifleFold);
+      }
+
+      // Subtle gluteal / biceps femoris croup cleft (uCoord ~ 0.46)
+      if (croupGroove > 0) {
+        const croupDip = Math.exp(-Math.pow((uCoord - 0.46) / 0.065, 2));
+        zScale -= croupGroove * 0.045 * croupDip;
+      }
+
+      // Flared nostril ala, nasal philtrum, & parted lip contour near muzzle
       let dShift = 0;
       if (nostrilFlare > 0) {
-        const nostrilBell = Math.exp(-Math.pow((uCoord - 0.36) / 0.14, 2));
-        const lipNotch = Math.exp(-Math.pow((uCoord - 0.72) / 0.06, 2));
-        zScale += nostrilFlare * (0.22 * nostrilBell - 0.12 * lipNotch);
-        dShift -= nostrilFlare * 0.004 * lipNotch;
+        const nostrilBell = Math.exp(-Math.pow((uCoord - 0.36) / 0.13, 2));
+        const lipNotch = Math.exp(-Math.pow((uCoord - 0.72) / 0.055, 2));
+        const upperLipFull = Math.exp(-Math.pow((uCoord - 0.56) / 0.08, 2));
+        zScale += nostrilFlare * (0.24 * nostrilBell + 0.07 * upperLipFull - 0.14 * lipNotch);
+        dShift -= nostrilFlare * 0.005 * lipNotch;
       }
 
       const z = sd * st.halfWidth * sinT * zScale;
@@ -258,6 +320,7 @@ export function createOrientedHalfBodyCoatMesh(
   }
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
@@ -462,6 +525,7 @@ export function createSculptedEquineLimbMesh(
   }
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
@@ -559,6 +623,7 @@ export function createEquineEarPinnaMesh(
   geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
@@ -904,6 +969,7 @@ export function createAnatomicalLongBoneMesh(
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.copy(a).add(b).multiplyScalar(0.5);
@@ -1126,6 +1192,7 @@ export function createBiospheraMuscleMesh(
   geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, sheetMat);
   mesh.castShadow = true;
@@ -1307,6 +1374,7 @@ export function createSculptedMuscleSheetMesh(
   }
   geo.setIndex(indices);
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
 
   const mesh = new THREE.Mesh(geo, sheetMat);
   mesh.castShadow = true;
@@ -1565,23 +1633,30 @@ export function createHoofMesh(
     new THREE.Vector2(0.056, 0.015),
     new THREE.Vector2(0.049, 0.039),
     new THREE.Vector2(0.042, 0.062),
-    new THREE.Vector2(0.0445, 0.068), // sculpted coronary periople band
-    new THREE.Vector2(0.038, 0.074),
+    new THREE.Vector2(0.045, 0.0685), // sculpted coronary periople band
+    new THREE.Vector2(0.0385, 0.074),
     new THREE.Vector2(0, 0.074),
   ];
-  const geo = new THREE.LatheGeometry(pts, 26);
+  const geo = new THREE.LatheGeometry(pts, 30);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const z = pos.getZ(i);
     const toeShift = (0.074 - y) * wallSlope;
-    const heelPinch = x < 0 ? 1 - Math.abs(x) * 2.0 : 1.05;
-    // Slight heel bulb dip caudally so heels angle lower than dorsal coronary line
-    const heelDrop = x < -0.018 && y > 0.055 ? -0.008 * Math.min(1, (-x - 0.018) * 28) : 0;
-    pos.setXYZ(i, x * 1.15 + toeShift, Math.max(0, y + heelDrop), z * 0.94 * Math.max(0.76, heelPinch));
+    const heelPinch = x < 0 ? 1 - Math.abs(x) * 1.9 : 1.05;
+    // Slight heel bulb dip caudally + delicate central frog/heel cleft
+    const heelDrop = x < -0.018 && y > 0.055 ? -0.0085 * Math.min(1, (-x - 0.018) * 28) : 0;
+    const bulbCleft = x < -0.025 && Math.abs(z) < 0.018 ? -0.003 * (1 - Math.abs(z) / 0.018) : 0;
+    pos.setXYZ(
+      i,
+      x * 1.15 + toeShift + bulbCleft,
+      Math.max(0, y + heelDrop),
+      z * 0.94 * Math.max(0.76, heelPinch),
+    );
   }
   geo.computeVertexNormals();
+  safeComputeTangents(geo);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(centerX, 0, centerZ);
   mesh.castShadow = true;

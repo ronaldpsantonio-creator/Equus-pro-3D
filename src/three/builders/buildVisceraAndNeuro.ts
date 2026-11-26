@@ -75,19 +75,19 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
 
     push(
       `equ.res.tra.007-${tag}`,
-      createTubeCurveMesh([V3(0.20, 1.11, 0), V3(0.14, 1.09, 0.09 * sd)], 0.016, tracMat(), 8, 8),
+      createTubeCurveMesh([V3(0.20, 1.11, 0), V3(0.14, 1.09, 0.072 * sd)], 0.015, tracMat(), 8, 8),
       side,
     );
 
     const lungGrp = new THREE.Group();
-    const cardiacNotchInset = sd === -1 ? 0.022 : 0.01;
-    // Cranial (apical) lobe tucked cranial to heart base
+    const cardiacNotchInset = sd === -1 ? 0.016 : 0.008;
+    // Cranial (apical) lobe tucked cranial to heart base and medial to cranial ribs R1-R5
     lungGrp.add(
       createMultiStationLoftTube(
         [
-          { pos: V3(0.50, 1.07, (0.056 + cardiacNotchInset * 0.25) * sd), rx: 0.032, ry: 0.048 },
-          { pos: V3(0.41, 1.08, (0.075 + cardiacNotchInset * 0.6) * sd), rx: 0.048, ry: 0.075 },
-          { pos: V3(0.32, 1.11, (0.092 + cardiacNotchInset * 0.7) * sd), rx: 0.058, ry: 0.095 },
+          { pos: V3(0.50, 1.07, (0.044 + cardiacNotchInset * 0.25) * sd), rx: 0.026, ry: 0.040 },
+          { pos: V3(0.41, 1.08, (0.056 + cardiacNotchInset * 0.5) * sd), rx: 0.038, ry: 0.064 },
+          { pos: V3(0.32, 1.11, (0.068 + cardiacNotchInset * 0.6) * sd), rx: 0.044, ry: 0.082 },
         ],
         lungMat(),
         16,
@@ -96,11 +96,11 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     // Main caudal (diaphragmatic) lobe with rib-arch surface modulation matching thoracic cage
     const caudalLung = createMultiStationLoftTube(
       [
-        { pos: V3(0.36, 1.13, (0.088 + cardiacNotchInset) * sd), rx: 0.056, ry: 0.098 },
-        { pos: V3(0.24, 1.13, 0.114 * sd), rx: 0.074, ry: 0.145 },
-        { pos: V3(0.10, 1.13, 0.124 * sd), rx: 0.078, ry: 0.155 },
-        { pos: V3(-0.04, 1.14, 0.118 * sd), rx: 0.072, ry: 0.142 },
-        { pos: V3(-0.15, 1.16, 0.096 * sd), rx: 0.046, ry: 0.092 },
+        { pos: V3(0.36, 1.13, (0.068 + cardiacNotchInset) * sd), rx: 0.044, ry: 0.086 },
+        { pos: V3(0.24, 1.13, 0.102 * sd), rx: 0.066, ry: 0.132 },
+        { pos: V3(0.10, 1.13, 0.118 * sd), rx: 0.074, ry: 0.148 },
+        { pos: V3(-0.04, 1.14, 0.112 * sd), rx: 0.068, ry: 0.135 },
+        { pos: V3(-0.15, 1.16, 0.092 * sd), rx: 0.044, ry: 0.088 },
       ],
       lungMat(),
       20,
@@ -246,13 +246,13 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
       `equ.car.acc.011-${tag}`,
       createTubeCurveMesh(
         [
-          V3(1.02, 1.61, 0.036 * sd),
-          V3(1.13, 1.47, 0.056 * sd),
-          V3(1.23, 1.52, 0.088 * sd),
-          V3(1.33, 1.56, 0.066 * sd),
-          V3(1.44, 1.53, 0.044 * sd),
+          V3(1.02, 1.61, 0.034 * sd),
+          V3(1.14, 1.495, 0.044 * sd),
+          V3(1.23, 1.535, 0.060 * sd),
+          V3(1.33, 1.56, 0.048 * sd),
+          V3(1.44, 1.53, 0.032 * sd),
         ],
-        0.0042,
+        0.0040,
         artMat(),
         14,
         6,
@@ -263,13 +263,13 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
       `equ.car.vcc.004-${tag}`,
       createTubeCurveMesh(
         [
-          V3(1.02, 1.59, 0.048 * sd),
-          V3(1.14, 1.46, 0.062 * sd),
-          V3(1.24, 1.53, 0.092 * sd),
-          V3(1.31, 1.60, 0.072 * sd),
-          V3(1.42, 1.55, 0.048 * sd),
+          V3(1.02, 1.59, 0.044 * sd),
+          V3(1.145, 1.488, 0.048 * sd),
+          V3(1.24, 1.54, 0.062 * sd),
+          V3(1.31, 1.60, 0.052 * sd),
+          V3(1.42, 1.55, 0.036 * sd),
         ],
-        0.0048,
+        0.0044,
         veinMat(),
         14,
         6,
@@ -438,18 +438,18 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     // Ganglio parotídeo (001) & mandibular (002)
     push(
       `equ.car.lin.001-${tag}`,
-      createOrganMesh(V3(1.045, 1.625, 0.082 * sd), [0.014, 0.022, 0.01], lymphMat(), [0, 0, -0.25], 10),
+      createOrganMesh(V3(1.045, 1.620, 0.062 * sd), [0.013, 0.020, 0.008], lymphMat(), [0, 0, -0.25], 10),
       side,
     );
     push(
       `equ.car.lin.002-${tag}`,
-      createOrganMesh(V3(1.13, 1.495, 0.048 * sd), [0.022, 0.013, 0.012], lymphMat(), [0, 0, 0.2], 10),
+      createOrganMesh(V3(1.13, 1.522, 0.034 * sd), [0.020, 0.012, 0.010], lymphMat(), [0, 0, 0.2], 10),
       side,
     );
     // Ganglio cervical superficial / prescapular (005 — prominent emerald cluster cranial to shoulder!)
     const cervSupGrp = new THREE.Group();
-    cervSupGrp.add(createOrganMesh(V3(0.495, 1.245, 0.168 * sd), [0.018, 0.044, 0.014], lymphMat(), [0, 0, -0.35], 12));
-    cervSupGrp.add(createTubeCurveMesh([V3(0.495, 1.245, 0.168 * sd), V3(0.50, 1.18, 0.04 * sd)], 0.0038, lymphMat(), 8, 5));
+    cervSupGrp.add(createOrganMesh(V3(0.495, 1.245, 0.138 * sd), [0.016, 0.040, 0.012], lymphMat(), [0, 0, -0.35], 12));
+    cervSupGrp.add(createTubeCurveMesh([V3(0.495, 1.245, 0.138 * sd), V3(0.50, 1.18, 0.04 * sd)], 0.0038, lymphMat(), 8, 5));
     push(`equ.car.lin.005-${tag}`, cervSupGrp, side);
 
     // Ganglio axilar (009) + forelimb lymphatic vessels down to cannon/fetlock
@@ -474,8 +474,8 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
 
     // Ganglio subilíaco / prefemoral (036 — visible green cluster cranial to thigh/tensor fasciae latae!)
     const subilGrp = new THREE.Group();
-    subilGrp.add(createOrganMesh(V3(-0.625, 1.12, 0.224 * sd), [0.016, 0.038, 0.014], lymphMat(), [0, 0, 0.25], 10));
-    subilGrp.add(createTubeCurveMesh([V3(-0.625, 1.12, 0.224 * sd), V3(-0.68, 1.20, 0.11 * sd), V3(-0.46, 1.27, 0.012 * sd)], 0.0035, lymphMat(), 12, 6));
+    subilGrp.add(createOrganMesh(V3(-0.625, 1.13, 0.184 * sd), [0.015, 0.036, 0.012], lymphMat(), [0, 0, 0.25], 10));
+    subilGrp.add(createTubeCurveMesh([V3(-0.625, 1.13, 0.184 * sd), V3(-0.68, 1.20, 0.11 * sd), V3(-0.46, 1.27, 0.012 * sd)], 0.0035, lymphMat(), 12, 6));
     push(`equ.car.lin.036-${tag}`, subilGrp, side);
 
     // Ganglio poplíteo (039) + hindlimb draining lymphatic vessels
@@ -504,10 +504,10 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'equ.car.lor.001',
     createMultiStationLoftTube(
       [
-        { pos: V3(-0.42, 1.21, -0.17), rx: 0.018, ry: 0.068 },
-        { pos: V3(-0.34, 1.11, -0.195), rx: 0.016, ry: 0.056 },
-        { pos: V3(-0.24, 0.99, -0.185), rx: 0.012, ry: 0.038 },
-        { pos: V3(-0.18, 0.92, -0.16), rx: 0.008, ry: 0.02 },
+        { pos: V3(-0.42, 1.21, -0.160), rx: 0.016, ry: 0.064 },
+        { pos: V3(-0.34, 1.11, -0.180), rx: 0.015, ry: 0.052 },
+        { pos: V3(-0.24, 0.99, -0.170), rx: 0.012, ry: 0.036 },
+        { pos: V3(-0.18, 0.92, -0.148), rx: 0.008, ry: 0.020 },
       ],
       createTissueMaterial('liver', tex),
       14,
@@ -530,10 +530,10 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'equ.dig.boc.007',
     createMultiStationLoftTube(
       [
-        { pos: V3(1.13, 1.565, 0), rx: 0.026, ry: 0.018 },
-        { pos: V3(1.28, 1.525, 0), rx: 0.024, ry: 0.016 },
-        { pos: V3(1.44, 1.485, 0), rx: 0.018, ry: 0.010 },
-        { pos: V3(1.50, 1.472, 0), rx: 0.011, ry: 0.006 },
+        { pos: V3(1.13, 1.555, 0), rx: 0.024, ry: 0.017 },
+        { pos: V3(1.28, 1.505, 0), rx: 0.021, ry: 0.015 },
+        { pos: V3(1.43, 1.445, 0), rx: 0.015, ry: 0.009 },
+        { pos: V3(1.49, 1.425, 0), rx: 0.009, ry: 0.005 },
       ],
       stoMat(),
       14,
@@ -566,11 +566,11 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
         [-0.016, 0.062],  // caudal border along atlas wing
         [-0.03, 0.0],
       ],
-      0.018,
-      0.005,
+      0.014,
+      0.004,
       salMat(),
     );
-    parotid.position.set(1.03, 1.622, 0.068 * sd);
+    parotid.position.set(1.03, 1.622, 0.056 * sd);
     parotid.rotation.set(0, 0, -0.22);
     push(`equ.dig.boc.009-${tag}`, parotid, side);
 
@@ -578,9 +578,9 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
       `equ.dig.boc.010-${tag}`,
       createMultiStationLoftTube(
         [
-          { pos: V3(1.04, 1.555, 0.038 * sd), rx: 0.012, ry: 0.015 },
-          { pos: V3(1.10, 1.505, 0.038 * sd), rx: 0.014, ry: 0.017 },
-          { pos: V3(1.16, 1.485, 0.034 * sd), rx: 0.010, ry: 0.012 },
+          { pos: V3(1.04, 1.560, 0.036 * sd), rx: 0.012, ry: 0.014 },
+          { pos: V3(1.10, 1.522, 0.034 * sd), rx: 0.014, ry: 0.015 },
+          { pos: V3(1.155, 1.502, 0.030 * sd), rx: 0.010, ry: 0.011 },
         ],
         salMat(),
         10,
@@ -628,11 +628,11 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'equ.dig.cie.001',
     createMultiStationLoftTube(
       [
-        { pos: V3(-0.68, 1.22, 0.135), rx: 0.078, ry: 0.082 }, // Base of cecum (right paralumbar fossa)
-        { pos: V3(-0.56, 1.12, 0.155), rx: 0.074, ry: 0.078 },
-        { pos: V3(-0.42, 0.99, 0.150), rx: 0.068, ry: 0.070 }, // Cecal body
-        { pos: V3(-0.26, 0.89, 0.115), rx: 0.052, ry: 0.054 },
-        { pos: V3(-0.14, 0.85, 0.045), rx: 0.032, ry: 0.032 }, // Apex at sternal xiphoid
+        { pos: V3(-0.66, 1.22, 0.122), rx: 0.068, ry: 0.072 }, // Base of cecum (right paralumbar fossa)
+        { pos: V3(-0.55, 1.13, 0.138), rx: 0.066, ry: 0.070 },
+        { pos: V3(-0.41, 1.01, 0.135), rx: 0.062, ry: 0.064 }, // Cecal body
+        { pos: V3(-0.26, 0.92, 0.105), rx: 0.048, ry: 0.050 },
+        { pos: V3(-0.14, 0.88, 0.042), rx: 0.030, ry: 0.030 }, // Apex at sternal xiphoid
       ],
       cecMat(),
       16,
@@ -647,16 +647,16 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
     'equ.dig.col.001',
     createMultiStationLoftTube(
       [
-        { pos: V3(-0.44, 0.92, 0.085), rx: 0.056, ry: 0.056 },  // Right ventral colon
-        { pos: V3(-0.18, 0.85, 0.085), rx: 0.058, ry: 0.056 },
-        { pos: V3(-0.08, 0.87, 0.0), rx: 0.052, ry: 0.052 },    // Sternal flexure
-        { pos: V3(-0.18, 0.88, -0.095), rx: 0.056, ry: 0.054 }, // Left ventral colon
-        { pos: V3(-0.48, 0.92, -0.125), rx: 0.054, ry: 0.052 },
-        { pos: V3(-0.66, 1.00, -0.095), rx: 0.030, ry: 0.030 }, // Narrow Pelvic Flexure!
-        { pos: V3(-0.52, 1.04, -0.105), rx: 0.042, ry: 0.042 }, // Left dorsal colon
-        { pos: V3(-0.22, 1.02, -0.075), rx: 0.048, ry: 0.048 },
-        { pos: V3(-0.16, 1.00, 0.055), rx: 0.062, ry: 0.062 },  // Diaphragmatic flexure
-        { pos: V3(-0.48, 1.05, 0.065), rx: 0.076, ry: 0.072 },  // Large Right Dorsal Colon ampulla!
+        { pos: V3(-0.44, 0.95, 0.082), rx: 0.052, ry: 0.052 },  // Right ventral colon
+        { pos: V3(-0.18, 0.91, 0.080), rx: 0.052, ry: 0.052 },
+        { pos: V3(-0.08, 0.92, 0.0), rx: 0.048, ry: 0.048 },    // Sternal flexure
+        { pos: V3(-0.18, 0.92, -0.088), rx: 0.052, ry: 0.050 }, // Left ventral colon
+        { pos: V3(-0.48, 0.95, -0.115), rx: 0.050, ry: 0.048 },
+        { pos: V3(-0.65, 1.02, -0.090), rx: 0.028, ry: 0.028 }, // Narrow Pelvic Flexure!
+        { pos: V3(-0.52, 1.06, -0.098), rx: 0.040, ry: 0.040 }, // Left dorsal colon
+        { pos: V3(-0.22, 1.04, -0.072), rx: 0.046, ry: 0.046 },
+        { pos: V3(-0.16, 1.02, 0.052), rx: 0.056, ry: 0.056 },  // Diaphragmatic flexure
+        { pos: V3(-0.48, 1.07, 0.062), rx: 0.068, ry: 0.065 },  // Large Right Dorsal Colon ampulla!
       ],
       colMat(),
       14,
@@ -688,7 +688,7 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
 
   push(
     'equ.dig.rec.001',
-    createTubeCurveMesh([V3(-0.72, 1.22, 0), V3(-0.98, 1.20, 0)], 0.028, colMat(), 10, 10),
+    createTubeCurveMesh([V3(-0.72, 1.22, 0), V3(-0.96, 1.21, 0)], 0.018, colMat(), 10, 10),
     'center',
   );
 
@@ -791,13 +791,13 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
 
     // Nervio trigémino (V), facial (VII) y vago (X)
     const trigGrp = new THREE.Group();
-    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.69, 0.032 * sd), V3(1.22, 1.64, 0.055 * sd), V3(1.38, 1.57, 0.048 * sd), V3(1.50, 1.50, 0.034 * sd)], 0.0036, nerveMat(), 14, 6));
-    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.67, 0.032 * sd), V3(1.18, 1.54, 0.056 * sd), V3(1.38, 1.46, 0.038 * sd)], 0.0034, nerveMat(), 12, 6));
+    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.69, 0.030 * sd), V3(1.22, 1.64, 0.048 * sd), V3(1.38, 1.56, 0.042 * sd), V3(1.47, 1.46, 0.028 * sd)], 0.0036, nerveMat(), 14, 6));
+    trigGrp.add(createTubeCurveMesh([V3(1.10, 1.67, 0.030 * sd), V3(1.18, 1.54, 0.046 * sd), V3(1.38, 1.46, 0.032 * sd)], 0.0034, nerveMat(), 12, 6));
     push(`equ.ner.cra.007-${tag}`, trigGrp, side);
 
     push(
       `equ.ner.cra.048-${tag}`,
-      createTubeCurveMesh([V3(1.06, 1.68, 0.042 * sd), V3(1.12, 1.59, 0.068 * sd), V3(1.25, 1.56, 0.072 * sd), V3(1.41, 1.52, 0.048 * sd)], 0.0038, nerveMat(), 14, 6),
+      createTubeCurveMesh([V3(1.06, 1.68, 0.038 * sd), V3(1.12, 1.59, 0.058 * sd), V3(1.25, 1.56, 0.064 * sd), V3(1.41, 1.52, 0.042 * sd)], 0.0036, nerveMat(), 14, 6),
       side,
     );
     push(
@@ -854,9 +854,9 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   // 6. APARATO REPRODUCTOR (rep — con filtro automático m / f)
   // =========================================================================
   const repMat = () => createTissueMaterial('repro', tex);
-  push('equ.rep.tes.001-i', createOrganMesh(V3(-0.78, 0.85, -0.035), [0.042, 0.03, 0.026], repMat(), undefined, 14), 'left');
-  push('equ.rep.tes.001-d', createOrganMesh(V3(-0.78, 0.85, 0.035), [0.042, 0.03, 0.026], repMat(), undefined, 14), 'right');
-  push('equ.rep.pen.001', createTubeCurveMesh([V3(-0.96, 1.07, 0), V3(-0.80, 0.90, 0), V3(-0.58, 0.86, 0)], 0.022, repMat(), 14, 10), 'center');
+  push('equ.rep.tes.001-i', createOrganMesh(V3(-0.78, 0.985, -0.028), [0.036, 0.024, 0.022], repMat(), undefined, 14), 'left');
+  push('equ.rep.tes.001-d', createOrganMesh(V3(-0.78, 0.985, 0.028), [0.036, 0.024, 0.022], repMat(), undefined, 14), 'right');
+  push('equ.rep.pen.001', createTubeCurveMesh([V3(-0.94, 1.07, 0), V3(-0.78, 0.99, 0), V3(-0.56, 0.94, 0)], 0.016, repMat(), 14, 10), 'center');
 
   push('equ.rep.ova.001-i', createOrganMesh(V3(-0.70, 1.17, -0.09), [0.032, 0.024, 0.022], repMat(), undefined, 12), 'left');
   push('equ.rep.ova.001-d', createOrganMesh(V3(-0.70, 1.17, 0.09), [0.032, 0.024, 0.022], repMat(), undefined, 12), 'right');
@@ -880,8 +880,8 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   push(
     'equ.sen.ocu.001-i',
     createOrganMesh(
-      V3(1.195, 1.695, -0.075),
-      [0.018, 0.021, 0.022],
+      V3(1.195, 1.695, -0.058),
+      [0.016, 0.018, 0.015],
       eyeMat(),
       [0, Math.PI / 2 - 0.26, 0.06],
       20,
@@ -891,8 +891,8 @@ export function buildVisceraAndNeuroParts(tex: ProceduralTextureSet): BuiltPart[
   push(
     'equ.sen.ocu.001-d',
     createOrganMesh(
-      V3(1.195, 1.695, 0.075),
-      [0.018, 0.021, 0.022],
+      V3(1.195, 1.695, 0.058),
+      [0.016, 0.018, 0.015],
       eyeMat(),
       [0, -Math.PI / 2 + 0.26, 0.06],
       20,

@@ -4,6 +4,7 @@ export interface ProceduralTextureSet {
   coatColor: THREE.CanvasTexture;
   coatBump: THREE.CanvasTexture;
   coatNormal: THREE.CanvasTexture;
+  coatRoughness: THREE.CanvasTexture;
   muscleColor: THREE.CanvasTexture;
   muscleBump: THREE.CanvasTexture;
   muscleNormal: THREE.CanvasTexture;
@@ -107,9 +108,10 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   const aniso = Math.min(maxAnisotropy || 1, 8);
   const rand = mulberry32(14092026);
 
-  // 1. Living equine warm bay coat texture (1024x1024 fine short-hair coat + dappled warmth + normal)
+  // 1. Living equine warm bay coat texture (1024x1024 fine short-hair coat + dappled warmth + roughness + normal)
   const [coatC, coatCtx] = makeCanvas(1024, 1024);
   const [coatBC, coatBCtx] = makeCanvas(1024, 1024);
+  const [coatRC, coatRCtx] = makeCanvas(512, 512);
 
   coatCtx.fillStyle = '#8b4929';
   coatCtx.fillRect(0, 0, 1024, 1024);
@@ -117,34 +119,46 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   coatBCtx.fillStyle = '#808080';
   coatBCtx.fillRect(0, 0, 1024, 1024);
 
-  // Soft organic dapples & subcutaneous warmth
-  for (let i = 0; i < 160; i++) {
+  coatRCtx.fillStyle = '#8c8c8c';
+  coatRCtx.fillRect(0, 0, 512, 512);
+
+  // Soft organic bay dapples & subcutaneous warmth
+  for (let i = 0; i < 190; i++) {
     const dx = rand() * 1024;
     const dy = rand() * 1024;
-    const dr = 22 + rand() * 44;
+    const dr = 20 + rand() * 46;
     const g = coatCtx.createRadialGradient(dx, dy, 3, dx, dy, dr);
-    g.addColorStop(0, i % 2 === 0 ? 'rgba(182, 108, 62, 0.085)' : 'rgba(64, 28, 14, 0.08)');
+    g.addColorStop(0, i % 2 === 0 ? 'rgba(186, 110, 62, 0.095)' : 'rgba(62, 27, 13, 0.085)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     coatCtx.fillStyle = g;
     coatCtx.beginPath();
     coatCtx.arc(dx, dy, dr, 0, Math.PI * 2);
     coatCtx.fill();
+
+    // Subtle sheen variation across coat dapples
+    const rg = coatRCtx.createRadialGradient(dx * 0.5, dy * 0.5, 2, dx * 0.5, dy * 0.5, dr * 0.5);
+    rg.addColorStop(0, i % 2 === 0 ? 'rgba(110, 110, 110, 0.14)' : 'rgba(162, 162, 162, 0.14)');
+    rg.addColorStop(1, 'rgba(0,0,0,0)');
+    coatRCtx.fillStyle = rg;
+    coatRCtx.beginPath();
+    coatRCtx.arc(dx * 0.5, dy * 0.5, dr * 0.5, 0, Math.PI * 2);
+    coatRCtx.fill();
   }
 
-  // Ultra-fine directional equine short coat hairs (wrapped horizontally & vertically for seamless tiling)
-  for (let i = 0; i < 38000; i++) {
+  // Ultra-fine directional equine short coat hairs
+  for (let i = 0; i < 46000; i++) {
     const x = rand() * 1024;
     const y = rand() * 1024;
-    const len = 5 + rand() * 11;
-    const dy = (rand() - 0.35) * 2.0;
+    const len = 4.5 + rand() * 10.5;
+    const dy = (rand() - 0.35) * 1.9;
     const tone = rand();
     const strokeCol =
       tone < 0.3
-        ? 'rgba(46, 20, 10, 0.14)'
+        ? 'rgba(44, 19, 9, 0.15)'
         : tone < 0.72
-          ? 'rgba(198, 124, 74, 0.11)'
-          : 'rgba(228, 166, 114, 0.075)';
-    const w = 0.7 + rand() * 0.55;
+          ? 'rgba(202, 126, 76, 0.115)'
+          : 'rgba(232, 170, 118, 0.08)';
+    const w = 0.65 + rand() * 0.5;
 
     coatCtx.strokeStyle = strokeCol;
     coatCtx.lineWidth = w;
@@ -153,8 +167,8 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatCtx.lineTo(x + len, y + dy);
     coatCtx.stroke();
 
-    const bv = tone < 0.48 ? 104 : 154;
-    coatBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.40)`;
+    const bv = tone < 0.48 ? 100 : 158;
+    coatBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.42)`;
     coatBCtx.lineWidth = w;
     coatBCtx.beginPath();
     coatBCtx.moveTo(x, y);
@@ -162,20 +176,35 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatBCtx.stroke();
   }
 
+  for (let i = 0; i < 6500; i++) {
+    const x = rand() * 512;
+    const y = rand() * 512;
+    const rv = rand() > 0.5 ? 122 : 158;
+    coatRCtx.fillStyle = `rgba(${rv},${rv},${rv},0.28)`;
+    coatRCtx.fillRect(x, y, 3 + rand() * 5, 1);
+  }
+
   const coatColor = new THREE.CanvasTexture(coatC);
   coatColor.colorSpace = THREE.SRGBColorSpace;
   coatColor.wrapS = THREE.RepeatWrapping;
   coatColor.wrapT = THREE.RepeatWrapping;
-  coatColor.repeat.set(3.2, 3.2);
+  coatColor.repeat.set(3.4, 3.4);
   coatColor.anisotropy = aniso;
 
   const coatBump = new THREE.CanvasTexture(coatBC);
   coatBump.wrapS = THREE.RepeatWrapping;
   coatBump.wrapT = THREE.RepeatWrapping;
-  coatBump.repeat.set(3.2, 3.2);
+  coatBump.repeat.set(3.4, 3.4);
   coatBump.anisotropy = aniso;
 
-  const coatNormal = bumpCanvasToNormalTexture(coatBC, 1.15, [3.2, 3.2], false, aniso);
+  const coatNormal = bumpCanvasToNormalTexture(coatBC, 1.24, [3.4, 3.4], false, aniso);
+
+  const coatRoughness = new THREE.CanvasTexture(coatRC);
+  coatRoughness.colorSpace = THREE.NoColorSpace;
+  coatRoughness.wrapS = THREE.RepeatWrapping;
+  coatRoughness.wrapT = THREE.RepeatWrapping;
+  coatRoughness.repeat.set(3.4, 3.4);
+  coatRoughness.anisotropy = aniso;
 
   // 2. Longitudinal striated skeletal muscle fascicles (512x512 neutral-bright striation + bump + crisp normal along UV.y)
   const [musC, musCtx] = makeCanvas(512, 512);
@@ -244,26 +273,26 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
 
   const muscleNormal = bumpCanvasToNormalTexture(musBC, 2.25, [2.4, 1.8], false, aniso);
 
-  // 3. Cortical periosteum bone texture (512x512 color + micro-pore bump + normal)
+  // 3. Cortical periosteum bone texture (512x512 osteological mineral warmth + Haversian micro-grain + normal)
   const [boneC, boneCtx] = makeCanvas(512, 512);
   const [boneBC, boneBCtx] = makeCanvas(512, 512);
-  boneCtx.fillStyle = '#eee6d4';
+  boneCtx.fillStyle = '#ede3ce';
   boneCtx.fillRect(0, 0, 512, 512);
   boneBCtx.fillStyle = '#808080';
   boneBCtx.fillRect(0, 0, 512, 512);
 
-  for (let i = 0; i < 4800; i++) {
+  for (let i = 0; i < 6400; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    const w = 2 + rand() * 10;
-    const h = 1 + rand() * 2;
+    const w = 1.5 + rand() * 11;
+    const h = 0.8 + rand() * 1.8;
     boneCtx.fillStyle =
-      i % 3 === 0 ? 'rgba(164, 146, 114, 0.14)' : 'rgba(255, 252, 242, 0.18)';
+      i % 3 === 0 ? 'rgba(156, 136, 102, 0.16)' : 'rgba(255, 251, 240, 0.20)';
     boneCtx.fillRect(x, y, w, h);
 
-    const bv = i % 3 === 0 ? 106 : 148;
+    const bv = i % 3 === 0 ? 102 : 152;
     boneBCtx.fillStyle = `rgb(${bv},${bv},${bv})`;
-    boneBCtx.fillRect(x, y, w * 0.7, h);
+    boneBCtx.fillRect(x, y, w * 0.75, h);
   }
   const boneColor = new THREE.CanvasTexture(boneC);
   boneColor.colorSpace = THREE.SRGBColorSpace;
@@ -276,7 +305,7 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   boneBump.wrapT = THREE.RepeatWrapping;
   boneBump.anisotropy = aniso;
 
-  const boneNormal = bumpCanvasToNormalTexture(boneBC, 1.05, [1, 1], false, aniso);
+  const boneNormal = bumpCanvasToNormalTexture(boneBC, 1.18, [1.5, 1.5], false, aniso);
 
   const [boneRC, boneRCtx] = makeCanvas(256, 256);
   boneRCtx.fillStyle = '#9a9a9a';
@@ -294,14 +323,15 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   boneRoughness.wrapT = THREE.RepeatWrapping;
   boneRoughness.anisotropy = aniso;
 
-  // 4. Equine keratin hoof wall texture (512x512 vertical horn tubules + periople + growth rings)
+  // 4. Equine keratin hoof wall texture (512x512 vertical horn tubules + pale coronary periople + growth rings)
   const [hoofC, hoofCtx] = makeCanvas(512, 512);
   const [hoofBC, hoofBCtx] = makeCanvas(512, 512);
   const hoofGrad = hoofCtx.createLinearGradient(0, 0, 0, 512);
-  hoofGrad.addColorStop(0, '#62564a');
-  hoofGrad.addColorStop(0.14, '#4e443b');
-  hoofGrad.addColorStop(0.65, '#352e28');
-  hoofGrad.addColorStop(1, '#241f1a');
+  hoofGrad.addColorStop(0, '#786b5e');
+  hoofGrad.addColorStop(0.10, '#5a4e43');
+  hoofGrad.addColorStop(0.35, '#433a32');
+  hoofGrad.addColorStop(0.75, '#2f2924');
+  hoofGrad.addColorStop(1, '#201c18');
   hoofCtx.fillStyle = hoofGrad;
   hoofCtx.fillRect(0, 0, 512, 512);
   hoofBCtx.fillStyle = '#808080';
@@ -468,6 +498,7 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatColor,
     coatBump,
     coatNormal,
+    coatRoughness,
     muscleColor,
     muscleBump,
     muscleNormal,
@@ -488,6 +519,7 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
       coatColor.dispose();
       coatBump.dispose();
       coatNormal.dispose();
+      coatRoughness.dispose();
       muscleColor.dispose();
       muscleBump.dispose();
       muscleNormal.dispose();
