@@ -325,7 +325,11 @@ const REGION_RULES: Record<
   },
   'equ.ske.hyo': () => ['equ.ske.cra.017', 'equ.ske.cra.008'],
   'equ.ske.cau': () => ['equ.ske.cau.018', 'equ.ske.cau.015'],
-  'equ.ske.aax': () => ['equ.ske.aax.002', 'equ.ske.aax.001'],
+  'equ.ske.aax': (t) => {
+    if (/sacroil/.test(t)) return ['equ.ske.aax.010'];
+    if (/s[ií]nfisis|pelv/.test(t)) return ['equ.ske.aax.011'];
+    return ['equ.ske.aax.002', 'equ.ske.aax.001'];
+  },
   'equ.ske.amp': (t) => {
     if (/tars|corvej/.test(t)) return ['equ.ske.amp.007', 'equ.ske.amp.008'];
     if (/tibioperon|femorotib|femoropatel|rodilla/.test(t)) return ['equ.ske.amp.002', 'equ.ske.amp.003'];
@@ -337,7 +341,9 @@ const REGION_RULES: Record<
     return ['equ.ske.amt.004', 'equ.ske.amt.008'];
   },
   'equ.ske.lax': (t) => {
-    if (/sacroil/.test(t)) return ['equ.ske.lax.009', 'equ.ske.lax.011'];
+    if (/sacrotub/.test(t)) return ['equ.ske.lax.011'];
+    if (/sacroil.*ventral/.test(t)) return ['equ.ske.lax.010', 'equ.ske.lax.009'];
+    if (/sacroil/.test(t)) return ['equ.ske.lax.009', 'equ.ske.lax.010', 'equ.ske.lax.011'];
     if (/nucal/.test(t)) return ['equ.ske.lax.001', 'equ.ske.lax.002'];
     if (/longitudinal/.test(t)) return ['equ.ske.lax.004'];
     return ['equ.ske.lax.003', 'equ.ske.lax.004'];

@@ -1732,3 +1732,469 @@ export function createEquineVertebraMesh(
   void halfLen;
   return g;
 }
+
+export interface EquineCoxalLandmarks {
+  tuberSacrale: THREE.Vector3;
+  tuberCoxae: THREE.Vector3;
+  acetabulum: THREE.Vector3;
+  tuberIschii: THREE.Vector3;
+  pubicPecten: THREE.Vector3;
+  ischialArch: THREE.Vector3;
+  ischiaticSpine: THREE.Vector3;
+}
+
+/**
+ * Helper to build a closed, outward-normal-verified thick curved plate from a
+ * (R+1) x (C+1) grid of center points `pts`, unit normals `norms`, and thickness `thick`.
+ */
+function buildClosedThickGridMesh(
+  pts: THREE.Vector3[][],
+  norms: THREE.Vector3[][],
+  thick: number[][],
+  mat: THREE.Material,
+): THREE.Mesh {
+  const rows = pts.length;
+  const cols = pts[0].length;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+
+  // Layer 0: +norm (outer), Layer 1: -norm (inner)
+  for (let layer = 0; layer < 2; layer++) {
+    const sign = layer === 0 ? 1 : -1;
+    for (let r = 0; r < rows; r++) {
+      const u = r / (rows - 1);
+      for (let c = 0; c < cols; c++) {
+        const v = c / (cols - 1);
+        const edgeEnv = Math.sin(u * Math.PI) * Math.sin(v * Math.PI);
+        const halfT = thick[r][c] * (0.28 + 0.72 * Math.pow(Math.max(0, edgeEnv), 0.35));
+        const p = pts[r][c].clone().addScaledVector(norms[r][c], sign * halfT);
+        positions.push(p.x, p.y, p.z);
+        uvs.push(u, v);
+      }
+    }
+  }
+
+  const getP = (idx: number) =>
+    new THREE.Vector3(positions[idx * 3], positions[idx * 3 + 1], positions[idx * 3 + 2]);
+
+  const pushOrientedTri = (i0: number, i1: number, i2: number, desiredDir: THREE.Vector3) => {
+    const a = getP(i0);
+    const b = getP(i1);
+    const c = getP(i2);
+    const triN = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a));
+    if (triN.dot(desiredDir) >= 0) {
+      indices.push(i0, i1, i2);
+    } else {
+      indices.push(i0, i2, i1);
+    }
+  };
+
+  const layerStride = rows * cols;
+  for (let layer = 0; layer < 2; layer++) {
+    const offset = layer * layerStride;
+    const sign = layer === 0 ? 1 : -1;
+    for (let r = 0; r < rows - 1; r++) {
+      for (let c = 0; c < cols - 1; c++) {
+        const a = offset + r * cols + c;
+        const b = a + 1;
+        const d = offset + (r + 1) * cols + c;
+        const e = d + 1;
+        const nRef = norms[r][c].clone().multiplyScalar(sign);
+        pushOrientedTri(a, b, d, nRef);
+        pushOrientedTri(b, e, d, nRef);
+      }
+    }
+  }
+
+  // Stitch perimeter rims so mesh is watertight
+  const stitchEdge = (edgeList: Array<[number, number]>) => {
+    for (let k = 0; k < edgeList.length - 1; k++) {
+      const [r0, c0] = edgeList[k];
+      const [r1, c1] = edgeList[k + 1];
+      const o0 = r0 * cols + c0;
+      const o1 = r1 * cols + c1;
+      const i0 = layerStride + o0;
+      const i1 = layerStride + o1;
+      const mid = pts[r0][c0].clone().add(pts[r1][c1]).multiplyScalar(0.5);
+      const center = pts[Math.floor(rows / 2)][Math.floor(cols / 2)];
+      const outDir = mid.sub(center);
+      if (outDir.lengthSq() < 1e-8) outDir.set(0, 1, 0);
+      pushOrientedTri(o0, o1, i0, outDir);
+      pushOrientedTri(o1, i1, i0, outDir);
+    }
+  };
+
+  const topEdge: Array<[number, number]> = [];
+  const botEdge: Array<[number, number]> = [];
+  for (let c = 0; c < cols; c++) topEdge.push([0, c]);
+  for (let c = 0; c < cols; c++) botEdge.push([rows - 1, c]);
+  const leftEdge: Array<[number, number]> = [];
+  const rightEdge: Array<[number, number]> = [];
+  for (let r = 0; r < rows; r++) leftEdge.push([r, 0]);
+  for (let r = 0; r < rows; r++) rightEdge.push([r, cols - 1]);
+
+  stitchEdge(topEdge);
+  stitchEdge(botEdge);
+  stitchEdge(leftEdge);
+  stitchEdge(rightEdge);
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+/**
+ * Builds a true 3D anatomical equine Os coxae (Ilium wing + Iliac shaft + Ischiatic spine +
+ * concave notched Acetabulum + Pubic & Ischial rami framing an open Obturator Foramen +
+ * Ischial table & Tuber ischii) seated cleanly inside the gluteal/thigh muscular envelope.
+ */
+export function createEquineCoxalMesh(
+  sd: -1 | 1,
+  lm: EquineCoxalLandmarks,
+  boneMat: THREE.Material,
+  darkBoneMat: THREE.Material,
+): THREE.Group {
+  const g = new THREE.Group();
+
+  // --- 1. ILIUM WING (Ala ossis ilii): curved 3D blade from Tuber sacrale -> Tuber coxae -> Iliac neck ---
+  const neckPoint = lm.tuberSacrale
+    .clone()
+    .lerp(lm.tuberCoxae, 0.48)
+    .lerp(lm.acetabulum, 0.42)
+    .add(new THREE.Vector3(-0.01, 0.005, 0));
+
+  const uSegs = 12; // mediolateral: 0 = tuber sacrale, 1 = tuber coxae
+  const vSegs = 8;  // craniocaudal: 0 = iliac crest, 1 = greater ischiatic notch / caudal wing
+  const wingPts: THREE.Vector3[][] = [];
+  const wingNorms: THREE.Vector3[][] = [];
+  const wingThick: number[][] = [];
+
+  for (let r = 0; r <= uSegs; r++) {
+    const u = r / uSegs;
+    const rowPts: THREE.Vector3[] = [];
+    const rowNorms: THREE.Vector3[] = [];
+    const rowThick: number[] = [];
+
+    // Cranial crest edge sweeps gently forward between tuber sacrale and tuber coxae
+    const crestCenter = lm.tuberSacrale.clone().lerp(lm.tuberCoxae, u);
+    crestCenter.x += Math.sin(u * Math.PI) * 0.024;
+    crestCenter.y += Math.sin(u * Math.PI) * 0.012;
+
+    // Caudal wing border tapers inward toward the iliac neck in the middle (u ~ 0.48)
+    const caudalMed = lm.tuberSacrale.clone().add(new THREE.Vector3(-0.048, -0.042, 0.012 * sd));
+    const caudalLat = lm.tuberCoxae.clone().add(new THREE.Vector3(-0.036, -0.042, -0.004 * sd));
+    const caudalBase = caudalMed.clone().lerp(caudalLat, u);
+    const neckPull = Math.exp(-Math.pow((u - 0.5) / 0.34, 2));
+    const caudalEdge = caudalBase.clone().lerp(neckPoint, neckPull * 0.82);
+
+    for (let c = 0; c <= vSegs; c++) {
+      const v = c / vSegs;
+      const p = crestCenter.clone().lerp(caudalEdge, v);
+      // Gentle dorsal gluteal concavity in the center of the wing
+      const glutealConcavity = Math.sin(u * Math.PI) * Math.sin(v * Math.PI) * 0.009;
+      p.y -= glutealConcavity * 0.65;
+      p.z -= glutealConcavity * 0.45 * sd;
+      rowPts.push(p);
+
+      // Thickest at tuber sacrale (u~0), tuber coxae (u~1), and iliac neck
+      const tubFactor = Math.max(Math.pow(1 - u, 2.2), Math.pow(u, 2.2));
+      rowThick.push(0.0065 + 0.006 * tubFactor + 0.003 * neckPull * v);
+    }
+    wingPts.push(rowPts);
+    wingNorms.push(rowNorms);
+    wingThick.push(rowThick);
+  }
+
+  for (let r = 0; r <= uSegs; r++) {
+    for (let c = 0; c <= vSegs; c++) {
+      const r0 = Math.max(0, r - 1);
+      const r1 = Math.min(uSegs, r + 1);
+      const c0 = Math.max(0, c - 1);
+      const c1 = Math.min(vSegs, c + 1);
+      const dU = new THREE.Vector3().subVectors(wingPts[r1][c], wingPts[r0][c]);
+      const dV = new THREE.Vector3().subVectors(wingPts[r][c1], wingPts[r][c0]);
+      const n = new THREE.Vector3().crossVectors(dU, dV);
+      if (n.lengthSq() < 1e-8) n.set(0, 1, 0.3 * sd);
+      n.normalize();
+      if (n.y < 0) n.negate(); // outer gluteal face always points dorsally/craniodorsally
+      wingNorms[r][c] = n;
+    }
+  }
+  g.add(buildClosedThickGridMesh(wingPts, wingNorms, wingThick, boneMat));
+
+  // Sculpted tuberosity caps at Tuber sacrale, Tuber coxae, and Iliac crest ridge
+  g.add(
+    createOrganMesh(
+      lm.tuberSacrale.clone().add(new THREE.Vector3(-0.01, -0.006, 0.003 * sd)),
+      [0.026, 0.016, 0.013],
+      darkBoneMat,
+      [0, 0, 0.35],
+      10,
+    ),
+  );
+  g.add(
+    createOrganMesh(
+      lm.tuberCoxae.clone().add(new THREE.Vector3(-0.004, -0.004, -0.002 * sd)),
+      [0.028, 0.026, 0.014],
+      darkBoneMat,
+      [0.25 * sd, 0.25 * sd, -0.3],
+      10,
+    ),
+  );
+
+  // --- 2. ILIAC SHAFT (Corpus ossis ilii) & ISCHIATIC SPINE (Spina ischiadica) ---
+  g.add(
+    createMultiStationLoftTube(
+      [
+        { pos: neckPoint.clone().add(new THREE.Vector3(0.012, 0.022, -0.004 * sd)), rx: 0.016, ry: 0.024 },
+        { pos: neckPoint.clone().lerp(lm.acetabulum, 0.42), rx: 0.014, ry: 0.018 },
+        { pos: neckPoint.clone().lerp(lm.acetabulum, 0.82).add(new THREE.Vector3(0.006, 0.006, 0)), rx: 0.017, ry: 0.022 },
+        { pos: lm.acetabulum.clone().add(new THREE.Vector3(0.012, 0.014, -0.006 * sd)), rx: 0.018, ry: 0.022 },
+      ],
+      boneMat,
+      12,
+    ),
+  );
+  // Ischiatic spine dorsal crest above acetabulum & greater/lesser ischiatic notches
+  g.add(
+    createMultiStationLoftTube(
+      [
+        { pos: lm.acetabulum.clone().add(new THREE.Vector3(0.018, 0.026, -0.018 * sd)), rx: 0.008, ry: 0.011 },
+        { pos: lm.ischiaticSpine, rx: 0.01, ry: 0.016 },
+        { pos: lm.ischiaticSpine.clone().lerp(lm.tuberIschii, 0.45).add(new THREE.Vector3(0, 0.008, 0)), rx: 0.009, ry: 0.012 },
+      ],
+      darkBoneMat,
+      10,
+    ),
+  );
+
+  // --- 3. CONCAVE ACETABULUM CUP WITH VENTRAL ACETABULAR NOTCH ---
+  const outAxis = new THREE.Vector3(0.14, -0.28, 0.95 * sd).normalize();
+  const refV = new THREE.Vector3(0, -1, 0); // ventral direction so phi = 0 is ventral notch
+  const e2 = new THREE.Vector3().crossVectors(outAxis, refV).normalize();
+  const e1 = new THREE.Vector3().crossVectors(e2, outAxis).normalize(); // roughly ventral inside plane perpendicular to outAxis
+
+  const innerR = 0.0255;
+  const outerR = 0.0355;
+  const notchHalf = 0.38; // ventral acetabular notch (~44 deg)
+  const phiStart = notchHalf;
+  const phiEnd = Math.PI * 2 - notchHalf;
+  const phiSegs = 20;
+  const thetaSegs = 6;
+
+  // Profile loop around cup cross-section: inner pole -> inner rim -> outer rim -> outer pole
+  const profile: Array<{ r: number; d: number }> = [];
+  for (let i = 0; i <= thetaSegs; i++) {
+    const a = (i / thetaSegs) * (Math.PI * 0.52);
+    profile.push({ r: Math.sin(a) * innerR, d: (1 - Math.cos(a)) * innerR - 0.012 });
+  }
+  for (let i = thetaSegs; i >= 0; i--) {
+    const a = (i / thetaSegs) * (Math.PI * 0.52);
+    profile.push({ r: Math.sin(a) * outerR, d: (1 - Math.cos(a)) * outerR - 0.020 });
+  }
+  const pCols = profile.length;
+  const aPos: number[] = [];
+  const aUvs: number[] = [];
+  const aIdx: number[] = [];
+
+  for (let j = 0; j <= phiSegs; j++) {
+    const u = j / phiSegs;
+    const phi = phiStart + u * (phiEnd - phiStart);
+    const radDir = e1.clone().multiplyScalar(Math.cos(phi)).addScaledVector(e2, Math.sin(phi));
+    for (let k = 0; k < pCols; k++) {
+      const pr = profile[k];
+      const pt = lm.acetabulum
+        .clone()
+        .addScaledVector(radDir, pr.r)
+        .addScaledVector(outAxis, pr.d);
+      aPos.push(pt.x, pt.y, pt.z);
+      aUvs.push(u, k / (pCols - 1));
+    }
+  }
+  for (let j = 0; j < phiSegs; j++) {
+    for (let k = 0; k < pCols - 1; k++) {
+      const a = j * pCols + k;
+      const b = a + 1;
+      const d = (j + 1) * pCols + k;
+      const e = d + 1;
+      aIdx.push(a, d, b, b, d, e);
+    }
+  }
+  const aGeo = new THREE.BufferGeometry();
+  aGeo.setAttribute('position', new THREE.Float32BufferAttribute(aPos, 3));
+  aGeo.setAttribute('uv', new THREE.Float32BufferAttribute(aUvs, 2));
+  aGeo.setIndex(aIdx);
+  aGeo.computeVertexNormals();
+  const acetMesh = new THREE.Mesh(aGeo, darkBoneMat);
+  acetMesh.castShadow = true;
+  acetMesh.receiveShadow = true;
+  g.add(acetMesh);
+
+  // --- 4. PUBIS & ISCHIUM PELVIC FLOOR RING (framing real Obturator Foramen + Pelvic Symphysis) ---
+  const acetCranialVentral = lm.acetabulum.clone().add(new THREE.Vector3(0.014, -0.018, -0.014 * sd));
+  const acetCaudalVentral = lm.acetabulum.clone().add(new THREE.Vector3(-0.018, -0.016, -0.012 * sd));
+  const symphysisMid = lm.pubicPecten.clone().lerp(lm.ischialArch, 0.52).add(new THREE.Vector3(0, -0.004, 0));
+
+  // Cranial pubic ramus (acetabulum -> midline pubic pecten)
+  g.add(
+    createMultiStationLoftTube(
+      [
+        { pos: acetCranialVentral, rx: 0.014, ry: 0.012 },
+        { pos: acetCranialVentral.clone().lerp(lm.pubicPecten, 0.45).add(new THREE.Vector3(0.004, 0.002, 0)), rx: 0.014, ry: 0.01 },
+        { pos: lm.pubicPecten, rx: 0.015, ry: 0.011 },
+      ],
+      boneMat,
+      10,
+    ),
+  );
+
+  // Symphyseal ramus (pubic pecten -> ischial arch along z ~ 0)
+  g.add(
+    createMultiStationLoftTube(
+      [
+        { pos: lm.pubicPecten, rx: 0.013, ry: 0.01 },
+        { pos: symphysisMid, rx: 0.013, ry: 0.01 },
+        { pos: lm.ischialArch, rx: 0.014, ry: 0.011 },
+      ],
+      boneMat,
+      10,
+    ),
+  );
+
+  // Lateral ischial body (acetabulum -> tuber ischii)
+  const ischLateralMid = acetCaudalVentral.clone().lerp(lm.tuberIschii, 0.52).add(new THREE.Vector3(0, 0.004, -0.004 * sd));
+  g.add(
+    createMultiStationLoftTube(
+      [
+        { pos: acetCaudalVentral, rx: 0.015, ry: 0.013 },
+        { pos: ischLateralMid, rx: 0.014, ry: 0.014 },
+        { pos: lm.tuberIschii, rx: 0.018, ry: 0.016 },
+      ],
+      boneMat,
+      10,
+    ),
+  );
+
+  // Broad caudal Ischial Table (Tabula ossis ischii) connecting ischial arch to tuber ischii,
+  // leaving the cranial pelvic floor open as the Obturator Foramen!
+  const tRows = 6;
+  const tCols = 8;
+  const tabPts: THREE.Vector3[][] = [];
+  const tabNorms: THREE.Vector3[][] = [];
+  const tabThick: number[][] = [];
+  const medObturatorCaudal = symphysisMid.clone().lerp(lm.ischialArch, 0.6);
+  const latObturatorCaudal = ischLateralMid.clone().lerp(lm.tuberIschii, 0.42);
+  for (let r = 0; r <= tRows; r++) {
+    const u = r / tRows; // 0 = medial symphysis, 1 = lateral ischium border
+    const cranEdge = medObturatorCaudal.clone().lerp(latObturatorCaudal, u);
+    const caudEdge = lm.ischialArch.clone().lerp(lm.tuberIschii, u);
+    caudEdge.x += Math.sin(u * Math.PI) * 0.012; // concave caudal ischial arch!
+    const rPts: THREE.Vector3[] = [];
+    const rNorms: THREE.Vector3[] = [];
+    const rThick: number[] = [];
+    for (let c = 0; c <= tCols; c++) {
+      const v = c / tCols;
+      rPts.push(cranEdge.clone().lerp(caudEdge, v));
+      rThick.push(0.0065 + 0.003 * u * v);
+    }
+    tabPts.push(rPts);
+    tabNorms.push(rNorms);
+    tabThick.push(rThick);
+  }
+  for (let r = 0; r <= tRows; r++) {
+    for (let c = 0; c <= tCols; c++) {
+      const r0 = Math.max(0, r - 1);
+      const r1 = Math.min(tRows, r + 1);
+      const c0 = Math.max(0, c - 1);
+      const c1 = Math.min(tCols, c + 1);
+      const dU = new THREE.Vector3().subVectors(tabPts[r1][c], tabPts[r0][c]);
+      const dV = new THREE.Vector3().subVectors(tabPts[r][c1], tabPts[r][c0]);
+      const n = new THREE.Vector3().crossVectors(dU, dV);
+      if (n.lengthSq() < 1e-8) n.set(0, 1, 0);
+      n.normalize();
+      if (n.y < 0) n.negate();
+      tabNorms[r][c] = n;
+    }
+  }
+  g.add(buildClosedThickGridMesh(tabPts, tabNorms, tabThick, boneMat));
+
+  // Tuber ischii cortical cap
+  g.add(
+    createOrganMesh(
+      lm.tuberIschii.clone().add(new THREE.Vector3(-0.005, 0.002, 0.002 * sd)),
+      [0.022, 0.02, 0.016],
+      darkBoneMat,
+      [0, -0.3 * sd, 0.25],
+      10,
+    ),
+  );
+
+  return g;
+}
+
+/**
+ * Builds a broad, anatomically curved ligamentous sheet (e.g. Broad Sacrotuberous Ligament)
+ * spanning smoothly between a dorsal curve and a ventral curve with subtle lateral bow.
+ */
+export function createCurvedLigamentSheetMesh(
+  dorsalPoints: THREE.Vector3[],
+  ventralPoints: THREE.Vector3[],
+  sd: -1 | 1,
+  mat: THREE.Material,
+  lateralBow = 0.016,
+  halfThickness = 0.0035,
+  uSegs = 14,
+  vSegs = 8,
+): THREE.Mesh {
+  const cTop = new THREE.CatmullRomCurve3(dorsalPoints);
+  const cBot = new THREE.CatmullRomCurve3(ventralPoints);
+  const pts: THREE.Vector3[][] = [];
+  const norms: THREE.Vector3[][] = [];
+  const thick: number[][] = [];
+
+  for (let r = 0; r <= uSegs; r++) {
+    const u = r / uSegs;
+    const pTop = cTop.getPointAt(u);
+    const pBot = cBot.getPointAt(u);
+    const rPts: THREE.Vector3[] = [];
+    const rNorms: THREE.Vector3[] = [];
+    const rThick: number[] = [];
+    for (let c = 0; c <= vSegs; c++) {
+      const v = c / vSegs;
+      const p = pTop.clone().lerp(pBot, v);
+      p.z += Math.sin(v * Math.PI) * lateralBow * sd;
+      rPts.push(p);
+      rThick.push(halfThickness);
+    }
+    pts.push(rPts);
+    norms.push(rNorms);
+    thick.push(rThick);
+  }
+
+  for (let r = 0; r <= uSegs; r++) {
+    for (let c = 0; c <= vSegs; c++) {
+      const r0 = Math.max(0, r - 1);
+      const r1 = Math.min(uSegs, r + 1);
+      const c0 = Math.max(0, c - 1);
+      const c1 = Math.min(vSegs, c + 1);
+      const dU = new THREE.Vector3().subVectors(pts[r1][c], pts[r0][c]);
+      const dV = new THREE.Vector3().subVectors(pts[r][c1], pts[r][c0]);
+      const n = new THREE.Vector3().crossVectors(dU, dV);
+      if (n.lengthSq() < 1e-8) n.set(0, 0, sd);
+      n.normalize();
+      if (n.z * sd < 0) n.negate();
+      norms[r][c] = n;
+    }
+  }
+
+  return buildClosedThickGridMesh(pts, norms, thick, mat);
+}
+

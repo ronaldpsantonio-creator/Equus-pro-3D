@@ -1398,13 +1398,13 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       side,
     );
     push(
-      `equ.mus.cad.002-${tag}`, // Glúteo medio (voluminous rounded equine croup dome)
+      `equ.mus.cad.002-${tag}`, // Glúteo medio (voluminous rounded equine croup dome covering iliac wing)
       createSculptedMuscleSheetMesh(
         [
-          { x: -0.96, yTop: 1.34, yBot: 1.18, zMid: 0.09, zBow: 0.064 },
-          { x: -0.82, yTop: 1.39, yBot: 1.15, zMid: 0.115, zBow: 0.094 },
-          { x: -0.66, yTop: 1.38, yBot: 1.16, zMid: 0.115, zBow: 0.088 },
-          { x: -0.54, yTop: 1.35, yBot: 1.21, zMid: 0.09, zBow: 0.052 },
+          { x: -0.96, yTop: 1.35, yBot: 1.16, zMid: 0.038, zBow: 0.112 },
+          { x: -0.82, yTop: 1.405, yBot: 1.15, zMid: 0.042, zBow: 0.162 },
+          { x: -0.68, yTop: 1.395, yBot: 1.16, zMid: 0.045, zBow: 0.156 },
+          { x: -0.54, yTop: 1.36, yBot: 1.21, zMid: 0.045, zBow: 0.095 },
         ],
         sd,
         msuMat(),
@@ -1416,8 +1416,8 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       `equ.mus.cad.003-${tag}`, // Glúteo profundo
       createBiospheraMuscleMesh(
         [
-          { pos: V3(-0.78, 1.25, 0.11 * sd), rx: 0.022, ry: 0.038 },
-          { pos: hl.hip.clone().add(V3(-0.01, 0.04, 0.01 * sd)), rx: 0.026, ry: 0.042 },
+          { pos: V3(-0.78, 1.25, 0.108 * sd), rx: 0.022, ry: 0.038 },
+          { pos: hl.hip.clone().add(V3(-0.01, 0.04, 0.008 * sd)), rx: 0.024, ry: 0.04 },
         ],
         mprMat(),
         { radialSegs: 12 },
@@ -1428,9 +1428,9 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       `equ.mus.cad.004-${tag}`, // Tensor de la fascia lata
       createBiospheraMuscleMesh(
         [
-          { pos: hl.tuberCoxae, rx: 0.02, ry: 0.052 },
-          { pos: hl.tuberCoxae.clone().lerp(hl.stifle, 0.44).add(V3(0.015, 0.02, 0.024 * sd)), rx: 0.026, ry: 0.064 },
-          { pos: hl.stifle.clone().add(V3(0.01, 0.11, 0.03 * sd)), rx: 0.018, ry: 0.044 },
+          { pos: hl.tuberCoxae.clone().add(V3(0.008, -0.006, 0.008 * sd)), rx: 0.022, ry: 0.052 },
+          { pos: hl.tuberCoxae.clone().lerp(hl.stifle, 0.44).add(V3(0.015, 0.02, 0.02 * sd)), rx: 0.026, ry: 0.062 },
+          { pos: hl.stifle.clone().add(V3(0.01, 0.11, 0.026 * sd)), rx: 0.018, ry: 0.044 },
         ],
         msuMat(),
         { originTendonFrac: 0.1, insertionTendonFrac: 0.28, radialSegs: 14, grooveAO: 0.26 },
@@ -1498,10 +1498,10 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       `equ.mus.fem.012-${tag}`, // Bíceps femoral (wide sweeping lateral hamstring plate)
       createBiospheraMuscleMesh(
         [
-          { pos: V3(-0.88, 1.25, 0.155 * sd), rx: 0.042, ry: 0.088 },
-          { pos: V3(-0.85, 1.07, 0.186 * sd), rx: 0.052, ry: 0.108 },
-          { pos: hl.stifle.clone().add(V3(-0.07, 0.02, 0.068 * sd)), rx: 0.046, ry: 0.092 },
-          { pos: hl.stifle.clone().add(V3(-0.04, -0.06, 0.032 * sd)), rx: 0.03, ry: 0.06 },
+          { pos: V3(-0.88, 1.26, 0.12 * sd), rx: 0.04, ry: 0.084 },
+          { pos: V3(-0.86, 1.08, 0.148 * sd), rx: 0.048, ry: 0.098 },
+          { pos: hl.stifle.clone().add(V3(-0.06, 0.02, 0.038 * sd)), rx: 0.042, ry: 0.078 },
+          { pos: hl.stifle.clone().add(V3(-0.04, -0.06, 0.024 * sd)), rx: 0.028, ry: 0.055 },
         ],
         msuMat(),
         { originTendonFrac: 0.12, insertionTendonFrac: 0.2, radialSegs: 16, grooveAO: 0.3 },
@@ -1512,9 +1512,9 @@ export function buildMuscularAndTegumentaryParts(tex: ProceduralTextureSet): Bui
       `equ.mus.fem.013-${tag}`, // Semitendinoso (graceful curved caudal buttock line)
       createBiospheraMuscleMesh(
         [
-          { pos: hl.tuberIschii.clone().add(V3(0.02, -0.01, 0.025 * sd)), rx: 0.036, ry: 0.064 },
-          { pos: V3(-1.00, 1.04, 0.115 * sd), rx: 0.044, ry: 0.074 },
-          { pos: V3(-0.92, 0.81, 0.098 * sd), rx: 0.036, ry: 0.06 },
+          { pos: hl.tuberIschii.clone().add(V3(-0.006, 0.018, 0.014 * sd)), rx: 0.036, ry: 0.064 },
+          { pos: V3(-0.99, 1.03, 0.105 * sd), rx: 0.044, ry: 0.072 },
+          { pos: V3(-0.91, 0.81, 0.095 * sd), rx: 0.036, ry: 0.06 },
           { pos: hl.hock.clone().add(V3(0.01, 0.24, 0.02 * sd)), rx: 0.022, ry: 0.036 },
         ],
         msuMat(),

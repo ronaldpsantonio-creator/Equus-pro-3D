@@ -17,6 +17,8 @@ import {
   createAnatomicalExtrudedPlate,
   createAnatomicalLongBoneMesh,
   createCoffinBoneMesh,
+  createCurvedLigamentSheetMesh,
+  createEquineCoxalMesh,
   createEquineVertebraMesh,
   createFacetedTarsalOrCarpalBlock,
   createFlatRibMesh,
@@ -476,9 +478,38 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     const [x, y] = sacralPos(s);
     const id = `equ.ske.sac.${String(s).padStart(3, '0')}`;
     const g = new THREE.Group();
-    const wingW = Math.max(0.028, 0.088 - s * 0.014);
-    g.add(createOrganMesh(V3(x, y, 0), [0.028, 0.026, wingW], boneMat(), undefined, 10));
-    g.add(createLongBoneMesh(V3(x, y + 0.015, 0), V3(x - 0.022, y + 0.082 - s * 0.008, 0), 0.01, 0.013, boneMat(), 0.48));
+    const wingW = s === 1 ? 0.068 : s === 2 ? 0.054 : Math.max(0.026, 0.064 - s * 0.011);
+    // Sacral body / fused centrum + alae ossis sacri
+    g.add(createOrganMesh(V3(x, y, 0), [0.027, 0.024, wingW], boneMat(), undefined, 10));
+    if (s <= 2) {
+      // Flared cranial sacral wings mating flush against medial auricular surface of ilium
+      for (const sd of [-1, 1] as const) {
+        g.add(
+          createOrganMesh(
+            V3(x + 0.006, y + 0.008, (wingW - 0.014) * sd),
+            [0.026, 0.016, 0.022],
+            darkBoneMat(),
+            [0.22 * sd, 0, 0.18],
+            10,
+          ),
+        );
+      }
+    }
+    // Beveled sacral spinous process blade tilted gently caudodorsally
+    const spH = 0.072 - s * 0.007;
+    const spBlade = createAnatomicalExtrudedPlate(
+      [
+        [-0.016, 0],
+        [0.016, 0],
+        [-0.006, spH],
+        [-0.026, spH * 0.96],
+      ],
+      0.01,
+      0.003,
+      boneMat(),
+    );
+    spBlade.position.set(x, y + 0.016, 0);
+    g.add(spBlade);
     push(id, g, 'center', V3(x, y, 0));
   }
 
@@ -739,59 +770,59 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     // HINDLIMB
     const hl = hindlimbLandmarks(sd);
 
-    // Coxal / Pelvis (equ.ske.mpe.001-i/d): sculpted extruded Ilium wing + Ischium/Pubis with real Obturator Foramen!
-    const coxal = new THREE.Group();
-    const coxalPlate = createAnatomicalExtrudedPlate(
-      [
-        [hl.tuberIschii.x, hl.tuberIschii.y + 0.02],
-        [hl.tuberIschii.x + 0.05, hl.tuberIschii.y - 0.07], // ischial arch
-        [hl.hip.x + 0.06, hl.hip.y - 0.085],                // pubic pecten
-        [hl.hip.x + 0.03, hl.hip.y + 0.025],                // acetabular body cranial
-        [hl.tuberCoxae.x + 0.06, hl.tuberCoxae.y - 0.02],   // tuber coxae lateral crest
-        [hl.tuberSacrale.x - 0.02, hl.tuberSacrale.y + 0.015], // tuber sacrale dorsal
-        [hl.hip.x - 0.04, hl.hip.y + 0.065],                // greater ischiatic notch
-      ],
-      0.022,
-      0.006,
+    // Coxal / Os coxae (equ.ske.mpe.001-i/d): sculpted 3D equine ilium wing, shaft, ischiatic spine,
+    // concave notched acetabulum, pubic & ischial rami framing a real obturator foramen, and ischial table
+    const coxal = createEquineCoxalMesh(
+      sd,
+      {
+        tuberSacrale: hl.tuberSacrale,
+        tuberCoxae: hl.tuberCoxae,
+        acetabulum: hl.acetabulum,
+        tuberIschii: hl.tuberIschii,
+        pubicPecten: V3(-0.79, 1.072, 0.005 * sd),
+        ischialArch: V3(-0.962, 1.088, 0.011 * sd),
+        ischiaticSpine: V3(-0.868, 1.186, 0.112 * sd),
+      },
       boneMat(),
-      [
-        [
-          [hl.hip.x - 0.11, hl.hip.y - 0.045],
-          [hl.hip.x - 0.03, hl.hip.y - 0.055],
-          [hl.hip.x - 0.04, hl.hip.y - 0.01],
-          [hl.hip.x - 0.12, hl.hip.y - 0.005],
-        ], // Real Obturator Foramen perforation!
-      ],
+      darkBoneMat(),
     );
-    coxalPlate.position.set(0, 0, hl.hip.z * 0.72);
-    coxalPlate.rotation.y = 0.24 * sd;
-    coxal.add(coxalPlate);
-    // Acetabular rim cup
-    coxal.add(createOrganMesh(hl.hip, [0.034, 0.034, 0.024], darkBoneMat(), undefined, 12));
     push(`equ.ske.mpe.001-${tag}`, coxal, side);
 
-    // Fémur (002) with greater trochanter, third trochanter & bicondylar trochlea
+    // Fémur (002) with medial neck + femoral head seated inside acetabulum, greater/lesser/third trochanters & bicondylar trochlea
     const femGrp = new THREE.Group();
     femGrp.add(
       createAnatomicalLongBoneMesh(
         hl.hip,
         hl.stifle,
         {
-          rMid: 0.037,
-          rProxX: 0.056,
-          rProxZ: 0.048,
-          rDistX: 0.056,
-          rDistZ: 0.052,
+          rMid: 0.035,
+          rProxX: 0.044,
+          rProxZ: 0.036,
+          rDistX: 0.054,
+          rDistZ: 0.048,
           bicondylarDistal: true,
-          proximalTubercle: 0.012,
+          proximalTubercle: 0.01,
           cranialBow: 0.014,
           midFlattenZ: 0.85,
         },
         boneMat(),
       ),
     );
-    femGrp.add(createOrganMesh(hl.hip.clone().add(V3(-0.025, 0.055, 0.022 * sd)), [0.026, 0.036, 0.02], darkBoneMat(), undefined, 10)); // Trocánter mayor
-    femGrp.add(createOrganMesh(hl.hip.clone().lerp(hl.stifle, 0.32).add(V3(-0.01, 0, 0.038 * sd)), [0.02, 0.026, 0.014], darkBoneMat(), undefined, 8)); // Tercer trocánter
+    // Collum femoris (neck) & Caput ossis femoris (spherical head seated inside acetabular socket)
+    femGrp.add(
+      createLongBoneMesh(
+        hl.hip.clone().add(V3(-0.002, -0.006, 0)),
+        hl.acetabulum,
+        0.017,
+        0.022,
+        boneMat(),
+        0.92,
+      ),
+    );
+    femGrp.add(createOrganMesh(hl.acetabulum, [0.0225, 0.0225, 0.0225], darkBoneMat(), undefined, 14)); // Caput ossis femoris
+    femGrp.add(createOrganMesh(hl.hip.clone().add(V3(-0.022, 0.042, 0.01 * sd)), [0.023, 0.032, 0.018], darkBoneMat(), [0, 0, 0.3], 10)); // Trocánter mayor
+    femGrp.add(createOrganMesh(hl.hip.clone().add(V3(0.012, -0.068, -0.02 * sd)), [0.013, 0.016, 0.011], darkBoneMat(), undefined, 8)); // Trocánter menor
+    femGrp.add(createOrganMesh(hl.hip.clone().lerp(hl.stifle, 0.30).add(V3(-0.008, 0, 0.03 * sd)), [0.018, 0.024, 0.013], darkBoneMat(), undefined, 8)); // Tercer trocánter
     push(`equ.ske.mpe.002-${tag}`, femGrp, side);
 
     // Rótula (003) sculpted triangular wedge
@@ -984,18 +1015,132 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
   push('equ.ske.lax.004', createTubeCurveMesh(longPts, 0.008, ligMat(), 36, 6), 'center');
   push('equ.ske.aax.004', ivdGrp, 'center');
 
-  // Ligamento sacroilíaco dorsal (equ.ske.lax.009) & Sacrotuberal ancho (equ.ske.lax.011)
+  // Articulación sacroilíaca (equ.ske.aax.010), Lig. sacroilíaco dorsal (lax.009) & ventral (lax.010),
+  // Lig. sacrotuberal ancho (lax.011), y Sínfisis pelviana (aax.011)
   push(
-    'equ.ske.lax.009',
+    'equ.ske.aax.010',
     buildBilateralArticular((sd) =>
-      createTubeCurveMesh([V3(-0.75, 1.39, 0.03 * sd), V3(-0.92, 1.33, 0.025 * sd)], 0.013, ligMat(), 10, 8),
+      createOrganMesh(V3(-0.772, 1.352, 0.056 * sd), [0.028, 0.016, 0.014], cartMat(), [0.28 * sd, 0, -0.25], 10),
     ),
     'center',
   );
   push(
-    'equ.ske.lax.011',
-    buildBilateralArticular((sd) =>
-      createLongBoneMesh(V3(-0.86, 1.32, 0.04 * sd), V3(-1.02, 1.17, 0.12 * sd), 0.022, 0.034, ligMat(), 0.25),
+    'equ.ske.lax.009',
+    buildBilateralArticular((sd) => {
+      const hl = hindlimbLandmarks(sd);
+      const g = new THREE.Group();
+      const [s1x, s1y] = sacralPos(1);
+      const [s3x, s3y] = sacralPos(3);
+      const [s5x, s5y] = sacralPos(5);
+      // Funicular (short) dorsal sacroiliac ligament: tuber sacrale -> sacral spinous summits
+      g.add(
+        createTubeCurveMesh(
+          [
+            hl.tuberSacrale.clone().add(V3(0.01, 0.004, -0.004 * sd)),
+            V3(s1x - 0.012, s1y + 0.058, 0.016 * sd),
+            V3(s3x - 0.015, s3y + 0.048, 0.014 * sd),
+            V3(s5x - 0.015, s5y + 0.038, 0.012 * sd),
+          ],
+          0.0085,
+          ligMat(),
+          14,
+          8,
+        ),
+      );
+      // Membranous (long) dorsal sacroiliac sheet: caudal ilium crest -> lateral sacral crest
+      g.add(
+        createCurvedLigamentSheetMesh(
+          [
+            hl.tuberSacrale.clone().add(V3(-0.015, -0.006, 0)),
+            V3(s3x - 0.01, s3y + 0.032, 0.018 * sd),
+            V3(s5x - 0.01, s5y + 0.026, 0.015 * sd),
+          ],
+          [
+            hl.tuberSacrale.clone().add(V3(-0.035, -0.03, 0.012 * sd)),
+            V3(s3x - 0.01, s3y + 0.006, 0.034 * sd),
+            V3(s5x - 0.01, s5y + 0.004, 0.026 * sd),
+          ],
+          sd,
+          ligMat(),
+          0.005,
+          0.0025,
+          8,
+          5,
+        ),
+      );
+      return g;
+    }),
+    'center',
+  );
+  push(
+    'equ.ske.lax.010', // Ligamento sacroilíaco ventral
+    buildBilateralArticular((sd) => {
+      const [s1x, s1y] = sacralPos(1);
+      const [s2x, s2y] = sacralPos(2);
+      const g = new THREE.Group();
+      g.add(
+        createTubeCurveMesh(
+          [V3(s1x + 0.006, s1y - 0.014, 0.052 * sd), V3(s1x + 0.01, s1y - 0.022, 0.088 * sd)],
+          0.0075,
+          ligMat(),
+          8,
+          7,
+        ),
+      );
+      g.add(
+        createTubeCurveMesh(
+          [V3(s2x, s2y - 0.012, 0.044 * sd), V3(s2x - 0.006, s2y - 0.024, 0.078 * sd)],
+          0.007,
+          ligMat(),
+          8,
+          7,
+        ),
+      );
+      return g;
+    }),
+    'center',
+  );
+  push(
+    'equ.ske.lax.011', // Ligamento sacrotuberal ancho (curved broad fibrous sheet)
+    buildBilateralArticular((sd) => {
+      const hl = hindlimbLandmarks(sd);
+      const [s2x, s2y] = sacralPos(2);
+      const [s4x, s4y] = sacralPos(4);
+      const [c1x, c1y] = caudalPos(1);
+      const [c2x, c2y] = caudalPos(2);
+      return createCurvedLigamentSheetMesh(
+        [
+          V3(s2x - 0.005, s2y + 0.002, 0.046 * sd),
+          V3(s4x, s4y + 0.002, 0.032 * sd),
+          V3(c1x, c1y + 0.002, 0.02 * sd),
+          V3(c2x - 0.01, c2y, 0.016 * sd),
+        ],
+        [
+          hl.acetabulum.clone().add(V3(-0.005, 0.038, -0.014 * sd)),
+          V3(-0.868, 1.186, 0.112 * sd), // spina ischiadica
+          V3(-0.935, 1.16, 0.108 * sd),  // lesser ischiatic arch
+          hl.tuberIschii.clone().add(V3(0.012, 0.008, -0.002 * sd)),
+        ],
+        sd,
+        ligMat(),
+        0.016,
+        0.0032,
+        14,
+        8,
+      );
+    }),
+    'center',
+  );
+  push(
+    'equ.ske.aax.011', // Sínfisis pelviana (fibrocartilage midline union of pubis & ischium)
+    createMultiStationLoftTube(
+      [
+        { pos: V3(-0.79, 1.072, 0), rx: 0.008, ry: 0.009 },
+        { pos: V3(-0.876, 1.076, 0), rx: 0.008, ry: 0.009 },
+        { pos: V3(-0.962, 1.088, 0), rx: 0.009, ry: 0.01 },
+      ],
+      cartMat(),
+      10,
     ),
     'center',
   );
@@ -1146,10 +1291,57 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     'center',
   );
 
-  // Hindlimb hip, stifle menisci, patellar locking ligaments & distal joints
+  // Hindlimb hip (Articulación coxofemoral + Lig. cabeza del fémur + Lig. accesorio del fémur), stifle & distal joints
   push(
-    'equ.ske.amp.001',
-    buildBilateralArticular((sd) => createOrganMesh(hindlimbLandmarks(sd).hip, [0.048, 0.046, 0.044], cartMat(), undefined, 12)),
+    'equ.ske.amp.001', // Articulación coxofemoral (capsule cuff hugging acetabular rim & femoral neck)
+    buildBilateralArticular((sd) => {
+      const hl = hindlimbLandmarks(sd);
+      return createMultiStationLoftTube(
+        [
+          { pos: hl.acetabulum.clone().add(V3(0.001, 0.002, -0.008 * sd)), rx: 0.028, ry: 0.028 },
+          { pos: hl.acetabulum.clone().add(V3(-0.001, 0, 0.01 * sd)), rx: 0.029, ry: 0.029 },
+          { pos: hl.acetabulum.clone().lerp(hl.hip, 0.82), rx: 0.022, ry: 0.023 },
+        ],
+        cartMat(),
+        14,
+      );
+    }),
+    'center',
+  );
+  push(
+    'equ.ske.lmp.001-i', // Ligamento de la cabeza del fémur (intracapsular)
+    buildBilateralArticular((sd) => {
+      const hl = hindlimbLandmarks(sd);
+      return createTubeCurveMesh(
+        [
+          hl.acetabulum.clone().add(V3(0, -0.005, -0.012 * sd)),
+          hl.acetabulum.clone().add(V3(0, 0.001, 0.005 * sd)),
+        ],
+        0.006,
+        ligMat(),
+        8,
+        6,
+      );
+    }),
+    'center',
+  );
+  push(
+    'equ.ske.lmp.002-i', // Ligamento accesorio del fémur (prepubic -> acetabular notch -> fovea capitis)
+    buildBilateralArticular((sd) => {
+      const hl = hindlimbLandmarks(sd);
+      return createTubeCurveMesh(
+        [
+          V3(-0.79, 1.072, 0.016 * sd),
+          V3(-0.805, 1.096, 0.072 * sd),
+          hl.acetabulum.clone().add(V3(0.005, -0.022, -0.008 * sd)),
+          hl.acetabulum.clone().add(V3(0, -0.002, 0.004 * sd)),
+        ],
+        0.0055,
+        ligMat(),
+        14,
+        7,
+      );
+    }),
     'center',
   );
   push(

@@ -94,10 +94,11 @@ export function forelimbLandmarks(sd: -1 | 1) {
 export function hindlimbLandmarks(sd: -1 | 1) {
   const z = 0.175 * sd;
   return {
-    tuberSacrale: V3(-0.77, 1.40, 0.035 * sd),
-    tuberCoxae: V3(-0.71, 1.37, z * 1.08),
-    hip: V3(-0.825, 1.15, z * 0.95),
-    tuberIschii: V3(-1.05, 1.16, z * 0.76),
+    tuberSacrale: V3(-0.77, 1.382, 0.036 * sd),
+    tuberCoxae: V3(-0.715, 1.316, 0.168 * sd),
+    acetabulum: V3(-0.822, 1.152, 0.132 * sd),
+    hip: V3(-0.825, 1.15, 0.162 * sd),
+    tuberIschii: V3(-1.005, 1.132, 0.108 * sd),
     stifle: V3(-0.67, 0.855, z * 1.04),
     hock: V3(-0.89, 0.51, z * 0.94),
     calcaneusTip: V3(-0.95, 0.585, z * 0.94),
