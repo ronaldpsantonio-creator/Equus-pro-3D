@@ -6,7 +6,6 @@ import {
   HEAD,
   hindlimbLandmarks,
   lumbarPos,
-  ribArcPoints,
   sacralPos,
   thoracicPos,
   V3,
@@ -14,10 +13,7 @@ import {
 import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import {
-  createAnatomicalExtrudedPlate,
   createCurvedLigamentSheetMesh,
-  createEquineVertebraMesh,
-  createFlatRibMesh,
   createLongBoneMesh,
   createMultiStationLoftTube,
   createOrganMesh,
@@ -28,6 +24,7 @@ import { buildSculptedCervicalVertebraeParts } from './sculptEquineCervical';
 import { buildSculptedForelimbParts } from './sculptEquineForelimb';
 import { buildSculptedHindlimbParts } from './sculptEquineHindlimb';
 import { buildSculptedPelvisParts } from './sculptEquinePelvis';
+import { buildSculptedRibcageParts } from './sculptEquineRibcage';
 
 export type BuiltPart = {
   id: string;
@@ -122,61 +119,9 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
   // --- 2. VERTEBRAL COLUMN (C1-C7 sculpted, T1-T18, L1-L6, S1-S5, Caudal) ---
   buildSculptedCervicalVertebraeParts({ darkBoneMat, sculptedBoneMat, push });
 
-  for (let t = 1; t <= 18; t++) {
-    const [x, y] = thoracicPos(t);
-    const [nx, ny] = thoracicPos(Math.max(1, t - 1));
-    const [px, py] = thoracicPos(Math.min(18, t + 1));
-    const id = `equ.ske.tor.${String(t).padStart(3, '0')}`;
-    const witherFactor = Math.exp(-Math.pow((t - 5.2) / 4.0, 2));
-    const spineH = 0.060 + 0.140 * witherFactor;
-    const tiltX = t <= 14 ? -0.038 : 0.01; // anticlinal around T15-T16
-    const vMesh = createEquineVertebraMesh(
-      {
-        pos: V3(x, y, 0),
-        forwardDir: V3(nx - px, ny - py, 0),
-        bodyLength: 0.046,
-        bodyRadius: 0.023,
-        spineHeight: spineH,
-        spineTiltX: tiltX,
-        spineThick: 0.011,
-        transverseSpan: 0.042,
-        transverseWidth: 0.016,
-      },
-      boneMat(),
-      darkBoneMat(),
-    );
-    push(id, vMesh, 'center', V3(x, y + spineH * 0.35, 0));
-  }
-
-  // Lumbar (L1-L6), Sacrum (S1-S5), Os Coxae (mpe.001-i/d), and Caudal (Cd1-Cd21) sculpted below
+  // Thoracic (T1-T18), Costal (R1-R18-i/d), Sternum (ste.001), Lumbar, Sacrum, Coxal, and Caudal sculpted below
+  buildSculptedRibcageParts({ sculptedBoneMat, cartMat, push });
   buildSculptedPelvisParts({ sculptedBoneMat, push });
-
-  // --- 3. RIBCAGE & STERNUM (flattened equine costal blades) ---
-  for (let r = 1; r <= 18; r++) {
-    for (const sd of [-1, 1] as const) {
-      const tag = sd === -1 ? 'i' : 'd';
-      const side = sd === -1 ? 'left' : 'right';
-      const pts = ribArcPoints(r, sd);
-      const id = `equ.ske.cos.${String(r).padStart(3, '0')}-${tag}`;
-      const g = new THREE.Group();
-      const widthScale = r <= 7 ? 1.12 : r >= 15 ? 0.84 : 1.0;
-      g.add(createFlatRibMesh(pts.slice(0, 4), 0.014 * widthScale, 0.0072, boneMat(), 18, 10));
-      g.add(createFlatRibMesh(pts.slice(3), 0.0105, 0.0062, cartMat(), 8, 8));
-      push(id, g, side, pts[2]);
-    }
-  }
-
-  // Keeled equine Sternum (equ.ske.ste.001)
-  push(
-    'equ.ske.ste.001',
-    (() => {
-      const g = new THREE.Group();
-      g.add(createLongBoneMesh(V3(0.47, 0.878, 0), V3(-0.08, 0.848, 0), 0.028, 0.038, boneMat(), 0.6));
-      g.add(createOrganMesh(V3(0.48, 0.896, 0), [0.030, 0.032, 0.018], cartMat(), undefined, 10)); // Manubrium / cariniform cartilage
-      return g;
-    })(),
-    'center',
-  );
 
   // --- 4. FORELIMBS (equ.ske.mto.001..020-i/d sculpted) & HINDLIMBS (equ.ske.mpe.002..020-i/d sculpted) ---
   buildSculptedForelimbParts({ boneMat, darkBoneMat, sculptedBoneMat, cartMat, push });
