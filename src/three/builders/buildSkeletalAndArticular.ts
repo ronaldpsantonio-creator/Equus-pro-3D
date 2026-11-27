@@ -15,12 +15,9 @@ import { createTissueMaterial } from '../materials';
 import { ProceduralTextureSet } from '../textures';
 import {
   createAnatomicalExtrudedPlate,
-  createAnatomicalLongBoneMesh,
-  createCoffinBoneMesh,
   createCurvedLigamentSheetMesh,
   createEquineCoxalMesh,
   createEquineVertebraMesh,
-  createFacetedTarsalOrCarpalBlock,
   createFlatRibMesh,
   createLongBoneMesh,
   createMultiStationLoftTube,
@@ -30,6 +27,7 @@ import {
 import { buildSculptedEquineSkullParts } from './sculptEquineSkull';
 import { buildSculptedCervicalVertebraeParts } from './sculptEquineCervical';
 import { buildSculptedForelimbParts } from './sculptEquineForelimb';
+import { buildSculptedHindlimbParts } from './sculptEquineHindlimb';
 
 export type BuiltPart = {
   id: string;
@@ -298,184 +296,9 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       darkBoneMat(),
     );
     push(`equ.ske.mpe.001-${tag}`, coxal, side);
-
-    // Fémur (002) with medial neck + femoral head seated inside acetabulum, greater/lesser/third trochanters & bicondylar trochlea
-    const femGrp = new THREE.Group();
-    femGrp.add(
-      createAnatomicalLongBoneMesh(
-        hl.hip,
-        hl.stifle,
-        {
-          rMid: 0.035,
-          rProxX: 0.044,
-          rProxZ: 0.036,
-          rDistX: 0.054,
-          rDistZ: 0.048,
-          bicondylarDistal: true,
-          proximalTubercle: 0.01,
-          cranialBow: 0.014,
-          midFlattenZ: 0.85,
-        },
-        boneMat(),
-      ),
-    );
-    // Collum femoris (neck) & Caput ossis femoris (spherical head seated inside acetabular socket)
-    femGrp.add(
-      createLongBoneMesh(
-        hl.hip.clone().add(V3(-0.002, -0.006, 0)),
-        hl.acetabulum,
-        0.017,
-        0.022,
-        boneMat(),
-        0.92,
-      ),
-    );
-    femGrp.add(createOrganMesh(hl.acetabulum, [0.0225, 0.0225, 0.0225], darkBoneMat(), undefined, 14)); // Caput ossis femoris
-    femGrp.add(createOrganMesh(hl.hip.clone().add(V3(-0.022, 0.042, 0.01 * sd)), [0.023, 0.032, 0.018], darkBoneMat(), [0, 0, 0.3], 10)); // Trocánter mayor
-    femGrp.add(createOrganMesh(hl.hip.clone().add(V3(0.012, -0.068, -0.02 * sd)), [0.013, 0.016, 0.011], darkBoneMat(), undefined, 8)); // Trocánter menor
-    femGrp.add(createOrganMesh(hl.hip.clone().lerp(hl.stifle, 0.30).add(V3(-0.008, 0, 0.03 * sd)), [0.018, 0.024, 0.013], darkBoneMat(), undefined, 8)); // Tercer trocánter
-    push(`equ.ske.mpe.002-${tag}`, femGrp, side);
-
-    // Rótula (003) sculpted triangular wedge
-    push(
-      `equ.ske.mpe.003-${tag}`,
-      createFacetedTarsalOrCarpalBlock(hl.stifle.clone().add(V3(0.028, 0.014, -0.004 * sd)), [0.024, 0.034, 0.022], darkBoneMat(), [0, 0, -0.25]),
-      side,
-    );
-    push(
-      `equ.ske.mpe.004-${tag}`,
-      createAnatomicalLongBoneMesh(
-        hl.stifle,
-        hl.hock,
-        {
-          rMid: 0.026,
-          rProxX: 0.048,
-          rProxZ: 0.044,
-          rDistX: 0.036,
-          rDistZ: 0.036,
-          bicondylarDistal: true,
-          proximalTubercle: 0.012,
-          cranialBow: 0.01,
-          midFlattenZ: 0.82,
-        },
-        boneMat(),
-      ),
-      side,
-    ); // Tibia
-    push(
-      `equ.ske.mpe.005-${tag}`, // Fíbula
-      createLongBoneMesh(hl.stifle.clone().add(V3(-0.02, -0.02, 0.022 * sd)), hl.stifle.clone().add(V3(-0.08, -0.18, 0.015 * sd)), 0.007, 0.01, darkBoneMat()),
-      side,
-    );
-
-    // Calcáneo (007) with tuber calcanei
-    const calcGrp = new THREE.Group();
-    calcGrp.add(createLongBoneMesh(hl.hock, hl.calcaneusTip, 0.02, 0.029, boneMat(), 0.65));
-    calcGrp.add(createOrganMesh(hl.calcaneusTip, [0.022, 0.024, 0.018], darkBoneMat(), undefined, 10));
-    push(`equ.ske.mpe.007-${tag}`, calcGrp, side);
-
-    // Talus (006) with prominent oblique trochlear ridges
-    const talusGrp = new THREE.Group();
-    talusGrp.add(createFacetedTarsalOrCarpalBlock(V3(hl.hock.x + 0.008, hl.hock.y + 0.018, hl.hock.z), [0.038, 0.036, 0.034], boneMat(), [0, 0, 0.35]));
-    talusGrp.add(createOrganMesh(V3(hl.hock.x + 0.018, hl.hock.y + 0.028, hl.hock.z - 0.011 * sd), [0.016, 0.02, 0.008], darkBoneMat(), [0.2 * sd, 0, 0.5], 8));
-    talusGrp.add(createOrganMesh(V3(hl.hock.x + 0.018, hl.hock.y + 0.028, hl.hock.z + 0.011 * sd), [0.016, 0.02, 0.008], darkBoneMat(), [-0.2 * sd, 0, 0.5], 8));
-    push(`equ.ske.mpe.006-${tag}`, talusGrp, side);
-
-    // Distal tarsal row (008 central, 009 T1+T2, 010 T3, 011 T4)
-    const tarsalDistal: Array<{ num: number; dx: number; dy: number; dz: number; size: [number, number, number] }> = [
-      { num: 8, dx: 0.006, dy: -0.002, dz: -0.004, size: [0.032, 0.014, 0.032] },
-      { num: 9, dx: -0.005, dy: -0.016, dz: -0.016, size: [0.022, 0.016, 0.014] },
-      { num: 10, dx: 0.008, dy: -0.017, dz: 0.0, size: [0.032, 0.015, 0.026] },
-      { num: 11, dx: -0.004, dy: -0.014, dz: 0.016, size: [0.024, 0.024, 0.016] },
-    ];
-    for (const sp of tarsalDistal) {
-      push(
-        `equ.ske.mpe.${String(sp.num).padStart(3, '0')}-${tag}`,
-        createFacetedTarsalOrCarpalBlock(V3(hl.hock.x + sp.dx, hl.hock.y + sp.dy, hl.hock.z + sp.dz * sd), sp.size, boneMat()),
-        side,
-      );
-    }
-
-    // Metatarsus III (012) & Splints (013, 014)
-    push(
-      `equ.ske.mpe.012-${tag}`,
-      createAnatomicalLongBoneMesh(
-        hl.hock,
-        hl.fetlock,
-        {
-          rMid: 0.019,
-          rProxX: 0.026,
-          rProxZ: 0.026,
-          rDistX: 0.024,
-          rDistZ: 0.025,
-          bicondylarDistal: true,
-          midFlattenZ: 0.82,
-        },
-        boneMat(),
-      ),
-      side,
-    );
-    push(
-      `equ.ske.mpe.013-${tag}`,
-      createLongBoneMesh(
-        hl.hock.clone().add(V3(-0.013, -0.01, -0.016 * sd)),
-        hl.fetlock.clone().add(V3(-0.01, 0.085, -0.013 * sd)),
-        0.006,
-        0.009,
-        darkBoneMat(),
-      ),
-      side,
-    );
-    push(
-      `equ.ske.mpe.014-${tag}`,
-      createLongBoneMesh(
-        hl.hock.clone().add(V3(-0.013, -0.01, 0.016 * sd)),
-        hl.fetlock.clone().add(V3(-0.01, 0.085, 0.013 * sd)),
-        0.006,
-        0.009,
-        darkBoneMat(),
-      ),
-      side,
-    );
-
-    // Hind Phalanges & Sesamoids (015..020)
-    push(
-      `equ.ske.mpe.015-${tag}`,
-      createAnatomicalLongBoneMesh(
-        hl.fetlock,
-        hl.pasternMid,
-        { rMid: 0.017, rProxX: 0.024, rProxZ: 0.025, rDistX: 0.021, rDistZ: 0.022, bicondylarDistal: true, midFlattenZ: 0.88 },
-        boneMat(),
-      ),
-      side,
-    );
-    push(
-      `equ.ske.mpe.016-${tag}`,
-      createAnatomicalLongBoneMesh(
-        hl.pasternMid,
-        hl.coronet,
-        { rMid: 0.018, rProxX: 0.023, rProxZ: 0.024, rDistX: 0.022, rDistZ: 0.024, bicondylarDistal: true, midFlattenZ: 0.9 },
-        boneMat(),
-      ),
-      side,
-    );
-    push(`equ.ske.mpe.017-${tag}`, createCoffinBoneMesh(hl.hoofCenter.clone().add(V3(0.003, 0.006, 0)), darkBoneMat()), side);
-    push(
-      `equ.ske.mpe.018-${tag}`,
-      createFacetedTarsalOrCarpalBlock(hl.fetlock.clone().add(V3(-0.018, 0.012, -0.010 * sd)), [0.014, 0.022, 0.010], darkBoneMat(), [0, 0, -0.3]),
-      side,
-    );
-    push(
-      `equ.ske.mpe.019-${tag}`,
-      createFacetedTarsalOrCarpalBlock(hl.fetlock.clone().add(V3(-0.018, 0.012, 0.010 * sd)), [0.014, 0.022, 0.010], darkBoneMat(), [0, 0, -0.3]),
-      side,
-    );
-    push(
-      `equ.ske.mpe.020-${tag}`,
-      createFacetedTarsalOrCarpalBlock(hl.coronet.clone().add(V3(-0.018, -0.012, 0)), [0.011, 0.011, 0.032], darkBoneMat(), [0, 0, 0.45]),
-      side,
-    );
   }
+
+  buildSculptedHindlimbParts({ sculptedBoneMat, push });
 
   // --- 5. ARTICULAR & LIGAMENTOUS STRUCTURES (layer = "art", sistema_articular.json) ---
   // Funículo nucal (equ.ske.lax.001 — paired dorsal cord from external occipital protuberance to T3–T5 withers cap)
