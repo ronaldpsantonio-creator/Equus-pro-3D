@@ -16,7 +16,6 @@ import { ProceduralTextureSet } from '../textures';
 import {
   createAnatomicalExtrudedPlate,
   createCurvedLigamentSheetMesh,
-  createEquineCoxalMesh,
   createEquineVertebraMesh,
   createFlatRibMesh,
   createLongBoneMesh,
@@ -28,6 +27,7 @@ import { buildSculptedEquineSkullParts } from './sculptEquineSkull';
 import { buildSculptedCervicalVertebraeParts } from './sculptEquineCervical';
 import { buildSculptedForelimbParts } from './sculptEquineForelimb';
 import { buildSculptedHindlimbParts } from './sculptEquineHindlimb';
+import { buildSculptedPelvisParts } from './sculptEquinePelvis';
 
 export type BuiltPart = {
   id: string;
@@ -148,99 +148,8 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     push(id, vMesh, 'center', V3(x, y + spineH * 0.35, 0));
   }
 
-  for (let l = 1; l <= 6; l++) {
-    const [x, y] = lumbarPos(l);
-    const [nx, ny] = lumbarPos(Math.max(1, l - 1));
-    const [px, py] = lumbarPos(Math.min(6, l + 1));
-    const id = `equ.ske.lum.${String(l).padStart(3, '0')}`;
-    const transSpan = 0.092 + (l <= 4 ? 0.026 : 0.012);
-    const vMesh = createEquineVertebraMesh(
-      {
-        pos: V3(x, y, 0),
-        forwardDir: V3(nx - px, ny - py, 0),
-        bodyLength: 0.052,
-        bodyRadius: 0.025,
-        spineHeight: 0.072,
-        spineTiltX: 0.012,
-        spineThick: 0.013,
-        transverseSpan: transSpan,
-        transverseWidth: 0.023,
-        isLumbar: true,
-      },
-      boneMat(),
-      darkBoneMat(),
-    );
-    push(id, vMesh, 'center', V3(x, y, 0));
-  }
-
-  for (let s = 1; s <= 5; s++) {
-    const [x, y] = sacralPos(s);
-    const id = `equ.ske.sac.${String(s).padStart(3, '0')}`;
-    const g = new THREE.Group();
-    const wingW = s === 1 ? 0.068 : s === 2 ? 0.054 : Math.max(0.026, 0.064 - s * 0.011);
-    // Sacral body / fused centrum + alae ossis sacri
-    g.add(createOrganMesh(V3(x, y, 0), [0.027, 0.024, wingW], boneMat(), undefined, 10));
-    if (s <= 2) {
-      // Flared cranial sacral wings mating flush against medial auricular surface of ilium
-      for (const sd of [-1, 1] as const) {
-        g.add(
-          createOrganMesh(
-            V3(x + 0.006, y + 0.008, (wingW - 0.014) * sd),
-            [0.026, 0.016, 0.022],
-            darkBoneMat(),
-            [0.22 * sd, 0, 0.18],
-            10,
-          ),
-        );
-      }
-    }
-    // Beveled sacral spinous process blade tilted gently caudodorsally
-    const spH = 0.072 - s * 0.007;
-    const spBlade = createAnatomicalExtrudedPlate(
-      [
-        [-0.016, 0],
-        [0.016, 0],
-        [-0.006, spH],
-        [-0.026, spH * 0.96],
-      ],
-      0.01,
-      0.003,
-      boneMat(),
-    );
-    spBlade.position.set(x, y + 0.016, 0);
-    g.add(spBlade);
-    push(id, g, 'center', V3(x, y, 0));
-  }
-
-  for (let ca = 1; ca <= 21; ca++) {
-    // caudalPos satura en la vértebra 18; Cd19-Cd21 se extrapolan siguiendo la curva de la cola
-    const getCau = (idx: number): [number, number] => {
-      const [bx, by] = caudalPos(Math.min(idx, 18));
-      const ext = Math.max(idx - 18, 0);
-      return [bx - 0.02 * ext, by - 0.035 * ext];
-    };
-    const [x, y] = getCau(ca);
-    const [px, py] = getCau(Math.max(1, ca - 1));
-    const [nx, ny] = getCau(Math.min(21, ca + 1));
-    const dir = V3(nx - px, ny - py, 0).normalize();
-    const id = `equ.ske.cau.${String(ca).padStart(3, '0')}`;
-    const rMid = Math.max(0.0045, 0.014 - ca * 0.0005);
-    const rEnds = Math.max(0.0065, 0.020 - ca * 0.0007);
-    const halfLen = Math.max(0.013, 0.020 - ca * 0.0003);
-    push(
-      id,
-      createLongBoneMesh(
-        V3(x - dir.x * halfLen, y - dir.y * halfLen, 0),
-        V3(x + dir.x * halfLen, y + dir.y * halfLen, 0),
-        rMid,
-        rEnds,
-        boneMat(),
-        0.92,
-      ),
-      'center',
-      V3(x, y, 0),
-    );
-  }
+  // Lumbar (L1-L6), Sacrum (S1-S5), Os Coxae (mpe.001-i/d), and Caudal (Cd1-Cd21) sculpted below
+  buildSculptedPelvisParts({ sculptedBoneMat, push });
 
   // --- 3. RIBCAGE & STERNUM (flattened equine costal blades) ---
   for (let r = 1; r <= 18; r++) {
@@ -269,35 +178,8 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     'center',
   );
 
-  // --- 4. FORELIMBS (equ.ske.mto.001..020-i/d sculpted) & HINDLIMBS (equ.ske.mpe.*) ---
+  // --- 4. FORELIMBS (equ.ske.mto.001..020-i/d sculpted) & HINDLIMBS (equ.ske.mpe.002..020-i/d sculpted) ---
   buildSculptedForelimbParts({ boneMat, darkBoneMat, sculptedBoneMat, cartMat, push });
-
-  for (const sd of [-1, 1] as const) {
-    const tag = sd === -1 ? 'i' : 'd';
-    const side = sd === -1 ? 'left' : 'right';
-
-    // HINDLIMB
-    const hl = hindlimbLandmarks(sd);
-
-    // Coxal / Os coxae (equ.ske.mpe.001-i/d): sculpted 3D equine ilium wing, shaft, ischiatic spine,
-    // concave notched acetabulum, pubic & ischial rami framing a real obturator foramen, and ischial table
-    const coxal = createEquineCoxalMesh(
-      sd,
-      {
-        tuberSacrale: hl.tuberSacrale,
-        tuberCoxae: hl.tuberCoxae,
-        acetabulum: hl.acetabulum,
-        tuberIschii: hl.tuberIschii,
-        pubicPecten: V3(-0.79, 1.072, 0.005 * sd),
-        ischialArch: V3(-0.962, 1.088, 0.011 * sd),
-        ischiaticSpine: V3(-0.868, 1.186, 0.112 * sd),
-      },
-      boneMat(),
-      darkBoneMat(),
-    );
-    push(`equ.ske.mpe.001-${tag}`, coxal, side);
-  }
-
   buildSculptedHindlimbParts({ sculptedBoneMat, push });
 
   // --- 5. ARTICULAR & LIGAMENTOUS STRUCTURES (layer = "art", sistema_articular.json) ---
