@@ -122,22 +122,21 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   coatRCtx.fillStyle = '#8c8c8c';
   coatRCtx.fillRect(0, 0, 512, 512);
 
-  // Soft organic bay dapples & subcutaneous warmth
-  for (let i = 0; i < 190; i++) {
+  // Soft organic bay dapples, shoulder/croup sheen & subcutaneous warmth
+  for (let i = 0; i < 240; i++) {
     const dx = rand() * 1024;
     const dy = rand() * 1024;
-    const dr = 20 + rand() * 46;
+    const dr = 18 + rand() * 52;
     const g = coatCtx.createRadialGradient(dx, dy, 3, dx, dy, dr);
-    g.addColorStop(0, i % 2 === 0 ? 'rgba(186, 110, 62, 0.095)' : 'rgba(62, 27, 13, 0.085)');
+    g.addColorStop(0, i % 2 === 0 ? 'rgba(196, 118, 66, 0.105)' : 'rgba(54, 23, 11, 0.09)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     coatCtx.fillStyle = g;
     coatCtx.beginPath();
     coatCtx.arc(dx, dy, dr, 0, Math.PI * 2);
     coatCtx.fill();
 
-    // Subtle sheen variation across coat dapples
     const rg = coatRCtx.createRadialGradient(dx * 0.5, dy * 0.5, 2, dx * 0.5, dy * 0.5, dr * 0.5);
-    rg.addColorStop(0, i % 2 === 0 ? 'rgba(110, 110, 110, 0.14)' : 'rgba(162, 162, 162, 0.14)');
+    rg.addColorStop(0, i % 2 === 0 ? 'rgba(104, 104, 104, 0.16)' : 'rgba(164, 164, 164, 0.15)');
     rg.addColorStop(1, 'rgba(0,0,0,0)');
     coatRCtx.fillStyle = rg;
     coatRCtx.beginPath();
@@ -145,20 +144,20 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatRCtx.fill();
   }
 
-  // Ultra-fine directional equine short coat hairs
-  for (let i = 0; i < 46000; i++) {
+  // Ultra-fine directional equine short coat hairs with subtle guard-hair shimmer
+  for (let i = 0; i < 52000; i++) {
     const x = rand() * 1024;
     const y = rand() * 1024;
-    const len = 4.5 + rand() * 10.5;
-    const dy = (rand() - 0.35) * 1.9;
+    const len = 4.2 + rand() * 11.2;
+    const dy = (rand() - 0.35) * 1.85;
     const tone = rand();
     const strokeCol =
-      tone < 0.3
-        ? 'rgba(44, 19, 9, 0.15)'
+      tone < 0.28
+        ? 'rgba(42, 18, 9, 0.16)'
         : tone < 0.72
-          ? 'rgba(202, 126, 76, 0.115)'
-          : 'rgba(232, 170, 118, 0.08)';
-    const w = 0.65 + rand() * 0.5;
+          ? 'rgba(206, 130, 78, 0.12)'
+          : 'rgba(238, 178, 124, 0.09)';
+    const w = 0.62 + rand() * 0.52;
 
     coatCtx.strokeStyle = strokeCol;
     coatCtx.lineWidth = w;
@@ -167,8 +166,8 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatCtx.lineTo(x + len, y + dy);
     coatCtx.stroke();
 
-    const bv = tone < 0.48 ? 100 : 158;
-    coatBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.42)`;
+    const bv = tone < 0.48 ? 96 : 162;
+    coatBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.45)`;
     coatBCtx.lineWidth = w;
     coatBCtx.beginPath();
     coatBCtx.moveTo(x, y);
@@ -176,10 +175,10 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
     coatBCtx.stroke();
   }
 
-  for (let i = 0; i < 6500; i++) {
+  for (let i = 0; i < 7200; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    const rv = rand() > 0.5 ? 122 : 158;
+    const rv = rand() > 0.5 ? 116 : 160;
     coatRCtx.fillStyle = `rgba(${rv},${rv},${rv},0.28)`;
     coatRCtx.fillRect(x, y, 3 + rand() * 5, 1);
   }
@@ -188,70 +187,84 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   coatColor.colorSpace = THREE.SRGBColorSpace;
   coatColor.wrapS = THREE.RepeatWrapping;
   coatColor.wrapT = THREE.RepeatWrapping;
-  coatColor.repeat.set(3.4, 3.4);
+  coatColor.repeat.set(3.6, 3.6);
   coatColor.anisotropy = aniso;
 
   const coatBump = new THREE.CanvasTexture(coatBC);
   coatBump.wrapS = THREE.RepeatWrapping;
   coatBump.wrapT = THREE.RepeatWrapping;
-  coatBump.repeat.set(3.4, 3.4);
+  coatBump.repeat.set(3.6, 3.6);
   coatBump.anisotropy = aniso;
 
-  const coatNormal = bumpCanvasToNormalTexture(coatBC, 1.24, [3.4, 3.4], false, aniso);
+  const coatNormal = bumpCanvasToNormalTexture(coatBC, 1.32, [3.6, 3.6], false, aniso);
 
   const coatRoughness = new THREE.CanvasTexture(coatRC);
   coatRoughness.colorSpace = THREE.NoColorSpace;
   coatRoughness.wrapS = THREE.RepeatWrapping;
   coatRoughness.wrapT = THREE.RepeatWrapping;
-  coatRoughness.repeat.set(3.4, 3.4);
+  coatRoughness.repeat.set(3.6, 3.6);
   coatRoughness.anisotropy = aniso;
 
-  // 2. Longitudinal striated skeletal muscle fascicles (512x512 neutral-bright striation + bump + crisp normal along UV.y)
+  // 2. Longitudinal striated skeletal muscle fascicles (512x512 organic epimysium marbling + fascicle relief)
   const [musC, musCtx] = makeCanvas(512, 512);
-  musCtx.fillStyle = '#ece7e4';
+  musCtx.fillStyle = '#ebe4e0';
   musCtx.fillRect(0, 0, 512, 512);
   const [musBC, musBCtx] = makeCanvas(512, 512);
   musBCtx.fillStyle = '#808080';
   musBCtx.fillRect(0, 0, 512, 512);
 
+  // Subtle organic blood-rich mottling so muscle avoids flat uniform stripes
+  for (let i = 0; i < 95; i++) {
+    const mx = rand() * 512;
+    const my = rand() * 512;
+    const mr = 24 + rand() * 56;
+    const mg = musCtx.createRadialGradient(mx, my, 4, mx, my, mr);
+    mg.addColorStop(0, i % 2 === 0 ? 'rgba(174, 128, 122, 0.14)' : 'rgba(255, 245, 242, 0.14)');
+    mg.addColorStop(1, 'rgba(0,0,0,0)');
+    musCtx.fillStyle = mg;
+    musCtx.beginPath();
+    musCtx.arc(mx, my, mr, 0, Math.PI * 2);
+    musCtx.fill();
+  }
+
   // Subtle anatomical fascicle bundles running vertically (UV.y = fiber direction)
   for (let x = 0; x < 512; x += 2) {
     const primary = Math.sin((x / 512) * Math.PI * 56);
-    const bundle = Math.sin((x / 512) * Math.PI * 16 + 0.6);
-    const fine = Math.sin((x / 512) * Math.PI * 128);
-    const band = primary * 0.32 + bundle * 0.28 + fine * 0.14 + 0.5;
+    const bundle = Math.sin((x / 512) * Math.PI * 14 + 0.6);
+    const fine = Math.sin((x / 512) * Math.PI * 132);
+    const band = primary * 0.30 + bundle * 0.30 + fine * 0.14 + 0.5;
     const clamped = Math.max(0, Math.min(1, band));
 
-    if (clamped > 0.6) {
-      musCtx.fillStyle = `rgba(255, 252, 250, ${(clamped - 0.55) * 0.62})`;
+    if (clamped > 0.58) {
+      musCtx.fillStyle = `rgba(255, 250, 248, ${(clamped - 0.54) * 0.58})`;
     } else {
-      musCtx.fillStyle = `rgba(148, 124, 118, ${(0.62 - clamped) * 0.56})`;
+      musCtx.fillStyle = `rgba(142, 114, 110, ${(0.60 - clamped) * 0.54})`;
     }
     musCtx.fillRect(x, 0, 2, 512);
 
-    const v = Math.round(58 + clamped * 176);
+    const v = Math.round(52 + clamped * 184);
     musBCtx.fillStyle = `rgb(${v},${v},${v})`;
     musBCtx.fillRect(x, 0, 2, 512);
   }
   // Delicate organic myofibril curvature & pearly perimysium connective septa lines
-  for (let i = 0; i < 2400; i++) {
+  for (let i = 0; i < 3200; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    const len = 34 + rand() * 88;
-    const drift = (rand() - 0.5) * 3.0;
+    const len = 30 + rand() * 96;
+    const drift = (rand() - 0.5) * 3.8;
     const isSeptum = i % 5 === 0;
 
     musCtx.strokeStyle = isSeptum
-      ? 'rgba(255, 255, 255, 0.44)'
-      : 'rgba(136, 110, 106, 0.28)';
-    musCtx.lineWidth = isSeptum ? 1.05 : 0.85;
+      ? 'rgba(255, 252, 249, 0.42)'
+      : 'rgba(132, 102, 98, 0.28)';
+    musCtx.lineWidth = isSeptum ? 1.15 : 0.85;
     musCtx.beginPath();
     musCtx.moveTo(x, y);
     musCtx.quadraticCurveTo(x + drift, y + len * 0.5, x, y + len);
     musCtx.stroke();
 
-    musBCtx.strokeStyle = isSeptum ? 'rgba(224,224,224,0.22)' : 'rgba(92,92,92,0.18)';
-    musBCtx.lineWidth = isSeptum ? 1.1 : 0.9;
+    musBCtx.strokeStyle = isSeptum ? 'rgba(232,232,232,0.26)' : 'rgba(84,84,84,0.20)';
+    musBCtx.lineWidth = isSeptum ? 1.2 : 0.9;
     musBCtx.beginPath();
     musBCtx.moveTo(x, y);
     musBCtx.quadraticCurveTo(x + drift, y + len * 0.5, x, y + len);
@@ -262,95 +275,176 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   muscleColor.colorSpace = THREE.SRGBColorSpace;
   muscleColor.wrapS = THREE.RepeatWrapping;
   muscleColor.wrapT = THREE.RepeatWrapping;
-  muscleColor.repeat.set(2.4, 1.8);
+  muscleColor.repeat.set(2.6, 2.0);
   muscleColor.anisotropy = aniso;
 
   const muscleBump = new THREE.CanvasTexture(musBC);
   muscleBump.wrapS = THREE.RepeatWrapping;
   muscleBump.wrapT = THREE.RepeatWrapping;
-  muscleBump.repeat.set(2.4, 1.8);
+  muscleBump.repeat.set(2.6, 2.0);
   muscleBump.anisotropy = aniso;
 
-  const muscleNormal = bumpCanvasToNormalTexture(musBC, 2.25, [2.4, 1.8], false, aniso);
+  const muscleNormal = bumpCanvasToNormalTexture(musBC, 2.65, [2.6, 2.0], false, aniso);
 
-  // 3. Cortical periosteum bone texture (512x512 osteological mineral warmth + Haversian micro-grain + normal)
+  // 3. Organic cortical periosteum bone texture (512x512 museum osteology ivory patina + Haversian lamellae + nutrient pores)
   const [boneC, boneCtx] = makeCanvas(512, 512);
   const [boneBC, boneBCtx] = makeCanvas(512, 512);
-  boneCtx.fillStyle = '#ede3ce';
-  boneCtx.fillRect(0, 0, 512, 512);
-  boneBCtx.fillStyle = '#808080';
-  boneBCtx.fillRect(0, 0, 512, 512);
+  const [boneRC, boneRCtx] = makeCanvas(512, 512);
 
-  for (let i = 0; i < 6400; i++) {
+  boneCtx.fillStyle = '#efe7d4';
+  boneCtx.fillRect(0, 0, 512, 512);
+  boneBCtx.fillStyle = '#848484';
+  boneBCtx.fillRect(0, 0, 512, 512);
+  boneRCtx.fillStyle = '#929292';
+  boneRCtx.fillRect(0, 0, 512, 512);
+
+  // Broad organic mineral mottling & ossification variation
+  for (let i = 0; i < 160; i++) {
+    const cx = rand() * 512;
+    const cy = rand() * 512;
+    const cr = 16 + rand() * 54;
+    const cg = boneCtx.createRadialGradient(cx, cy, 2, cx, cy, cr);
+    const warmAmber = i % 3 === 0;
+    cg.addColorStop(
+      0,
+      warmAmber ? 'rgba(182, 158, 122, 0.13)' : 'rgba(255, 252, 244, 0.14)',
+    );
+    cg.addColorStop(1, 'rgba(0,0,0,0)');
+    boneCtx.fillStyle = cg;
+    boneCtx.beginPath();
+    boneCtx.arc(cx, cy, cr, 0, Math.PI * 2);
+    boneCtx.fill();
+
+    // Subtle roughness variation: ivory patches more burnished, mineral areas slightly rougher
+    const rg = boneRCtx.createRadialGradient(cx, cy, 2, cx, cy, cr);
+    rg.addColorStop(0, warmAmber ? 'rgba(182,182,182,0.18)' : 'rgba(104,104,104,0.18)');
+    rg.addColorStop(1, 'rgba(0,0,0,0)');
+    boneRCtx.fillStyle = rg;
+    boneRCtx.beginPath();
+    boneRCtx.arc(cx, cy, cr, 0, Math.PI * 2);
+    boneRCtx.fill();
+  }
+
+  // Fine organic Haversian cortical striations & collagen lamellae curves
+  for (let i = 0; i < 4200; i++) {
     const x = rand() * 512;
     const y = rand() * 512;
-    const w = 1.5 + rand() * 11;
-    const h = 0.8 + rand() * 1.8;
-    boneCtx.fillStyle =
-      i % 3 === 0 ? 'rgba(156, 136, 102, 0.16)' : 'rgba(255, 251, 240, 0.20)';
-    boneCtx.fillRect(x, y, w, h);
+    const len = 8 + rand() * 34;
+    const angle = (rand() - 0.5) * 0.35;
+    const ex = x + Math.cos(angle) * len;
+    const ey = y + Math.sin(angle) * len;
+    const mx = (x + ex) * 0.5 + (rand() - 0.5) * 3.0;
+    const my = (y + ey) * 0.5 + (rand() - 0.5) * 2.5;
+    const isLight = i % 2 === 0;
 
-    const bv = i % 3 === 0 ? 102 : 152;
-    boneBCtx.fillStyle = `rgb(${bv},${bv},${bv})`;
-    boneBCtx.fillRect(x, y, w * 0.75, h);
+    boneCtx.strokeStyle = isLight
+      ? 'rgba(255, 252, 244, 0.15)'
+      : 'rgba(164, 142, 108, 0.13)';
+    boneCtx.lineWidth = 0.65 + rand() * 0.65;
+    boneCtx.beginPath();
+    boneCtx.moveTo(x, y);
+    boneCtx.quadraticCurveTo(mx, my, ex, ey);
+    boneCtx.stroke();
+
+    const bv = isLight ? 148 : 108;
+    boneBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.32)`;
+    boneBCtx.lineWidth = 0.75 + rand() * 0.6;
+    boneBCtx.beginPath();
+    boneBCtx.moveTo(x, y);
+    boneBCtx.quadraticCurveTo(mx, my, ex, ey);
+    boneBCtx.stroke();
   }
+
+  // Subtle vascular grooves & trabecular micro-foramina pits
+  for (let i = 0; i < 520; i++) {
+    const px = rand() * 512;
+    const py = rand() * 512;
+    const pr = 0.7 + rand() * 1.4;
+    boneCtx.fillStyle = 'rgba(128, 108, 82, 0.16)';
+    boneCtx.beginPath();
+    boneCtx.arc(px, py, pr, 0, Math.PI * 2);
+    boneCtx.fill();
+
+    boneBCtx.fillStyle = 'rgba(64, 64, 64, 0.45)';
+    boneBCtx.beginPath();
+    boneBCtx.arc(px, py, pr * 1.1, 0, Math.PI * 2);
+    boneBCtx.fill();
+
+    boneRCtx.fillStyle = 'rgba(205, 205, 205, 0.35)';
+    boneRCtx.beginPath();
+    boneRCtx.arc(px, py, pr * 1.4, 0, Math.PI * 2);
+    boneRCtx.fill();
+  }
+
   const boneColor = new THREE.CanvasTexture(boneC);
   boneColor.colorSpace = THREE.SRGBColorSpace;
   boneColor.wrapS = THREE.RepeatWrapping;
   boneColor.wrapT = THREE.RepeatWrapping;
+  boneColor.repeat.set(2.0, 2.0);
   boneColor.anisotropy = aniso;
 
   const boneBump = new THREE.CanvasTexture(boneBC);
   boneBump.wrapS = THREE.RepeatWrapping;
   boneBump.wrapT = THREE.RepeatWrapping;
+  boneBump.repeat.set(2.0, 2.0);
   boneBump.anisotropy = aniso;
 
-  const boneNormal = bumpCanvasToNormalTexture(boneBC, 1.18, [1.5, 1.5], false, aniso);
+  const boneNormal = bumpCanvasToNormalTexture(boneBC, 1.55, [2.0, 2.0], false, aniso);
 
-  const [boneRC, boneRCtx] = makeCanvas(256, 256);
-  boneRCtx.fillStyle = '#9a9a9a';
-  boneRCtx.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 1600; i++) {
-    const x = rand() * 256;
-    const y = rand() * 256;
-    const shade = i % 2 === 0 ? 128 : 178;
-    boneRCtx.fillStyle = `rgb(${shade},${shade},${shade})`;
-    boneRCtx.fillRect(x, y, 2 + rand() * 6, 1 + rand() * 2);
-  }
   const boneRoughness = new THREE.CanvasTexture(boneRC);
   boneRoughness.colorSpace = THREE.NoColorSpace;
   boneRoughness.wrapS = THREE.RepeatWrapping;
   boneRoughness.wrapT = THREE.RepeatWrapping;
+  boneRoughness.repeat.set(2.0, 2.0);
   boneRoughness.anisotropy = aniso;
 
-  // 4. Equine keratin hoof wall texture (512x512 vertical horn tubules + pale coronary periople + growth rings)
+  // 4. Equine keratin hoof wall texture (512x512 natural horn tubules + waxy coronary periople + growth rings)
   const [hoofC, hoofCtx] = makeCanvas(512, 512);
   const [hoofBC, hoofBCtx] = makeCanvas(512, 512);
   const hoofGrad = hoofCtx.createLinearGradient(0, 0, 0, 512);
-  hoofGrad.addColorStop(0, '#786b5e');
-  hoofGrad.addColorStop(0.10, '#5a4e43');
-  hoofGrad.addColorStop(0.35, '#433a32');
-  hoofGrad.addColorStop(0.75, '#2f2924');
-  hoofGrad.addColorStop(1, '#201c18');
+  hoofGrad.addColorStop(0, '#857768'); // pale waxy periople at top
+  hoofGrad.addColorStop(0.11, '#5d5145');
+  hoofGrad.addColorStop(0.35, '#463c33');
+  hoofGrad.addColorStop(0.75, '#312a24');
+  hoofGrad.addColorStop(1, '#231e19');
   hoofCtx.fillStyle = hoofGrad;
   hoofCtx.fillRect(0, 0, 512, 512);
   hoofBCtx.fillStyle = '#808080';
   hoofBCtx.fillRect(0, 0, 512, 512);
 
-  for (let x = 0; x < 512; x += 2) {
-    const shade = rand();
-    hoofCtx.fillStyle = shade > 0.5 ? 'rgba(98,88,78,0.18)' : 'rgba(18,15,12,0.22)';
-    hoofCtx.fillRect(x, 0, 1.6, 512);
-    const bv = Math.round(104 + shade * 48);
-    hoofBCtx.fillStyle = `rgb(${bv},${bv},${bv})`;
-    hoofBCtx.fillRect(x, 0, 1.6, 512);
+  // Subtle horn pigment mottling
+  for (let i = 0; i < 60; i++) {
+    const hx = rand() * 512;
+    const hy = rand() * 512;
+    const hr = 18 + rand() * 44;
+    const hg = hoofCtx.createRadialGradient(hx, hy, 2, hx, hy, hr);
+    hg.addColorStop(0, i % 2 === 0 ? 'rgba(134, 114, 92, 0.12)' : 'rgba(16, 13, 10, 0.14)');
+    hg.addColorStop(1, 'rgba(0,0,0,0)');
+    hoofCtx.fillStyle = hg;
+    hoofCtx.beginPath();
+    hoofCtx.arc(hx, hy, hr, 0, Math.PI * 2);
+    hoofCtx.fill();
   }
-  for (let r = 0; r < 22; r++) {
-    const y = 26 + r * 22 + (rand() - 0.5) * 6;
-    hoofCtx.fillStyle = 'rgba(20, 16, 13, 0.20)';
-    hoofCtx.fillRect(0, y, 512, 3);
-    hoofBCtx.fillStyle = 'rgb(96,96,96)';
-    hoofBCtx.fillRect(0, y, 512, 3);
+
+  for (let x = 0; x < 512; x += 1.5) {
+    const shade = rand();
+    hoofCtx.fillStyle =
+      shade > 0.62
+        ? 'rgba(118, 104, 88, 0.18)'
+        : shade > 0.25
+          ? 'rgba(62, 53, 44, 0.14)'
+          : 'rgba(16, 13, 10, 0.24)';
+    hoofCtx.fillRect(x, 0, 1.4, 512);
+    const bv = Math.round(98 + shade * 58);
+    hoofBCtx.fillStyle = `rgb(${bv},${bv},${bv})`;
+    hoofBCtx.fillRect(x, 0, 1.4, 512);
+  }
+  for (let r = 0; r < 24; r++) {
+    const y = 24 + r * 20 + (rand() - 0.5) * 6;
+    hoofCtx.fillStyle = 'rgba(20, 16, 13, 0.18)';
+    hoofCtx.fillRect(0, y, 512, 2.5);
+    hoofBCtx.fillStyle = 'rgb(92,92,92)';
+    hoofBCtx.fillRect(0, y, 512, 2.5);
   }
   const hoofColor = new THREE.CanvasTexture(hoofC);
   hoofColor.colorSpace = THREE.SRGBColorSpace;
@@ -363,7 +457,7 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
   hoofBump.wrapT = THREE.ClampToEdgeWrapping;
   hoofBump.anisotropy = aniso;
 
-  const hoofNormal = bumpCanvasToNormalTexture(hoofBC, 1.4, [1, 1], true, aniso);
+  const hoofNormal = bumpCanvasToNormalTexture(hoofBC, 1.75, [1, 1], true, aniso);
 
   // 5. Spongy lobular lung parenchyma texture
   const [lungC, lungCtx] = makeCanvas(256, 256);
@@ -422,58 +516,86 @@ export function createProceduralTextures(maxAnisotropy: number): ProceduralTextu
 
   const brainNormal = bumpCanvasToNormalTexture(brBC, 1.35, [2, 2], false, aniso);
 
-  // 5c. Parallel collagen crimp normal map for tendons & fascia
-  const [tenBC, tenBCtx] = makeCanvas(128, 128);
-  for (let x = 0; x < 128; x += 2) {
-    const v = Math.round(128 + Math.sin((x / 128) * Math.PI * 32) * 38);
+  // 5c. Parallel collagen crimp & micro-fascicle normal map for tendons, ligaments & fascia (256x256)
+  const [tenBC, tenBCtx] = makeCanvas(256, 256);
+  tenBCtx.fillStyle = '#808080';
+  tenBCtx.fillRect(0, 0, 256, 256);
+  for (let x = 0; x < 256; x += 2) {
+    const wave = Math.sin((x / 256) * Math.PI * 56) * 28 + Math.sin((x / 256) * Math.PI * 18) * 16;
+    const v = Math.round(128 + wave);
     tenBCtx.fillStyle = `rgb(${v},${v},${v})`;
-    tenBCtx.fillRect(x, 0, 2, 128);
+    tenBCtx.fillRect(x, 0, 2, 256);
   }
-  const tendonNormal = bumpCanvasToNormalTexture(tenBC, 1.0, [2, 4], false, aniso);
+  for (let i = 0; i < 650; i++) {
+    const sx = rand() * 256;
+    const sy = rand() * 256;
+    const bv = i % 2 === 0 ? 156 : 102;
+    tenBCtx.strokeStyle = `rgba(${bv},${bv},${bv},0.28)`;
+    tenBCtx.lineWidth = 0.85;
+    tenBCtx.beginPath();
+    tenBCtx.moveTo(sx, sy);
+    tenBCtx.quadraticCurveTo(sx + (rand() - 0.5) * 2.4, sy + 24, sx, sy + 48);
+    tenBCtx.stroke();
+  }
+  const tendonNormal = bumpCanvasToNormalTexture(tenBC, 1.25, [2.5, 4.0], false, aniso);
 
-  // 5d. Living equine eye texture (equirectangular UV: u spans 360°, v spans 180°, so rx_uv = 0.5 * ry_uv)
-  const [eyeC, eyeCtx] = makeCanvas(256, 256);
-  eyeCtx.fillStyle = '#ddd7cf';
-  eyeCtx.fillRect(0, 0, 256, 256);
+  // 5d. Living equine eye texture (512x512 equirectangular UV: rich chestnut iris fibers, sclera vessels, horizontal oval pupil + dorsal corpora nigra)
+  const [eyeC, eyeCtx] = makeCanvas(512, 512);
+  eyeCtx.fillStyle = '#d9d2c8';
+  eyeCtx.fillRect(0, 0, 512, 512);
+
+  // Subtle scleral vascular capillaries near limbus
+  for (let i = 0; i < 75; i++) {
+    const ang = rand() * Math.PI * 2;
+    const r0 = 152 + rand() * 24;
+    const r1 = r0 + 26 + rand() * 34;
+    eyeCtx.strokeStyle = 'rgba(154, 64, 58, 0.16)';
+    eyeCtx.lineWidth = 1.1;
+    eyeCtx.beginPath();
+    eyeCtx.moveTo(256 + Math.cos(ang) * r0 * 0.5, 256 + Math.sin(ang) * r0);
+    eyeCtx.lineTo(256 + Math.cos(ang + 0.08) * r1 * 0.5, 256 + Math.sin(ang + 0.08) * r1);
+    eyeCtx.stroke();
+  }
 
   eyeCtx.save();
-  eyeCtx.translate(128, 128);
+  eyeCtx.translate(256, 256);
   eyeCtx.scale(0.5, 1.0); // Compensate 2:1 SphereGeometry longitude/latitude stretch
-  const irisG = eyeCtx.createRadialGradient(0, 0, 12, 0, 0, 74);
-  irisG.addColorStop(0, '#522e18');
-  irisG.addColorStop(0.55, '#6e3f1f');
-  irisG.addColorStop(0.84, '#2a160c');
-  irisG.addColorStop(0.95, '#17100b');
-  irisG.addColorStop(1, '#d6cfc4');
+  const irisG = eyeCtx.createRadialGradient(0, 0, 22, 0, 0, 148);
+  irisG.addColorStop(0, '#5a3319');
+  irisG.addColorStop(0.50, '#784421');
+  irisG.addColorStop(0.80, '#2e180c');
+  irisG.addColorStop(0.93, '#17100b');
+  irisG.addColorStop(1, '#d2cbc0');
   eyeCtx.fillStyle = irisG;
   eyeCtx.beginPath();
-  eyeCtx.arc(0, 0, 74, 0, Math.PI * 2);
+  eyeCtx.arc(0, 0, 148, 0, Math.PI * 2);
   eyeCtx.fill();
 
-  for (let a = 0; a < 90; a++) {
-    const ang = (a / 90) * Math.PI * 2;
-    eyeCtx.strokeStyle = a % 2 === 0 ? 'rgba(164, 102, 52, 0.24)' : 'rgba(32, 16, 8, 0.25)';
-    eyeCtx.lineWidth = 1.6;
+  for (let a = 0; a < 160; a++) {
+    const ang = (a / 160) * Math.PI * 2;
+    eyeCtx.strokeStyle = a % 2 === 0 ? 'rgba(176, 112, 58, 0.25)' : 'rgba(28, 14, 7, 0.26)';
+    eyeCtx.lineWidth = 1.8;
     eyeCtx.beginPath();
-    eyeCtx.moveTo(Math.cos(ang) * 22, Math.sin(ang) * 22);
-    eyeCtx.lineTo(Math.cos(ang) * 66, Math.sin(ang) * 66);
+    eyeCtx.moveTo(Math.cos(ang) * 44, Math.sin(ang) * 44);
+    eyeCtx.lineTo(Math.cos(ang) * 134, Math.sin(ang) * 134);
     eyeCtx.stroke();
   }
 
   // Characteristic horizontal equine oval pupil
-  eyeCtx.fillStyle = '#090707';
+  eyeCtx.fillStyle = '#070505';
   eyeCtx.beginPath();
-  eyeCtx.ellipse(0, 0, 32, 14, 0, 0, Math.PI * 2);
+  eyeCtx.ellipse(0, 0, 64, 28, 0, 0, Math.PI * 2);
   eyeCtx.fill();
-  // Dorsal corpora nigra
-  for (let k = -2; k <= 2; k++) {
+  // Dorsal corpora nigra (granula iridica)
+  for (let k = -3; k <= 3; k++) {
     eyeCtx.beginPath();
-    eyeCtx.arc(k * 6, -13, 2.8, 0, Math.PI * 2);
+    eyeCtx.arc(k * 9.5, -26 + Math.abs(k) * 1.4, 5.2 - Math.abs(k) * 0.4, 0, Math.PI * 2);
     eyeCtx.fill();
   }
-  eyeCtx.fillStyle = 'rgba(255, 250, 242, 0.28)';
+  // Subtle natural moisture shimmer (real clearcoat carries specular highlights dynamically)
+  eyeCtx.fillStyle = 'rgba(255, 250, 242, 0.14)';
   eyeCtx.beginPath();
-  eyeCtx.ellipse(-13, -12, 7, 4.5, -0.3, 0, Math.PI * 2);
+  eyeCtx.ellipse(-26, -24, 12, 8, -0.3, 0, Math.PI * 2);
   eyeCtx.fill();
   eyeCtx.restore();
 

@@ -1627,30 +1627,35 @@ export function createHoofMesh(
   wallSlope = 0.28,
 ): THREE.Mesh {
   const pts = [
-    new THREE.Vector2(0, 0.009), // slightly recessed concave sole / frog center
-    new THREE.Vector2(0.036, 0.005),
+    new THREE.Vector2(0, 0.011), // apex of frog & concave solar arch
+    new THREE.Vector2(0.022, 0.007),
+    new THREE.Vector2(0.044, 0.004),
     new THREE.Vector2(0.058, 0.0), // ground-bearing hoof wall rim at Y = 0
-    new THREE.Vector2(0.056, 0.015),
+    new THREE.Vector2(0.056, 0.014),
     new THREE.Vector2(0.049, 0.039),
     new THREE.Vector2(0.042, 0.062),
-    new THREE.Vector2(0.045, 0.0685), // sculpted coronary periople band
+    new THREE.Vector2(0.0455, 0.0685), // sculpted coronary periople cushion
     new THREE.Vector2(0.0385, 0.074),
     new THREE.Vector2(0, 0.074),
   ];
-  const geo = new THREE.LatheGeometry(pts, 30);
+  const geo = new THREE.LatheGeometry(pts, 36);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const z = pos.getZ(i);
     const toeShift = (0.074 - y) * wallSlope;
-    const heelPinch = x < 0 ? 1 - Math.abs(x) * 1.9 : 1.05;
-    // Slight heel bulb dip caudally + delicate central frog/heel cleft
-    const heelDrop = x < -0.018 && y > 0.055 ? -0.0085 * Math.min(1, (-x - 0.018) * 28) : 0;
-    const bulbCleft = x < -0.025 && Math.abs(z) < 0.018 ? -0.003 * (1 - Math.abs(z) / 0.018) : 0;
+    const heelPinch = x < 0 ? 1 - Math.abs(x) * 1.85 : 1.06;
+    // Lower heel wall height caudally + distinct dual heel bulb lobes separated by central cleft
+    const heelDrop = x < -0.016 && y > 0.050 ? -0.010 * Math.min(1, (-x - 0.016) * 28) : 0;
+    const bulbCleft = x < -0.022 && Math.abs(z) < 0.018 ? -0.0045 * (1 - Math.abs(z) / 0.018) : 0;
+    const heelBulbFullness =
+      x < -0.020 && y > 0.012 && y < 0.058 && Math.abs(z) > 0.012
+        ? -0.0035 * Math.sin(((y - 0.012) / 0.046) * Math.PI)
+        : 0;
     pos.setXYZ(
       i,
-      x * 1.15 + toeShift + bulbCleft,
+      x * 1.15 + toeShift + bulbCleft + heelBulbFullness,
       Math.max(0, y + heelDrop),
       z * 0.94 * Math.max(0.76, heelPinch),
     );
