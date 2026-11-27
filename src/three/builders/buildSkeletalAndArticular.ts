@@ -27,6 +27,7 @@ import {
   createOrganMesh,
   createTubeCurveMesh,
 } from './geomHelpers';
+import { buildSculptedEquineSkullParts } from './sculptEquineSkull';
 
 export type BuiltPart = {
   id: string;
@@ -46,6 +47,7 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
   const parts: BuiltPart[] = [];
   const boneMat = () => createTissueMaterial('bone', tex);
   const darkBoneMat = () => createTissueMaterial('bone_dark', tex);
+  const sculptedBoneMat = () => createTissueMaterial('bone_sculpted', tex);
   const teethMat = () => createTissueMaterial('teeth', tex);
   const cartMat = () => createTissueMaterial('cartilage', tex);
   const ligMat = () => createTissueMaterial('ligament', tex);
@@ -73,296 +75,14 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     return g;
   };
 
-  // --- 1. CRANIUM & MANDIBLE (equ.ske.cra.*) ---
-  const occipGroup = new THREE.Group();
-  // Squamous occipital plate + nuchal crest + occipital condyles + paracondylar processes
-  occipGroup.add(
-    createMultiStationLoftTube(
-      [
-        { pos: V3(1.008, 1.792, 0), rx: 0.044, ry: 0.016 },
-        { pos: V3(1.028, 1.758, 0), rx: 0.052, ry: 0.036 },
-        { pos: V3(1.036, 1.718, 0), rx: 0.042, ry: 0.028 },
-      ],
-      boneMat(),
-      14,
-    ),
-  );
-  // Nuchal crest (protuberancia occipital externa) & bilateral condyles + paracondylar processes
-  occipGroup.add(createOrganMesh(V3(1.002, 1.784, 0), [0.016, 0.013, 0.042], darkBoneMat(), [0, 0, -0.35], 12));
-  for (const sd of [-1, 1] as const) {
-    occipGroup.add(createOrganMesh(V3(1.018, 1.732, 0.024 * sd), [0.016, 0.015, 0.013], darkBoneMat(), [0, 0, -0.2], 10));
-    occipGroup.add(createLongBoneMesh(V3(1.022, 1.72, 0.039 * sd), V3(1.012, 1.668, 0.042 * sd), 0.007, 0.01, darkBoneMat()));
-  }
+  // --- 1. CRANIUM & MANDIBLE (equ.ske.cra.001..019, individually selectable) ---
+  buildSculptedEquineSkullParts({ boneMat, darkBoneMat, sculptedBoneMat, teethMat, push });
 
-  const skullMap: Array<{
-    id: string;
-    build: () => THREE.Object3D;
-    side?: 'left' | 'right' | 'center';
-  }> = [
-    { id: 'equ.ske.cra.001', build: () => occipGroup }, // Occipital
-    // Esfenoides (cuerpo + alas orbitales/temporales integradas en la base craneana)
-    {
-      id: 'equ.ske.cra.002',
-      build: () => {
-        const g = new THREE.Group();
-        g.add(createLongBoneMesh(V3(1.08, 1.675, 0), V3(1.155, 1.648, 0), 0.022, 0.026, darkBoneMat(), 0.72));
-        for (const sd of [-1, 1] as const) {
-          g.add(createLongBoneMesh(V3(1.12, 1.662, 0.012 * sd), V3(1.145, 1.672, 0.044 * sd), 0.012, 0.014, darkBoneMat(), 0.55));
-        }
-        return g;
-      },
-    },
-    // Etmoides (lámina cribosa y laberinto etmoidal profundo)
-    { id: 'equ.ske.cra.003', build: () => createMultiStationLoftTube([{ pos: V3(1.15, 1.652, 0), rx: 0.032, ry: 0.024 }, { pos: V3(1.20, 1.638, 0), rx: 0.028, ry: 0.022 }], darkBoneMat(), 12) },
-    // Palatino (bóveda palatina caudal y coanas)
-    { id: 'equ.ske.cra.004', build: () => createMultiStationLoftTube([{ pos: V3(1.205, 1.59, 0), rx: 0.034, ry: 0.018 }, { pos: V3(1.28, 1.545, 0), rx: 0.032, ry: 0.015 }], darkBoneMat(), 12) },
-    // Interparietal + cresta sagital externa
-    { id: 'equ.ske.cra.005', build: () => createMultiStationLoftTube([{ pos: V3(1.028, 1.778, 0), rx: 0.024, ry: 0.011 }, { pos: V3(1.095, 1.772, 0), rx: 0.034, ry: 0.014 }, { pos: V3(1.145, 1.758, 0), rx: 0.026, ry: 0.011 }], boneMat(), 12) },
-    { id: 'equ.ske.cra.016', build: () => createLongBoneMesh(V3(1.22, 1.56, 0), V3(1.44, 1.44, 0), 0.011, 0.015, darkBoneMat()) },
-  ];
-
-  for (const item of skullMap) {
-    push(item.id, item.build(), item.side || 'center');
-  }
-
+  // Aparato hioideo bilateral (equ.ske.hyo.003..006): estilohioides, epihioides, ceratohioides y cartílago timpanohioideo
   for (const sd of [-1, 1] as const) {
     const tag = sd === -1 ? 'i' : 'd';
     const side = sd === -1 ? 'left' : 'right';
 
-    // Parietal (curved cranial vault roof sweeping cleanly from sagittal crest to temporal line)
-    push(
-      `equ.ske.cra.006-${tag}`,
-      createMultiStationLoftTube(
-        [
-          { pos: V3(1.045, 1.764, 0.024 * sd), rx: 0.024, ry: 0.024 },
-          { pos: V3(1.11, 1.750, 0.032 * sd), rx: 0.028, ry: 0.028 },
-          { pos: V3(1.168, 1.728, 0.028 * sd), rx: 0.022, ry: 0.024 },
-        ],
-        boneMat(),
-        14,
-      ),
-      side,
-    );
-
-    // Frontal + Supraorbital arch forming true equine upper eye orbit rim
-    const frontGrp = new THREE.Group();
-    frontGrp.add(
-      createMultiStationLoftTube(
-        [
-          { pos: V3(1.15, 1.734, 0.028 * sd), rx: 0.028, ry: 0.023 },
-          { pos: V3(1.21, 1.702, 0.033 * sd), rx: 0.032, ry: 0.022 },
-          { pos: V3(1.265, 1.660, 0.026 * sd), rx: 0.024, ry: 0.017 },
-        ],
-        boneMat(),
-        14,
-      ),
-    );
-    frontGrp.add(
-      createTubeCurveMesh(
-        [V3(1.155, 1.714, 0.052 * sd), V3(1.195, 1.712, 0.063 * sd), V3(1.225, 1.688, 0.062 * sd)],
-        0.008,
-        boneMat(),
-        10,
-        8,
-      ),
-    );
-    push(`equ.ske.cra.007-${tag}`, frontGrp, side);
-
-    // Temporal + external acoustic meatus + zygomatic process closing postorbital bar
-    const tempGrp = new THREE.Group();
-    tempGrp.add(
-      createMultiStationLoftTube(
-        [
-          { pos: V3(1.055, 1.69, 0.046 * sd), rx: 0.020, ry: 0.024 },
-          { pos: V3(1.105, 1.678, 0.052 * sd), rx: 0.022, ry: 0.026 },
-          { pos: V3(1.15, 1.668, 0.048 * sd), rx: 0.016, ry: 0.020 },
-        ],
-        boneMat(),
-        12,
-      ),
-    );
-    tempGrp.add(createOrganMesh(V3(1.068, 1.682, 0.058 * sd), [0.010, 0.010, 0.006], darkBoneMat(), [0, 0, 0], 10)); // External acoustic meatus ring
-    tempGrp.add(
-      createTubeCurveMesh(
-        [V3(1.11, 1.67, 0.056 * sd), V3(1.16, 1.66, 0.064 * sd), V3(1.205, 1.66, 0.064 * sd)],
-        0.007,
-        boneMat(),
-        8,
-        7,
-      ),
-    );
-    push(`equ.ske.cra.008-${tag}`, tempGrp, side);
-
-    // Nasal with curved bridge & rostral pointed nasal process (nasoincisive notch silhouette)
-    const nasalGrp = new THREE.Group();
-    nasalGrp.add(
-      createMultiStationLoftTube(
-        [
-          { pos: V3(1.255, 1.644, 0.020 * sd), rx: 0.014, ry: 0.021 },
-          { pos: V3(1.36, 1.564, 0.016 * sd), rx: 0.012, ry: 0.019 },
-          { pos: V3(1.46, 1.490, 0.011 * sd), rx: 0.010, ry: 0.015 },
-          { pos: V3(1.530, 1.434, 0.005 * sd), rx: 0.0045, ry: 0.006 },
-        ],
-        boneMat(),
-        12,
-      ),
-    );
-    push(`equ.ske.cra.009-${tag}`, nasalGrp, side);
-
-    push(
-      `equ.ske.cra.010-${tag}`, // Lagrimal (cranial orbital margin)
-      createOrganMesh(V3(1.23, 1.66, 0.054 * sd), [0.026, 0.020, 0.011], boneMat()),
-      side,
-    );
-
-    // Cigomático (lower orbital rim bridging into facial crest)
-    push(
-      `equ.ske.cra.011-${tag}`,
-      createTubeCurveMesh(
-        [V3(1.155, 1.645, 0.064 * sd), V3(1.205, 1.645, 0.064 * sd), V3(1.265, 1.575, 0.054 * sd)],
-        0.0095,
-        boneMat(),
-        12,
-        8,
-      ),
-      side,
-    );
-
-    // Maxilar + cresta facial + diastema + arcada premolar/molar superior
-    push(
-      `equ.ske.cra.012-${tag}`,
-      (() => {
-        const g = new THREE.Group();
-        g.add(
-          createMultiStationLoftTube(
-            [
-              { pos: V3(1.23, 1.545, 0.046 * sd), rx: 0.031, ry: 0.044 },
-              { pos: V3(1.33, 1.488, 0.041 * sd), rx: 0.028, ry: 0.038 },
-              { pos: V3(1.42, 1.435, 0.033 * sd), rx: 0.022, ry: 0.030 },
-              { pos: V3(1.48, 1.402, 0.026 * sd), rx: 0.017, ry: 0.022 },
-            ],
-            boneMat(),
-            14,
-          ),
-        );
-        // Cresta facial equina prominente
-        g.add(createLongBoneMesh(V3(1.195, 1.592, 0.063 * sd), V3(1.345, 1.515, 0.054 * sd), 0.008, 0.011, darkBoneMat(), 0.5));
-        for (let m = 0; m < 6; m++) {
-          const mt = m / 5;
-          g.add(
-            createOrganMesh(
-              V3(THREE.MathUtils.lerp(1.22, 1.35, mt), THREE.MathUtils.lerp(1.50, 1.44, mt), 0.032 * sd),
-              [0.011, 0.014, 0.009],
-              teethMat(),
-              [0, 0, -0.45],
-              8,
-            ),
-          );
-        }
-        return g;
-      })(),
-      side,
-    );
-
-    // Incisivo (sculpted premaxilla nasal process + alveolar arch + incisivos I1-I3)
-    push(
-      `equ.ske.cra.013-${tag}`,
-      (() => {
-        const g = new THREE.Group();
-        g.add(
-          createMultiStationLoftTube(
-            [
-              { pos: V3(1.445, 1.424, 0.018 * sd), rx: 0.012, ry: 0.015 },
-              { pos: V3(1.495, 1.394, 0.016 * sd), rx: 0.014, ry: 0.016 },
-              { pos: V3(1.530, 1.374, 0.010 * sd), rx: 0.012, ry: 0.014 },
-            ],
-            boneMat(),
-            12,
-          ),
-        );
-        // Nasal process of incisive bone bordering nasoincisive notch
-        g.add(
-          createTubeCurveMesh(
-            [V3(1.522, 1.392, 0.014 * sd), V3(1.47, 1.438, 0.016 * sd), V3(1.41, 1.468, 0.020 * sd)],
-            0.0065,
-            boneMat(),
-            8,
-            7,
-          ),
-        );
-        for (let inc = 0; inc < 3; inc++) {
-          g.add(
-            createOrganMesh(
-              V3(1.528 - inc * 0.008, 1.362, (0.006 + inc * 0.009) * sd),
-              [0.006, 0.010, 0.005],
-              teethMat(),
-              [0, 0, -0.2],
-              8,
-            ),
-          );
-        }
-        return g;
-      })(),
-      side,
-    );
-
-    push(`equ.ske.cra.014-${tag}`, createOrganMesh(V3(1.30, 1.50, 0.025 * sd), [0.045, 0.014, 0.02], darkBoneMat()), side);
-    push(`equ.ske.cra.015-${tag}`, createOrganMesh(V3(1.18, 1.57, 0.025 * sd), [0.028, 0.016, 0.014], darkBoneMat()), side);
-
-    // Hemimandíbula: extruded wide equine mandibular ramus + coronoid process + body + dentition
-    push(
-      `equ.ske.cra.017-${tag}`,
-      (() => {
-        const g = new THREE.Group();
-        // Extruded vertical ramus + broad gonial angle + coronoid process
-        const mandiblePlate = createAnatomicalExtrudedPlate(
-          [
-            [-0.060, -0.008], // gonion angle
-            [0.06, -0.014],   // ventral mandibular curve
-            [0.34, -0.156],   // symphyseal body
-            [0.355, -0.124],  // alveolar diastema border
-            [0.14, -0.02],    // molar alveolar border
-            [0.02, 0.138],    // coronoid process tip
-            [-0.03, 0.118],   // condylar process (TMJ)
-            [-0.075, 0.04],   // caudal border of ramus
-          ],
-          0.017,
-          0.004,
-          boneMat(),
-        );
-        mandiblePlate.position.set(1.115, 1.548, 0.050 * sd);
-        mandiblePlate.rotation.y = 0.102 * sd; // converge rostrally toward mandibular symphysis
-        g.add(mandiblePlate);
-
-        for (let m = 0; m < 6; m++) {
-          const mt = m / 5;
-          g.add(
-            createOrganMesh(
-              V3(THREE.MathUtils.lerp(1.20, 1.33, mt), THREE.MathUtils.lerp(1.48, 1.42, mt), 0.030 * sd),
-              [0.01, 0.013, 0.0085],
-              teethMat(),
-              [0, 0, -0.45],
-              8,
-            ),
-          );
-        }
-        for (let inc = 0; inc < 3; inc++) {
-          g.add(
-            createOrganMesh(
-              V3(1.500 - inc * 0.008, 1.348, (0.006 + inc * 0.0085) * sd),
-              [0.006, 0.010, 0.005],
-              teethMat(),
-              [0, 0, -0.7],
-              8,
-            ),
-          );
-        }
-        return g;
-      })(),
-      side,
-    );
-
-    // Aparato hioideo (equ.ske.hyo.003..006): estilohioides, epihioides, ceratohioides y cartílago timpanohioideo
     push(
       `equ.ske.hyo.006-${tag}`, // Cartílago timpanohioideo
       createOrganMesh(V3(1.045, 1.625, 0.038 * sd), [0.007, 0.010, 0.005], cartMat()),
@@ -383,13 +103,6 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
       createLongBoneMesh(V3(1.13, 1.540, 0.024 * sd), V3(1.155, 1.518, 0.014 * sd), 0.005, 0.007, darkBoneMat()),
       side,
     );
-
-    // Concha nasal ventral (equ.ske.cra.019): lámina enrollada dentro de la cavidad nasal
-    push(
-      `equ.ske.cra.019-${tag}`,
-      createLongBoneMesh(V3(1.3, 1.545, 0.018 * sd), V3(1.5, 1.44, 0.013 * sd), 0.01, 0.006, boneMat(), 0.5),
-      side,
-    );
   }
 
   // Basihioides (hyo.001) y procesos tirohioideos bilaterales (hyo.002), en la línea media
@@ -405,9 +118,6 @@ export function buildSkeletalAndArticularParts(tex: ProceduralTextureSet): Built
     ),
     'center',
   );
-
-  // Basioccipital (cra.018): porción basilar del occipital, extensión rostroventral
-  push('equ.ske.cra.018', createOrganMesh(V3(1.065, 1.7, 0), [0.03, 0.011, 0.02], darkBoneMat()), 'center');
 
   // --- 2. VERTEBRAL COLUMN (C1-C7, T1-T18, L1-L6, S1-S5, Caudal) ---
   for (let c = 1; c <= 7; c++) {
